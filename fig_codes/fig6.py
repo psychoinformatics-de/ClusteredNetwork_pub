@@ -242,7 +242,6 @@ def get_reaction_time_analysis(original_params,threshold_per_condition = False,t
     params['normalise_across_clusters'] = normalise_across_clusters
     params['redo'] = redo
     return load_data('../data/', 'reaction_time_analyses', params['sim_params'], old_key_code=False, ignore_keys=[''])
-    #return organiser.check_and_execute(params, _calc_reaction_time_analysis, 'reaction_time_analyses',redo = redo)
 
 
 
@@ -282,13 +281,9 @@ def reaction_time_plot(monkey,nbins = 40,condition_colors = ['0','0.3','0.6']):
     bins = pylab.linspace(minrt,maxrt,nbins)
     print(type(rts))
     for condition in [1,2,3]:
-        #hist,bins = pylab.histogram(rts[condition-1],bins,density = True)
         plotbins = (bins[1:]+bins[:-1])/2.
-        #pylab.plot(plotbins,hist,label = 'condition '+str(condition),color = condition_colors[condition-1])
         print('mean RT experiment: ', pylab.median(pylab.array(rts[condition-1])))
         pylab.hist(pylab.array(rts[condition-1]),bins,histtype = 'step',label = 'condition '+str(condition),color = condition_colors[condition-1],lw = 1.,normed = True)
-        #pylab.plot(pylab.mean(pylab.array(rts[condition-1])), 0.013, 'v', color = condition_colors[condition-1])
-        #pylab.plot(pylab.median(rts[condition-1]),0.012,'v',color=condition_colors[condition-1])
     
     ##############
     ##test#######
@@ -313,10 +308,7 @@ if __name__ == '__main__':
 
     settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400}]
 
-    
-    #settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':400}]
-    settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':2000}]#'trials':800}]
-    #settings = [{'randseed':0,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'fixed_indegree':True}]
+    settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':2000}]
 
     x_label_val=-0.5                            
     fig = plotting.nice_figure(ratio = 1.)

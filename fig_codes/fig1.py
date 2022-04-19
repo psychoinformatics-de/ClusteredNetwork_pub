@@ -19,7 +19,6 @@ except:
 fig = plotting.nice_figure(fig_width= 1.,ratio  =0.55,latex_page = 1.2*text_width_pts)
 
 ff_plotargs = {'color':colors['red']}
-#lv_plotargs = {'color':colors['blue']}
 cv2_plotargs = {'color':(0,0,0)}
 nrows = 5
 ncols  =9
@@ -57,13 +56,11 @@ pylab.xlim(xlim)
 # data ff
 subplotspec = gs.new_subplotspec((2,0), colspan=int(ncols/3),rowspan=11)
 ax3 = plotting.simpleaxis(pylab.subplot(subplotspec))
-#data_fig.plot_ffs(gns = None,plotargs= ff_plotargs,calc_ff=True)
 pylab.plot(tff[1:],pylab.nanmean(ffs,axis = 0),**ff_plotargs)
 pylab.xlim(xlim)
 pylab.axvline(500,linestyle = '--',color = (0,0,0),lw = 0.5)
 pylab.axvline(1500,linestyle = '--',color = (0,0,0),lw = 0.5)
 # data interval stats
-#data_fig.plot_interval_stats(plotargs_lv=None,plotargs_cv_two =cv2_plotargs)
 pylab.plot(tcv_two,pylab.nanmean(cv_twos,axis = 0),**cv2_plotargs)
 pylab.xlim(xlim)
 pylab.ylim(ff_ylim)
@@ -114,8 +111,6 @@ ax6 = plotting.simpleaxis(pylab.subplot(subplotspec))
 subplotspec = gs.new_subplotspec((2,2*int(ncols/3)), colspan=int(ncols/3),rowspan=1)
 ax7 = plotting.simpleaxis(pylab.subplot(subplotspec))
 
-#import input_currents
-#from model_fig_single import make_plot_ff_cv2
 
 params = {'N_E':4000,'N_I':1000,'I_th_E':2.14,'I_th_I':1.26,'ff_window':400,'min_vals_cv2':1,
               'stim_length':1000,'isi':1000,'isi_vari':200,'cut_window':[-500,1500],
@@ -123,7 +118,7 @@ params = {'N_E':4000,'N_I':1000,'I_th_E':2.14,'I_th_I':1.26,'ff_window':400,'min
 save = False
 plot = True
 num_stim_clus = 5
-stim_range = [0,1,2]#pylab.arange(0,50, 5)
+stim_range = [0,1,2]
 settings = [{'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 'stim_clusters':stim_range,'stim_amp':0.2, 'portion_I':50},
             {'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 'stim_clusters':stim_range,'stim_amp':0.25, 'portion_I':50},
             {'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 'stim_clusters':stim_range,'stim_amp':0.3, 'portion_I':50},
@@ -153,7 +148,6 @@ def make_plot_ff_cv2(params,axes = None,plot = True,ff_plotargs={},cvtwo_plotarg
     axes[0].plot(result['t_ff']+t_offset,pylab.nanmean(result['ffs'][stim_clusters],axis=0),**ff_plotargs)
     axes[0].set_ylim(ylim_ff)
     axes[0].set_xlim(xlim)
-    #axes.plot(result['t_rate']+t_offset,pylab.nanmean(result['rates'],axis=0),**ff_plotargs)        
     if split_ff_clusters:
         axes[0].plot(result['t_ff']+t_offset,pylab.nanmean(result['ffs'][stim_clusters],axis=0),linestyle = '--',**ff_plotargs)
         axes[0].plot(result['t_ff']+t_offset,pylab.nanmean(result['ffs'][non_stim_clusters],axis=0),linestyle = ':',**ff_plotargs)

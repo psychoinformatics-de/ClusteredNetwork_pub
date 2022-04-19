@@ -1,6 +1,5 @@
 import sys;sys.path.append('../utils')
 import plotting_functions as plotting
-#import organiser
 from copy import deepcopy
 import pylab
 import spiketools
@@ -52,8 +51,6 @@ def simulate_and_analyse(original_params):
     focus_index = find(sim_results['senders'] == focus_unit)
     
     results['current_times'] = sim_results['times']-kernel_width/2
-    # results['ex_current'] = sim_results['input_currents_ex'][focus_index]
-    # results['inh_current'] = sim_results['input_currents_in'][focus_index]
     results['ex_current'] = sim_results['I_syn_ex'][focus_index]
     results['inh_current'] = sim_results['I_syn_in'][focus_index]
     results['Ixe'] = sim_results['I_xE']
@@ -68,7 +65,6 @@ def simulate_and_analyse(original_params):
 def do_plot(params,axes=None,redo = False,plot = True,markersize = 0.5,spikealpha = 1,box_color = 'k',cmap = 'jet',lw = 0.8,show_clusters = 4,
             legend = False,current_limits = [-15,18],voltage_limits = [-20,42],ylabel = False,rate_ticks = [],V_ticks = [],I_ticks = []):
     result = load_data(datapath, datafile,params,old_key_code=True)
-    #result = organiser.check_and_execute(params,simulate_and_analyse,datafile,redo =redo)
     spiketimes = result['spiketimes']
     if plot:
         if axes is None:
@@ -87,7 +83,6 @@ def do_plot(params,axes=None,redo = False,plot = True,markersize = 0.5,spikealph
         
         x_margin = 2.
         y_margin = 2.
-        #pylab.fill([left,right,right,left,left],[bottom,bottom,top,top,bottom],color = [0.7]*3,lw = 0)
         pylab.fill([left,right,right,left,left],[bottom,bottom,top,top,bottom],color = "r",lw = 0,alpha=0.1)
         pylab.plot(spiketimes[0],spiketimes[1],'.k',markersize = markersize,alpha = spikealpha)
         pylab.xlim(0,params['simtime'])
@@ -261,5 +256,5 @@ if __name__ == '__main__':
         print(params)
         do_plot(params,redo = False,plot = plot,axes = axes[setno],box_color = 'r',cmap = 'Greys',legend = legend,ylabel = ylabel,
                 rate_ticks = rate_ticks,V_ticks = [-20,0,20,40],I_ticks = [-15,0,15])
-    pylab.savefig('fig03.pdf')
+    pylab.savefig('fig3.pdf')
 

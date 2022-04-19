@@ -5,7 +5,6 @@ import pandas as pd
 import plotting_functions as plotting
 import global_params
 from general_func import *
-#from functions_vi import extract_info_from_keys
 import scipy.stats as ss
 
 data_path = '../data/'

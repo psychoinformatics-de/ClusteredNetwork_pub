@@ -14,7 +14,7 @@ from general_func import *
 
 
 
-datapath = '../data/'#'/Users/vahid/git_repo/koeln_server/code/MS_EE_EI/data'#'../data'
+datapath = '../data/'
 datafile = 'fig02_cluster_dynamics'
 datafile1 = 'ff_cv2_spontaneous'
 
@@ -99,17 +99,12 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             counts.append(count)
             
     ffs = pylab.array(ffs)
-    #ffs = pylab.nanmean(ffs,axis=2)
-    #ffs = pylab.nanmean(ffs,axis=1)
     cv2s = pylab.array(cv2s)
-    #cv2s = pylab.nanmean(cv2s,axis=2)
     cv2s = pylab.nanmean(cv2s,axis=1)
     
     if plot:
-        #pylab.plot(jep_range,ffs,'ok',alpha = 0.1)
         ffs = pylab.nanmean(ffs,axis=1)
         pylab.plot(jep_range,ffs,'k')
-        #pylab.plot(jep_range,cv2s)
 
 
         n_boxes = len(spike_js)
@@ -139,7 +134,6 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spike_params['simtime'] = spike_simtime
             print(spike_params)
             spiketimes = load_data(datapath, datafile + '_spikes',spike_params,old_key_code=True, reps=None)['spiketimes']
-            #spiketimes = organiser.check_and_execute(spike_params, sim_nest.simulate, datafile +'_spikes',redo = redo_spiketrains)['spiketimes']
             spiketimes = spiketimes[:,spiketimes[1]<plot_units[1]]
             spiketimes = spiketimes[:,spiketimes[1]>=plot_units[0]]
             spiketimes[1] -= plot_units[0]
@@ -154,14 +148,12 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             pylab.plot(spiketimes[0],spiketimes[1],'.k',markersize = markersize,alpha = spikealpha)
 
             pylab.xlim(jep_range.min(),jep_range.max())
-            #pylab.xlim(0,50)
         pylab.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
 
 def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),Q_range = pylab.arange(2,20,2),jipfactor = 1,reps = 40,plot = True,vrange = [0,15],redo = False):
     
     ffs = pylab.zeros((len(jep_range),len(Q_range),reps))
     all_results = pd.read_pickle(datapath + datafile1)
-    #results = load_data(datapath, datafile1,params,old_key_code=True,reps=reps,ignore_keys=['n_jobs'])
     for i,jep_ in enumerate(jep_range):
         for j,Q in enumerate(Q_range):
             jep = float(min(jep_,Q))
@@ -177,8 +169,6 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),Q_range = pylab.ara
             params['Q'] = int(Q)
             key = key_from_params(params, reps==reps,ignore_keys=['n_jobs'])
             results = [all_results[result_key] for result_key in key]
-            #results = load_data(datapath, datafile1,params,old_key_code=True,reps=reps,ignore_keys=['n_jobs'])
-            #results = organiser.check_and_execute(params, simulate_spontaneous, datafile1,reps = reps,ignore_keys=['n_jobs'],redo = redo)
             ff = [r[0] for r in results]
             ffs[i,j,:] = ff
             
@@ -189,10 +179,7 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),Q_range = pylab.ara
 
     if plot:
         print(pylab.nanmean(ffs,axis=2).T)
-        #pylab.pcolor(jep_range,Q_range,pylab.nanmean(ffs,axis=2).T,vmin = vrange[0],vmax = vrange[1])
         pylab.contourf(jep_range,Q_range,pylab.nanmean(ffs,axis=2).T,levels = [0.5, 1.,1.5,2.],extend = 'both',cmap = 'Greys')
-        #'both'
-        #pylab.pcolor(jep_range,Q_range,pylab.nanmean(ffs,axis=2))
         x = pylab.linspace(Q_range.min(), jep_range.max(),1000)
         y1 = pylab.ones_like(x)*Q_range.min()
         y2 = x
@@ -209,24 +196,12 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),Q_range = pylab.ara
         
 if __name__ == '__main__':
     
-
-    # settings = [{'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':12,'Q':20,'I_th_E':2.14,'I_th_I':1.26,'jipfactor':0.,'jep_range':pylab.linspace(1,4,61),'spike_js':[1.]}, #3,5  hz
-    #             {'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':12,'Q':20,'I_th_E':2.14,'I_th_I':1.26,'jipfactor':0.5,'jep_range':pylab.linspace(1,4,61),'spike_js':[1.]}, #3,5  hz
-    #             {'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':12,'Q':20,'I_th_E':2.14,'I_th_I':1.26,'jipfactor':0.75,'jep_range':pylab.linspace(1,20,381),'spike_js':[1.,4.,5.]}, #3,5  hz
-    #             {'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':12,'Q':20,'I_th_E':5.34,'I_th_I':2.61,'jipfactor':0.,'jep_range':pylab.linspace(1,4,61),'spike_js':[1.]}, # 10,15 hz
-    #             {'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':12,'Q':20,'I_th_E':5.34,'I_th_I':2.61,'jipfactor':0.5,'jep_range':pylab.linspace(1,4,61),'spike_js':[1.]},
-    #             {'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':12,'Q':20,'I_th_E':5.34,'I_th_I':2.61,'jipfactor':0.75,'jep_range':pylab.linspace(1,5,81),'spike_js':[1.]}]
-    
-    # settings = [{'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':12,'Q':20,'jipfactor':0.,'jep_range':pylab.linspace(1,4,121),'spike_js':[1.,'max',2.5,3.]}, #3,5  hz
-    #             {'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':12,'Q':20,'jipfactor':0.75,'jep_range':pylab.linspace(1,20,381),'spike_js':[1.,5.,10.,20.]}]  #3,5  hz
     n_jobs = 12
-    settings = [{'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.,'jep_range':pylab.arange(1,50.001,0.1),'spike_js':[1.,3.,3.7, 8. ,10.], 'portion_I':50}, #3,5  hz [1.,3.,3.7, 4. ,4.8]
+    settings = [{'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.,'jep_range':pylab.arange(1,50.001,0.1),'spike_js':[1.,3.,3.7, 8. ,10.], 'portion_I':50}, 
                 {'jipfactor':0.,'fixed_indegree':False, 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26},
                 {'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.75,'jep_range':pylab.arange(1.001,50.001, 0.1),'spike_js':[1.,8.,10.5,14.,50.], 'portion_I':1},
                 {'jipfactor':0.75,'fixed_indegree':False, 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
     
-    #settings = settings[:1]
-
     plot = True
     reps = 20
     x_label_val = -0.25
@@ -235,15 +210,12 @@ if __name__ == '__main__':
         fig  =plotting.nice_figure(ratio = 0.8,latex_page=global_params.text_width_pts)
         fig.subplots_adjust(bottom = 0.15,hspace = 0.4,wspace = 0.3)
         
-        #fig = plotting.nice_figure(ratio = 1.1)
-        #fig.subplots_adjust(hspace=0.35,left = 0.1,right = 0.9,top = 0.95)
         labels = ['a','b','c','d']
     title_left = ['E clustered network','','E/I clustered network']
     for i,params in enumerate(settings):
         row = int(i/2)
         col= int(i%2)
         if plot and i in [0,2]:
-            #ax = plotting.simpleaxis(pylab.subplot(2,2,i+1))
             ax = plotting.simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col), colspan=2))
             plotting.ax_label1(ax, labels[i],x=x_label_val)
             pylab.ylabel('FF')
@@ -254,8 +226,6 @@ if __name__ == '__main__':
             plot_ff_cv_vs_jep(params,reps = reps,jipfactor =jipfactor,jep_range = jep_range,spike_js = spike_js,plot = plot,spike_randseed = 3,spike_simtime = 2000.,markersize = 0.1,spikealpha= 0.3)
             pylab.gca().text(-8, 3.3 + i*4., title_left[i], rotation=90, fontweight='bold')
         else:
-            #for k in setting.keys():
-            #    params[k] = setting[k]
             jipfactor = params.pop('jipfactor')
             jep_step = 0.5
             jep_range = pylab.arange(1.,15.+0.5*jep_step,jep_step)
@@ -263,11 +233,8 @@ if __name__ == '__main__':
             Q_range = pylab.arange(q_step,60+0.5*q_step,q_step)
             
             if plot:
-                #pylab.subplot(1,len(settings),setno+1)
                 ax = plotting.simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col+1)))          
-                #ax = plotting.simpleaxis(pylab.subplot(pylab.subplot(2,2,i+1)))
                 plotting.ax_label1(ax, labels[i], x=x_label_val)
-                #pylab.title('$R_J = '+str(jipfactor)+'$')
             plot_ff_jep_vs_Q(params,jep_range,Q_range,jipfactor,plot=plot)
             if plot:
                 cbar = pylab.colorbar()

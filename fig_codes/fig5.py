@@ -1,11 +1,10 @@
-import sys;sys.path.append('../utils')#;sys.path.append('../data')
+import sys;sys.path.append('../utils')
 import pylab
 import pandas as pd
 import plotting_functions as plotting
 import analyses
 import joe_and_lili
 from scipy.stats import wilcoxon
-#import organiser
 import pickle as pickle
 import analyse_model
 from matplotlib.collections import LineCollection
@@ -36,7 +35,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
     if ff_ax is not None:
         pylab.sca(ff_ax)
         try:
-            ffs,tff,ff_conditions,ff_gns,ff_directions = pd.read_pickle(path+'ff_file_'+alignment)#pickle.load(open('ff_file_'+alignment))
+            ffs,tff,ff_conditions,ff_gns,ff_directions = pd.read_pickle(path+'ff_file_'+alignment)
         except:
         
             ff_gns = []
@@ -127,36 +126,6 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
     if dir_score_ax is not None:
         pylab.sca(dir_score_ax)
         dir_score_gns,dir_score_conditions,dir_score_directions,tdir_score,dir_scores = pd.read_pickle(path+'dir_score_file')
-        print('scoreworked!!')
-        #try:
-
-            
-        """    
-        except:
-
-            dir_score_gns = []
-            dir_score_conditions = [] 
-            dir_score_directions = []
-            dir_scores = []
-            for i,gn in enumerate(gns):
-                for j,condition in enumerate([1,2,3]):
-                    for k,direction in enumerate([1,2,3,4,5,6]):
-                        if good_directions[i,k]:
-                            dir_score,tdir_score = analyses.get_direction_score(gn, condition,alignment = alignment,tlim  =tlim)
-                            dir_scores.append(dir_score)
-                            dir_score_gns.append(gn)
-                            dir_score_conditions.append(condition)
-                            dir_score_directions.append(direction)
-            dir_scores = pylab.array(dir_scores)
-            print(dir_scores.shape,tdir_score.shape)
-            dir_score_conditions = pylab.array(dir_score_conditions)
-            pickle.dump((dir_score_gns,dir_score_conditions,dir_score_directions,tdir_score,dir_scores),open('dir_score_file','w'),protocol = 2)
-
-        for (condition,color) in zip([1,2,3],condition_colors):
-            pylab.plot(tdir_score, pylab.nanmean(dir_scores[dir_score_conditions==condition],axis=0),color = color,label = 'condition '+str(condition))
-        pylab.axhline(1/6.,linestyle = '--',lw = lw_line,color = '0.4',zorder = -1)
-        pylab.text(2000, 1/6., r'$1/6$',va= 'center',ha = 'left',size = textsize)
-        """
     if pop_score_ax is not None:
         pylab.sca(pop_score_ax)
         pop_score_gns = []
@@ -164,8 +133,6 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
         pop_scores = []
         for i,gn in enumerate(gns):
             for j,condition in enumerate([1,2,3]):
-                #datapath, datafile,params, old_key_code=False, ignore_keys=[''], reps=None):
-                #result= load_data(path, 'population_decoding_file',params,old_key_code=True, reps = 10)
                 params = {'gns':tuple(sorted(gns)),'condition':condition,'alignment':'TS',
                           'tlim':tlim,'window':400.0,'classifier':'LogisticRegression',
                           'folds':5,'classifier_args':{}}
@@ -200,7 +167,6 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
 ###########MODEL#################
 condition_colors = ['0','0.3','0.6']
 condition_colors = ['navy','royalblue','lightskyblue']
-#condition_colors = ['crimson','lightcoral','pink']
     
 def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5):
     ffs = analyse_model.get_fanos(params)
@@ -262,7 +228,6 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5):
                 pylab.text(sig_time-10, center-0.05, sig_symbol,va = 'top',ha ='right')
 
     pylab.ylabel(r'$\Delta$FF',rotation=90)
-    #pylab.xlabel('time [ms]')
 
 def plot_cv2s(params,sig_time = 1000,plot = True,lw_line=0.5):
     cv2s = analyse_model.get_cv_two(params)
@@ -333,7 +298,6 @@ def draw_hex_array(center,size=0.3,colors = [[0.5]*3]*6,axes = None,radius = 0.1
         if add:
             axes.add_patch(circ)
         circs.append(circ)
-        #pylab.text(x,y,str(i),va='center',ha = 'center')
         if show_numbers:
             pylab.text(x+center[0],y+center[1],str(number),size = 6,ha ='center',va = 'center')
             if number == 6:
@@ -392,7 +356,6 @@ def model_plot(ax, net_factor = 1.6,net_offset = 1.,offset_dir = [1.2,0.4],net_s
         ax.annotate('', xy=cluster_centers[i], xycoords='data',
                 xytext=coords[i], textcoords='data',
                 size=20,
-                # bbox=dict(boxstyle="round", fc="0.8"),
                 arrowprops=dict(arrowstyle="simple,tail_width=0.06,head_width=0.15",
                                 fc=[0,0,0,1.], ec="none",
                                 connectionstyle="arc3,rad=-0.3"),zorder = 3
@@ -410,7 +373,6 @@ def model_plot(ax, net_factor = 1.6,net_offset = 1.,offset_dir = [1.2,0.4],net_s
         ax.annotate('', xy=decoder_center, xycoords='data',
                 xytext=cluster_centers[i], textcoords='data',
                 size=20,
-                # bbox=dict(boxstyle="round", fc="0.8"),
                 arrowprops=dict(arrowstyle="-",
                                 fc=[0,0,0,1], ec="k",
                                 connectionstyle="arc3,rad=0.3",shrinkB=0),zorder = 2,
@@ -442,12 +404,6 @@ if __name__ == '__main__':
     rcparams = {'axes.labelsize': size*scale,
                 'xtick.major.size': ticksize,
                 'ytick.major.size': ticksize,
-              #'font.size':size,
-              #'legend.fontsize': size,
-                # 'xtick.major.width':ticksize/6.,                
-                # 'ytick.major.width':ticksize/6.,
-                # 'xtick.minor.size':(ticksize-1)/2,
-                # 'ytick.minor.size':(ticksize-1)/2,                
               'xtick.labelsize':size,
                 'ytick.labelsize': size,
                 'lines.linewidth':0.5,
@@ -473,94 +429,56 @@ if __name__ == '__main__':
     for monkey in ['joe']:
         
         extra_filters = [('monkey','=',str.encode(monkey))]
-        #extra_filters = []
         pop_score_ax = plotting.ax_label1(plotting.simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(0,1),rowspan=3),labelsize,pad=pad),'b',x=x_label_val,size=labelsize)
         ff_ax = plotting.ax_label1(plotting.simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(0,2),rowspan=2),labelsize,pad=pad),'c',x=x_label_val,size=labelsize)
         cv2_ax = plotting.simpleaxis1(pylab.subplot2grid((nrow,ncol),(2,2)),labelsize,pad=pad)
-        #ff_ax_mo = plotting.ax_label1(plotting.simpleaxis1(
-        #    pylab.subplot2grid((nrow,ncol),(2,2)),labelsize,pad=pad),'B',labelsize)
 
         do_plot(extra_filters = extra_filters,ff_ax = ff_ax,pop_score_ax = pop_score_ax,cv2_ax=cv2_ax,textsize=size,lw=1,lw_line=0.3, condition_colors=condition_colors_exp)
-        #do_plot(extra_filters = extra_filters,ff_ax = ff_ax_mo,textsize=size,lw=1,lw_line=0.3, condition_colors=condition_colors_exp, tlim = [-1500,500],alignment ='MO', ff_test_point = None)
 
 
     pylab.sca(cv2_ax)
     pylab.ylim(0.4,1.3)
-    #pylab.xticks([])
     pylab.xticks(xticks)
     pylab.yticks([0.4,0.8,1.2])    
     pylab.ylabel(r'$\text{CV}_2$',rotation=90)
     pylab.xlabel('time [ms]')    
     pylab.xlim(tlim)
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
-    #pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize1)
     pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
-    #pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',ha = 'center',size = labelsize1)
-    #pylab.fill_betweenx([0.4,1.2],1500,2000,color='gray',alpha=0.5)
 
     pylab.sca(ff_ax)
     pylab.xlim(tlim)
-    #pylab.xticks(xticks)
     pylab.xticks([])
     pylab.ylabel(r'$\Delta$FF',rotation=90)
-    #pylab.xlabel('time [ms]')
     pylab.ylim(-0.7,0.1)
     pylab.yticks([-0.5,0])
-    #pylab.yticks([-0.8,-0.4,0])
     pylab.legend(frameon = False,fontsize = labelsize1-2,loc = 'upper center',bbox_to_anchor=(1.2, 1.1))
     
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
     pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize1)
     pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
     pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',ha = 'center',size = labelsize1)
-    #pylab.fill_betweenx([-.7,0.1],1500,2000,color='gray',alpha=0.5)
 
     pylab.sca(pop_score_ax)
     pylab.xlim(tlim)
     pylab.xticks(xticks)
-    #pylab.xticks([])
     pylab.ylabel('Decoding Accuracy',rotation=90)
     pylab.xlabel('time [ms]')
     pylab.ylim(0.1,1.)
     pylab.yticks([0.1,0.4,0.7,1.])
-    #pylab.fill_betweenx([0.1,1],1500,2000,color='gray',alpha=0.5)
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
     pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize1)
     pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
     pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',ha = 'center',size = labelsize1)
 
 
-    # pylab.sca(ff_ax_mo)
-    # pylab.axvline(0,linestyle = '-',color = 'k',lw = lw/2)
-    # #pylab.text(0, pylab.ylim()[1],'MO',va = 'bottom',ha = 'center',size = labelsize1)
-    # #pylab.xlim(tlim)
-    # pylab.xlim(-500,500)
-    # pylab.xticks([-500,0,500])
-    # ff_ax_mo.set_xticklabels(['-500','MO','500'])
-    # #pylab.xticks([])
-    # pylab.ylabel(r'$\Delta$FF',rotation=90)
-    # pylab.xlabel('time [ms]')
-    # #pylab.yticks([1,1.3,1.6,1.9])
-    # pylab.ylim(-0.8,0.1)
-    # pylab.yticks([-0.8,-0.4,0])
-
     ########################################
     ###################MODEL###############
     params = {'randseed':8721,'trials':150,'N_E':1200,'N_I':300,'I_th_E':1.25,'I_th_I':0.78,'Q':6,'rs_stim_amp':0,'n_jobs':12,'conditions':[1,2,3]}
 
-    settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400},
-                {'randseed':5362,'jep':2.8,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400}]
-
-    #settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':150}]
-    #settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400, 'trials':150}]    
-    #settings = [{'randseed':7745,'jep':2.5,'jipratio':0.,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':100}]
-    #settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':300}]
-    #settings = [{'randseed':0,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'fixed_indegree':True}]
-    #settings = [{'randseed':8721,'jep':3.31,'jipratio':0.75,'condition_stim_amps':[0.11,0.11,0.11],'rs_stim_amp':0.11,'rs_length':400, 'trials':150}]    
     settings = [{'randseed':8721,'jep':3.2,'jipratio':0.75,'condition_stim_amps':[0.1,0.1,0.1],'rs_stim_amp':0.1,'rs_length':400, 'trials':150}]    
-    #settings = [{'randseed':8721,'jep':2.,'jipratio':0.,'condition_stim_amps':[0.1,0.1,0.1],'rs_stim_amp':0.1,'rs_length':400, 'trials':150}]    
     ax_model = plotting.ax_label1(plotting.simpleaxis1(
         pylab.subplot2grid((nrow,ncol),(4,0),rowspan=3),labelsize,pad=pad),'d',x=x_label_val, size=labelsize)      
     pylab.box('off')
@@ -583,7 +501,6 @@ if __name__ == '__main__':
         print('model pop decoding done!!!!')
         pylab.axvline(500,linestyle = '-',color = 'k',lw = lw)
         pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw)
-        #pylab.axvline(1900,linestyle = '--',color = 'k',lw = lw)
         pylab.xlim(0,2000)
         pylab.axhline(1/6.,linestyle = '--',lw = lw,color = '0.4',zorder = -1)
         pylab.text(2000, 1/6., r'$1/6$',va= 'center',ha = 'left',size = size)
@@ -593,7 +510,6 @@ if __name__ == '__main__':
         pylab.text(2000, 1/2., r'$1/2$',va= 'center',ha = 'left',size = size)
         plot_params.pop('timestep')
         pylab.yticks([0.1,0.4,0.7,1.])
-        #pylab.fill_betweenx([0.1,1],1500,2000,color='gray',alpha=0.5)
 
         plotting.ax_label1(plotting.simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(4,2),rowspan=2),labelsize,pad=pad),'f',x=x_label_val,size=labelsize)            
@@ -601,23 +517,19 @@ if __name__ == '__main__':
         plot_ffs(plot_params,plot = plot)
         pylab.axvline(500,linestyle = '-',color = 'k',lw = lw)
         pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw)
-        #pylab.axvline(1900,linestyle = '--',color = 'k',lw = lw)
         pylab.xlim(0,2000)
         pylab.yticks([-1,-0.5,0])
         pylab.ylim(-1.5,0.2)
-        #pylab.fill_betweenx([-1.5,0.2],1500,2000,color='gray',alpha=0.5)
-        #pylab.yticks([-1.,0])
+
         pylab.xticks([])
         plotting.simpleaxis1(pylab.subplot2grid((nrow,ncol),(6,2)),labelsize,pad=pad)            
     
         plot_cv2s(plot_params,plot = plot)
         pylab.axvline(500,linestyle = '-',color = 'k',lw = lw)
         pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw)
-        #pylab.axvline(1900,linestyle = '--',color = 'k',lw = lw)
         pylab.xlim(0,2000)
         pylab.ylim(0.4,1.3)
         pylab.yticks([0.4,0.8,1.2])
-        #pylab.fill_betweenx([0.4,1.3],1500,2000,color='gray',alpha=0.5)
     pylab.savefig('compound_data_fig_cv2_corrected0.eps')
     pylab.close()
 
@@ -651,7 +563,7 @@ if __name__ == '__main__':
                size = size_cond)
 
     pylab.text(-2.3,-vsep+0.2,r'\textbf{Behaving monkey}',va = 'center',ha='right',
-               color='k',rotation=90,size=size_cond+2)#,weight='bold')
+               color='k',rotation=90,size=size_cond+2)
 
     txth = 0.8
     lw = 1.5
@@ -693,21 +605,13 @@ if __name__ == '__main__':
 
     
     import pyx
-    # pyx.text.preamble(r"\usepackage{helvet}")
-    
     c = pyx.canvas.canvas()
     c.insert(pyx.epsfile.epsfile(0, 0.0, "compound_data_fig_cv2_corrected0.eps"))
     c.insert(pyx.epsfile.epsfile(.3, 3.1,"experiment.eps",scale=0.35))
-    # c.insert(pyx.epsfile.epsfile(12., 2.1, "../figures/fig_1C.eps"))
     c.writeEPSfile("compound_data_fig_cv2_corrected1.eps")  
 
     #inser model
     c.insert(pyx.epsfile.epsfile(0, 0.0, "compound_data_fig_cv2_corrected1.eps"))
     c.insert(pyx.epsfile.epsfile(.29, .3,"model.eps",scale=0.35))
-    #c.insert(pyx.bitmap.bitmap(0,0,"model.png"))
-    # c.insert(pyx.epsfile.epsfile(12., 2.1, "../figures/fig_1C.eps"))
     c.writeEPSfile("fig5.eps")  
-
-    
-    #pylab.savefig('compound_data_fig_cv2.png',dpi  =400)
     pylab.show()
