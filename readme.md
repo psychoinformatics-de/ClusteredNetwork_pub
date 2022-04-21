@@ -1,4 +1,4 @@
-# A spiking neural program for sensorimotor control during foraging in flying insects
+# Spiking attractor model of motor cortex explains modulation of neural and behavioral variability by prior target information
 
 This repository contains all accompanying code to reproduce the figures of the following paper:
 
