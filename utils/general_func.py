@@ -8,6 +8,7 @@ def find(condition):
 
 
 def key_from_params(params, reps=None,ignore_keys=['']):
+    """create string keys from parameters dictionary"""
     key_list = [k for k in sorted(params.keys()) if k not in ignore_keys]
     key=''
     for k in key_list:
@@ -19,6 +20,7 @@ def key_from_params(params, reps=None,ignore_keys=['']):
 
 
 def compare_key(all_keys, params):
+    """change string key to dictionary and compare with a given parametr dict"""
     import ast
     for i in list(all_keys):
         test_string = '{' + i.split('{')[1].split('}')[0] + '}'
@@ -35,26 +37,23 @@ def compare_key(all_keys, params):
 
 
 def load_data(datapath, datafile,params, old_key_code=False, ignore_keys=[''], reps=None):
+    """load pickle format data using pandas"""
     all_results = pd.read_pickle(datapath + datafile)
-    #print('all_results_key',all_results.keys(),params)
-    #print('real_keys',all_results.keys())
     if old_key_code:
         key = key_from_params(params,reps=reps,ignore_keys=ignore_keys)
         if reps != None:
-            #result_keys =  [key+'_'+str(r) for r in range(reps)]
             result = [all_results[result_key] for result_key in key]
         else:
             result = all_results[key]
     else:
-        
         k = compare_key(all_results.keys(), params)
         print('k', k)
         result = all_results[k]
     return result
 
 def extract_info_from_keys(params, keys):
+    """extract info from string keys"""
     keys_dic = keys[keys.find('{')+1: keys.find('}')]
-    # extract the portion of inhibition from keys
     for i, k in enumerate(keys_dic.split(",'")):
         if i ==0:
             params.update(ast.literal_eval("{"+k+'}'))

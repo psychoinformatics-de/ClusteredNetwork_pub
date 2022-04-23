@@ -70,19 +70,13 @@ class memoized_but_forgetful(object):
     def __get__(self, obj, objtype):
         '''Support instance methods.'''
         return functools.partial(self.__call__, obj)
-
-#os.chdir("..")
-#datapath = os.path.abspath(os.path.join(os.path.dirname(__file__),'..','./data'))
 datapath = '../data/'
 print('datapath', datapath)
 @memoized
 def get_data_file(filename):
     try:
-        #all_results = pickle.load(open(filename,'rb'),encoding='latin-1')
         print('get_data_filename',filename)
         all_results = pd.read_pickle(filename)
-        #print('all_results_get_data_file',all_results)
-        #print('filename',filename)
     except:
         all_results = {}
     return all_results
@@ -141,25 +135,19 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,redo = Fals
     key = key_from_params(params,key_list)
     datapath = '../data/'
     full_datafile = os.path.join(datapath,datafile)
-    print('datapath', datapath)
-    print('full_datapath', full_datafile)
                                                                         
     try:
         if redo:
             raise
         all_results = get_data_file(full_datafile)
         
-        #print('v',all_results.keys())
         if reps is None and not redo:
             results = all_results[key]
             result_keys = [key]
-            print('result_keys', result_keys)
-            #print('results.keys()',results.keys())
 
         elif not redo:
             result_keys =  [key+'_'+str(r) for r in range(reps)]
             results = [all_results[result_key] for result_key in result_keys]
-            print('result!!!', result_keys)
         elif redo:
             print('redo')
             raise 
@@ -170,7 +158,7 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,redo = Fals
             get_data_file.cache.pop(cache_key)
         try:
             print('in except!!!!!!', full_datafile)
-            all_results = pd.read_pickle(full_datafile)#pickle.load(open(full_datafile,'rb'),encoding='latin-1')
+            all_results = pd.read_pickle(full_datafile)
             print(all_results.keys())
         except:
             
@@ -200,7 +188,6 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,redo = Fals
                 
                 
                 new_results = Parallel(n_jobs)(delayed(func)(cp) for cp in copied_params)
-                #new_results = multiprocessing.Pool(processes=n_jobs).map(func,copied_params)
                 
                 for mk,nr in zip(missing_keys,new_results):
                     all_results[mk] = nr

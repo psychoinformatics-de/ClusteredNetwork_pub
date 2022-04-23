@@ -1,4 +1,4 @@
-name: EI_MS
+name: ClusteredNetwork_pub
 channels:
   - soumith
   - defaults
@@ -9,10 +9,12 @@ dependencies:
   - ipython
   - nest-simulator=2.16.0
   - pip
+  - pip:
+    - latex
+    - pyx
   - python=3.6
   - joblib
   - networkx
   - scikit-learn
   - matplotlib=3.1
-  - pyx
-prefix: /Users/vahid/opt/anaconda3/envs/EI_MS
+

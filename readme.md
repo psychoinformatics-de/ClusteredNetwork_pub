@@ -13,7 +13,12 @@ If you have questions or encounter any problems while using this code base, feel
 This project used Python and Nest for analyses of experimental data and simulations and analyses of the spiking neural networks (SNN). The simulation results (spike trains) are dumped as pickled files.
 
 
-* `utils/` folder contains all Python scripts to run and analyse both the SNN simulations and experimental data to re-generate the data used for the paper (Note: this requires several TB of disk space and large amount of RAM !)
-* `fig_codes/` contains python scripts to reproduce all the figures of the paper.
+* `utils/` folder contains all Python scripts to run and analyse both the SNN simulations and experimental data to re-generate the data used for the paper
+** Note1: this requires several TB of disk space and large amount of RAM !
+** Note2: we are working with the NEST developer to include our model as an example in the newest NEST release. We will then adjust the script accordingly and will have a running version of our model using the newest NEST version upon publication.
+* `fig_codes/` contains matplotlib scripts to reproduce all the figures of the paper.
 * `data/` contains all the experimental and simulation data. To download the data please unzip the following link in the repository: https://www.dropbox.com/s/51atayocaqqha72/data.zip?dl=0 NOTE that around 33Gb of memory is needed to unzip the data.
+* `enviroment.yml´contains necessary packages to run the codes. Please run the following code to create a conda enviroment:
+** `conda env create -f environment.yml´
+** `conda activate ClusteredNetwork_pub´ 
 

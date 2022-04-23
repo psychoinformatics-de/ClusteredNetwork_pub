@@ -23,7 +23,6 @@ def load_data(gn,condition,direction  =None,alignment = 'TS'):
     file = toc['file'][(toc['global_neuron']==gn)*(toc['condition'] == condition)]
     ppath = joe_and_lili.pickle_path
     data = pickle.load(open(os.path.join(ppath,file[0].decode()),'rb'),encoding='latin-1')
-    #print('data', data)
     if direction is not None:
         spiketimes = data['spiketimes']
         direction_inds = find(spiketimes[2]==direction)
@@ -37,10 +36,8 @@ def load_data(gn,condition,direction  =None,alignment = 'TS'):
 
     if alignment != 'TS':
         alignment_column = data['eventtimes'][:,data['event_names'] == alignment]
-        #print alignment_column.shape
         spiketimes = data['spiketimes']
         for trial,offset in enumerate(alignment_column):
-            #print offset
             spiketimes[0,spiketimes[1]==trial] -= offset
             data['eventtimes'][trial,:] -= offset
         data['spiketimes'] = spiketimes
@@ -60,19 +57,6 @@ def _calc_ff(params):
     ff,tff = spiketools.kernel_fano(spiketimes, params['window'],tlim  =params['tlim'])
     return ff,tff
 
-
-# def get_cv2(gn,condition,direction,window = 400,tlim = [0,2000],alignment = 'TS',redo = False):
-#     params = {'gn':gn,'condition':condition,'direction':direction,
-#               'window':window,'alignment':alignment,
-#               'tlim':tlim}
-#     return organiser.check_and_execute(params, _calc_cv2, 'cv2_file_'+str(condition)+'_'+str(direction),redo = redo)
-
-# def _calc_cv2(params):
-    
-#     data = load_data(params['gn'],params['condition'],params['direction'],params['alignment'])
-#     spiketimes = data['spiketimes'][:2]
-#     cv2,tcv2 = spiketools.time_resolved_cv_two(spiketimes, params['window'],tlim  =params['tlim'])
-#     return cv2,tcv2
 
 
 def get_rate(gn,condition,direction,kernel = 'triangular',sigma = 50.,tlim = [0,2000],alignment = 'TS',redo  =False):
@@ -119,24 +103,7 @@ def _get_direction_counts(gn,condition,window = 400,tlim = [0,2000],alignment = 
     params = {'gn':gn,'condition':condition,'alignment':alignment,'tlim':tlim,'window':window}
 
     return organiser.check_and_execute(params, _calc_direction_counts, 'direction_counts_file',reps = 1)
-    """
-    data = load_data(gn,condition,alignment= alignment)
 
-    spiketimes = data['spiketimes']
-    
-    counts,time = spiketools.sliding_counts(spiketimes[:2], window,tlim = tlim)
-    
-    trial_directions = pylab.array([spiketimes[2,find(spiketimes[1]==t)[0]] for t in pylab.sort(pylab.unique(spiketimes[1]))])
-    
-    
-    direction_counts = []
-    mean_direction_counts = pylab.zeros((6,counts.shape[1]))
-    min_direction_trials = 10000
-    for direction in range(1,7):
-        direction_counts.append(counts[trial_directions == direction])
-
-    return direction_counts,time
-    """
 def tuning_vector(counts):
     angles = 360 /float(len(counts))
     degrees = pylab.arange(0,360,angles)

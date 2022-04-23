@@ -61,7 +61,6 @@ def calc_js(params):
         N_E * amp_EE / (ps[0, 1] * N_I * amp_EI)
     K_IE = N_E * ps[1, 0]
     js[1, 0] = gie * (V_th_I - E_L) * (K_IE**-0.5) * N**0.5 / amp_IE
-    # js[1,0] = gie * tau_E/tau_I * ps[0,0]/ps[1,0] * amp_EE/amp_IE * js[0,0]
     js[1, 1] = -gi * js[1, 0] * ps[1, 0] * \
         N_E * amp_IE / (ps[1, 1] * N_I * amp_II)
 

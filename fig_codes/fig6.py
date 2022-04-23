@@ -450,7 +450,7 @@ if __name__ == '__main__':
 
 
 
-    pylab.savefig('Fig6_Final.pdf')
+    pylab.savefig('fig6.pdf')
     pylab.show()
 
 
