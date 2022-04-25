@@ -23,3 +23,6 @@ This project used Python and Nest for analyses of experimental data and simulati
   * `conda env create -f environment.yml`
   * `conda activate ClusteredNetwork_pub` 
 
+# Reproducing figures
+* run the following command inside the `fig_codes`
+  * `python figX.py`where X is the number of figure. This will then create figX.pdf or figX.eps or figX.png in the fig_codes folder.
