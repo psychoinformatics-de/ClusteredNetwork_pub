@@ -14,14 +14,12 @@ This project used Python and Nest for analyses of experimental data and simulati
 
 * `fig_codes/` contains matplotlib scripts to reproduce all the figures of the paper.
 
-it contains all the experimental and the SIMULATED data used in our paper and required to reproduce the figures.
 * `data/` contains all the experimental and simulated data used in our paper and required to reproduce the figures. To download the data please unzip the following link in the repository: https://www.dropbox.com/s/51atayocaqqha72/data.zip?dl=0
   * NOTE that the zip file is around 11GB and after unzipping it needsaround 33Gb of memory.
 
-contains all Python scripts to execute the SNN simulations and to analyze the simulated and experimental data used for this paper.
-
 * `utils/` folder contains all Python scripts to execute the SNN simulations and to analyze the simulated and experimental data used for this paper.
   * Note1: we are working with the NEST developers to include our model as an example in the newest NEST release. We will then adjust the script accordingly and will have a running version of our model using the newest NEST version upon publication.
+
 * `enviroment.yml`contains necessary packages to run the codes. Please run the following code to create a conda enviroment:
   * `conda env create -f environment.yml`
   * `conda activate ClusteredNetwork_pub` 
