@@ -12,13 +12,16 @@ If you have questions or encounter any problems while using this code base, feel
 # project layout
 This project used Python and Nest for analyses of experimental data and simulations and analyses of the spiking neural networks (SNN). The simulation results (spike trains) are dumped as pickled files.
 
-
-* `utils/` folder contains all Python scripts to run and analyse both the SNN simulations and experimental data to re-generate the data used for the paper
-  * Note1: this requires several TB of disk space and large amount of RAM !
-  * Note2: we are working with the NEST developers to include our model as an example in the newest NEST release. We will then adjust the script accordingly and will have a running version of our model using the newest NEST version upon publication.
 * `fig_codes/` contains matplotlib scripts to reproduce all the figures of the paper.
-* `data/` contains all the experimental and simulation data. To download the data please unzip the following link in the repository: https://www.dropbox.com/s/51atayocaqqha72/data.zip?dl=0
-  * NOTE that around 33Gb of memory is needed to unzip the data.
+
+it contains all the experimental and the SIMULATED data used in our paper and required to reproduce the figures.
+* `data/` contains all the experimental and simulated data used in our paper and required to reproduce the figures. To download the data please unzip the following link in the repository: https://www.dropbox.com/s/51atayocaqqha72/data.zip?dl=0
+  * NOTE that the zip file is around 11GB and after unzipping it needsaround 33Gb of memory.
+
+contains all Python scripts to execute the SNN simulations and to analyze the simulated and experimental data used for this paper.
+
+* `utils/` folder contains all Python scripts to execute the SNN simulations and to analyze the simulated and experimental data used for this paper.
+  * Note1: we are working with the NEST developers to include our model as an example in the newest NEST release. We will then adjust the script accordingly and will have a running version of our model using the newest NEST version upon publication.
 * `enviroment.yml`contains necessary packages to run the codes. Please run the following code to create a conda enviroment:
   * `conda env create -f environment.yml`
   * `conda activate ClusteredNetwork_pub` 
