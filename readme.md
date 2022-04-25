@@ -18,7 +18,7 @@ This project used Python and Nest for analyses of experimental data and simulati
   * NOTE that the zip file is around 11GB and after unzipping it needsaround 33Gb of memory.
 
 * `utils/` folder contains all Python scripts to execute the SNN simulations and to analyze the simulated and experimental data used for this paper.
-  * Note1: we are working with the NEST developers to include our model as an example in the newest NEST release. We will then adjust the script accordingly and will have a running version of our model using the newest NEST version upon publication.
+  * NOTE that we are working with the NEST developers to include our model as an example in the newest NEST release. We will then adjust the script accordingly and will have a running version of our model using the newest NEST version upon publication.
 
 * `enviroment.yml`contains necessary packages to run the codes. Please run the following code to create a conda enviroment:
   * `conda env create -f environment.yml`
