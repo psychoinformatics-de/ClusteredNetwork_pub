@@ -6,10 +6,15 @@ import pylab
 import numpy as np
 from general_func import *
 import pandas as pd
+import numpy as np
 gdf_path = '../data/'
 pickle_path = os.path.join(gdf_path,'pickle')
 
 
+def find(condition):
+    """old pylab.find function"""
+    res, = np.nonzero(np.ravel(condition))
+    return res
 
 marker_list = {'TS':'700','PS':'11','RS':'12','MO':'13','ME':'14','RW':'19','TE':'20'}
 
@@ -231,7 +236,7 @@ def gdf2pickle(fname,outpath,cut_window = [0,3000]):
      
 def get_toc(filters = standard_filters,extra_filters = []):
     
-    dpath = '../data'
+    dpath = '../data/pickle'
     if 'toc' in os.listdir(dpath):
         #f=open(os.path.join(dpath,'toc'), 'rb')
         #toc = pickle.load(f, encoding='latin1')
@@ -337,14 +342,11 @@ def get_toc(filters = standard_filters,extra_filters = []):
     
     
     for key,mode,value in filters+extra_filters:
-        print('key,mode,value',key,mode,value)
-        #print(toc.keys())
         if key not in list(toc.keys()):
             warn('toc does not have column '+key)
             continue
         if mode=='=':
             mask = toc[key]==value
-            print('here-->',key,mask,toc[key])
             
         
         elif mode=='in':

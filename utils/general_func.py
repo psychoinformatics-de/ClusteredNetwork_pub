@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import ast 
+
 def find(condition):
     """old pylab.find function"""
     res, = np.nonzero(np.ravel(condition))
@@ -36,7 +37,8 @@ def compare_key(all_keys, params):
 
 
 
-def load_data(datapath, datafile,params, old_key_code=False, ignore_keys=[''], reps=None):
+def load_data(datapath, datafile,params, old_key_code=False, 
+                ignore_keys=[''], reps=None):
     """load pickle format data using pandas"""
     all_results = pd.read_pickle(datapath + datafile)
     if old_key_code:

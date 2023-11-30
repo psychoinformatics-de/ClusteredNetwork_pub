@@ -189,7 +189,8 @@ col_conv= matplotlib.colors.ColorConverter()
 
 def ax_label(ax,label,size= 10):
     pylab.sca(ax)
-    pylab.title(r'\textbf{'+label+'}',loc = 'left',fontsize = size,family ='sans-serif')
+    pylab.title(r'\textbf{'+label+'}',loc = 'left',
+                fontsize = size,family ='sans-serif')
     return ax
 
 def ax_label_title(ax,label,size= 10):
@@ -199,7 +200,8 @@ def ax_label_title(ax,label,size= 10):
 
 def ax_label1(ax,label,x=-0.5, size= 10):
     pylab.sca(ax)
-    ax.text(x, 1.1, r'\textbf{'+label+'}',transform=ax.transAxes, size=size, weight='bold')
+    ax.text(x, 1.1, r'\textbf{'+label+'}',transform=ax.transAxes, 
+            size=size, weight='bold')
     return ax
 def ax_label2(ax,label,size= 10):
     ax.annotate(label, xy=(0.9, 0.9), xycoords="axes fraction")
@@ -235,7 +237,8 @@ def simpleaxis1(ax,labelsize = 5,pad=1.5):
     #ax.tick_params('both', which='major',pad = pad,labelsize=labelsize)
     return ax
 
-def nice_figure(fig_width= 0.95,ps = False,square = False,ratio = None,latex_page = 345.,rcparams = {}):
+def nice_figure(fig_width= 0.95,ps = False,square = False,
+                ratio = None,latex_page = 345.,rcparams = {}):
     inches_per_pt = 1.0/(72.27)  
     if not square and ratio is None:             # Convert pt to cm
         golden_mean = (pylab.sqrt(5)-1.0)/2.0
