@@ -1,12 +1,17 @@
 import sys;sys.path.append('../utils')
+import analyse_model
 import pylab
+import organiser
+from organiser import memoized
+from copy import deepcopy
 from simulate_experiment import get_simulated_data
 import plotting_functions as plotting
 import spiketools
-#import analyses
-from general_func import find
-import scipy.stats as ss
-from reaction_times_func import reaction_time_plot, get_reaction_time_analysis
+import analyses
+import joe_and_lili
+from general_func import *
+
+from reaction_times_func import *
 
 
 
@@ -16,7 +21,19 @@ from reaction_times_func import reaction_time_plot, get_reaction_time_analysis
     
 
 if __name__ == '__main__':
-    sim_params = {'randseed':8721,'trials':2000,'N_E':1200,'N_I':300,'I_th_E':1.25,'I_th_I':0.78,'Q':6,'rs_stim_amp':0,'n_jobs':12,'conditions':[1,2,3]}
+    #sim_params = {'randseed':8721,'trials':150,'N_E':1200,'N_I':300,'I_th_E':1.25,'I_th_I':0.78,'Q':6,'rs_stim_amp':0,'n_jobs':12,'conditions':[1,2,3]}
+    sim_params = {'randseed':8721,'trials':800,'N_E':2400,'N_I':600,'I_th_E':1.25,'I_th_I':0.78,'Q':6,'rs_stim_amp':0,'n_jobs':20,'conditions':[1,2,3]}
+
+    # settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400},
+    #             {'randseed':5362,'jep':2.8,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400}]
+
+    # settings = [{'randseed':7745,'jep':3.3,
+    #              'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],
+    #              'rs_stim_amp':0.15,'rs_length':400}]
+
+    # settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,
+    #              'condition_stim_amps':[0.15,0.15,0.15],
+    #              'rs_stim_amp':0.15,'rs_length':400,'trials':2000}]
     settings = [{'randseed':7745,'jep':3.2,
                  'jipratio':0.75,'condition_stim_amps':[0.1,0.1,0.1],
                  'rs_stim_amp':0.1,'rs_length':400}]
@@ -141,14 +158,13 @@ if __name__ == '__main__':
                             for condition in [1,2,3]:
                                 
                                 rt = rts[(conditions == condition)*correct]
-                                mask = (rts > 100)*(rts < 400)
                                 bins = pylab.linspace(0,500,15)
                                 print('cond len_rt',condition,len(rt))
                                 print('mediann', pylab.median(rt))
                                 pylab.hist(rt,bins,histtype = 'step',facecolor = cond_colors[condition-1],
                                            density = True,edgecolor  = cond_colors[condition-1],label = 'condtion '+str(condition))
                                 pylab.xlim(1400,2000)
-                            
+                            import scipy.stats as ss
                             min_len = min(len(rts[(conditions == 2)*correct]),len(rts[(conditions == 3)*correct]))
                             print('sample size model:', min_len)
                             print('wilcoxon test', ss.wilcoxon(rts[(conditions == 2)*correct][:min_len],rts[(conditions == 3)*correct][:min_len]))
@@ -169,7 +185,7 @@ if __name__ == '__main__':
 
 
 
-    pylab.savefig('fig6.pdf')
+    pylab.savefig('fig6_extendedSize.pdf')
     pylab.show()
 
 
