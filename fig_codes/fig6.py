@@ -109,7 +109,8 @@ if __name__ == '__main__':
                             print(direction_clusters)
                             for cluster in range(6):
 
-                                pylab.text(2000,(cluster+0.5)*cluster_size,r'\textbf{'+str(cluster+1)+'}',va = 'center',ha = 'left')
+                                pylab.text(2000,(cluster+0.5)*cluster_size,str(cluster+1),
+                                           va = 'center',ha = 'left',weight='bold')
                                 direction = find(direction_clusters == cluster)[0]
                                 
                                 

@@ -41,7 +41,7 @@ data_path = '../data/'
 subplotspec = gs.new_subplotspec((0,0), colspan=int(ncols/3),rowspan=1)
 ax1 = pylab.subplot(subplotspec)
 plotting.ax_label_fig1(ax1, 'a')
-plotting.ax_label_title(ax1, 'Bahaving monkey')
+plotting.ax_label_title(ax1, 'Behaving monkey')#, family ='serif')
 drawing = mimage.imread(data_path+'drawing_small.png')
 drawing = drawing[:-2]
 pylab.imshow(drawing, cmap='gray')
@@ -71,7 +71,7 @@ pylab.ylim(ff_ylim)
 pylab.axvline(500,linestyle = '--',color = (0,0,0),lw = 0.5)
 pylab.axvline(1500,linestyle = '--',color = (0,0,0),lw = 0.5)
 pylab.axhline(1,linestyle = '--',color = (169/255,169/255,169/255),lw = 0.5)
-pylab.ylabel(r'CV$_2$, FF')
+pylab.ylabel(r'CV$_2$, FF', math_fontfamily='dejavusans')
 pylab.xlabel('time [ms]')
 
 # import model stuff only now to avoiud changing path of organiser...organiser
@@ -97,13 +97,13 @@ signal = (time>500)*(time<1500)
 pylab.plot(time,signal*0.5,color = (0.6, 0.6, 0.6))
 pylab.plot(time,signal,color = (0.4, 0.4, 0.4))
 pylab.plot(time,signal*1.5,color =(0.1, 0.1, 0.1))
-pylab.text(400, 1.9, "Stimulus Amplitude")
+pylab.text(300, 1.9, "Stimulus Amplitude")
 pylab.ylim(0,2.5)
 pylab.axis('off')
 
 subplotspec = gs.new_subplotspec((1,2*int(ncols/3)), colspan=int(ncols/3),rowspan=1)
 ax51 = plotting.simpleaxis(pylab.subplot(subplotspec))
-pylab.text(400, 1.9, "Stimulus Amplitude")
+pylab.text(300, 1.9, "Stimulus Amplitude")
 pylab.plot(time,signal*0.5,color = (0.6, 0.6, 0.6))
 pylab.plot(time,signal,color = (0.4, 0.4, 0.4))
 pylab.plot(time,signal*1.5,color =(0.1, 0.1, 0.1))
@@ -187,7 +187,7 @@ for setno,setting in enumerate(settings):
     axes = [ax6, ax7] 
     if setno == 0:
         ax6.set_ylabel('FF')
-        ax7.set_ylabel('CV$_2$')
+        ax7.set_ylabel('CV$_2$', math_fontfamily='dejavusans')
     ff_plotargs = {'color':colors['red'], 'alpha':.5 + setno%3/4.}
     cv2_plotargs = {'color':(0,0,0), 'alpha':0.5+setno%3/4.}
     
@@ -200,6 +200,6 @@ for setno,setting in enumerate(settings):
         ax.axvline(1500,linestyle = '--',color = (0,0,0),lw = 0.5)
     axes[1].set_xlabel('time [ms]')
 
-pylab.savefig('fig1.png',dpi = 300)
+#pylab.savefig('fig1.png',dpi = 300)
 pylab.savefig('fig1.pdf',dpi = 300)
 pylab.show()

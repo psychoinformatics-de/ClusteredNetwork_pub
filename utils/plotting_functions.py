@@ -187,20 +187,22 @@ def make_color_list(n,cmap = 'jet',minval = 0.0,maxval = 1.):
 
 col_conv= matplotlib.colors.ColorConverter()
 
-def ax_label(ax,label,size= 10):
+def ax_label(ax,label,size= 10, family ='sans-serif'):
     pylab.sca(ax)
-    pylab.title(r'\textbf{'+label+'}',loc = 'left',
-                fontsize = size,family ='sans-serif')
+    pylab.title(label,loc = 'left',
+                fontsize = size,family =family)
     return ax
 
-def ax_label_title(ax,label,size= 10):
+def ax_label_title(ax,label,size= 10,family ='sans-serif'):
     pylab.sca(ax)
-    pylab.title(label,loc = 'center',fontsize = size,family ='sans-serif')
+    pylab.title(label,loc = 'center',
+                fontsize = size,family =family)
     return ax
+
 
 def ax_label1(ax,label,x=-0.5, size= 10):
     pylab.sca(ax)
-    ax.text(x, 1.1, r'\textbf{'+label+'}',transform=ax.transAxes, 
+    ax.text(x, 1.1, label,transform=ax.transAxes, 
             size=size, weight='bold')
     return ax
 def ax_label2(ax,label,size= 10):
@@ -209,7 +211,8 @@ def ax_label2(ax,label,size= 10):
 
 def ax_label_fig1(ax,label,size= 10):
     pylab.sca(ax)
-    ax.text(-0.3, 1.08, r'\textbf{'+label+'}',transform=ax.transAxes, size=size, weight='bold')
+    ax.text(-0.3, 1.08, label,transform=ax.transAxes, 
+            size=size, weight='bold',font='DejaVu Sans')
     return ax
 
 
@@ -249,21 +252,22 @@ def nice_figure(fig_width= 0.95,ps = False,square = False,
     fig_height = fig_width*ratio      # height in inches
     fig_size =  [fig_width,fig_height]
     
-    preamble = [r'\usepackage{helvet}',
-                r'\renewcommand*\familydefault{\sfdefault}',
-                r'\usepackage{amsmath}',
-                r'\usepackage{amssymb}',
-                r'\usepackage{subdepth}']#'\usepackage{sfmath}']
+    # preamble = [r'\usepackage{helvet}',
+    #             r'\renewcommand*\familydefault{\sfdefault}',
+    #             r'\usepackage{amsmath}',
+    #             r'\usepackage{amssymb}',
+    #             r'\usepackage{subdepth}']#'\usepackage{sfmath}']
                
     params = {'axes.labelsize': 7,
               'font.size':8,
               'font.family':'sans-serif',
-              'font.sans-serif': 'Helvetica',
+              #'font.sans-serif': 'Helvetica',
               'legend.fontsize': 7,
               'xtick.labelsize':6,
               'ytick.labelsize': 6,
-              'text.usetex': True,
-              'text.latex.preamble' : preamble,
+              'mathtext.fontset': 'cm',
+              #'text.usetex': True,
+              #'text.latex.preamble' : preamble,
               'figure.figsize' : fig_size}
 
     params.update(rcparams)

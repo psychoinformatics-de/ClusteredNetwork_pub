@@ -81,7 +81,9 @@ def get_spikes_fig2(params):
 
         
     
-def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),Q_range = pylab.arange(2,20,2),jipfactor = 1,reps = 40,plot = True,vrange = [0,15],redo = False):
+def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),
+                            Q_range = pylab.arange(2,20,2),jipfactor = 1,
+                            reps = 40,plot = True,vrange = [0,15],redo = False):
     
     
     try:
@@ -129,8 +131,8 @@ def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),Q_range = py
         y1 = pylab.ones_like(x)*Q_range.min()
         y2 = x
         pylab.fill_between(x,y1, y2,facecolor = 'w',hatch = '\\\\\\',edgecolor = global_params.colors['orange'])
-        pylab.xlabel('$J_{E+}$')
-        pylab.ylabel('$Q$')
+        pylab.xlabel('$J_{E+}$',size = 14)
+        pylab.ylabel('$Q$', size = 14)
         pylab.axis('tight')
 
 
@@ -160,14 +162,14 @@ if __name__ == '__main__':
             Q_range = pylab.arange(q_step,60+0.5*q_step,q_step)
             
             if plot:
-                ax = plotting.simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col)))          
+                ax = plotting.simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col)),labelsize = 10)          
                 #plotting.ax_label1(ax, labels[i], x=x_label_val)
             plot_ff_jep_vs_Q_Litwin(params,jep_range,Q_range,jipfactor,plot=plot, redo=False)
             if plot:
                 cbar = pylab.colorbar()
-                cbar.set_label('FF', rotation=90)
+                cbar.set_label('FF', rotation=90,size = 14)
     pylab.savefig('suppl_fig1.pdf')
-    pylab.savefig('suppl_fig1.png', dpi=300)    
+    #pylab.savefig('suppl_fig1.png', dpi=300)    
     pylab.show()
 
 

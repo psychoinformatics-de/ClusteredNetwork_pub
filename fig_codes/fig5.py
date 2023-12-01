@@ -125,7 +125,7 @@ n '+str(condition))
                 center = 0.5 * (bottom_val+top_val) 
                 print('test_time' ,test_time)
                 pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line,ms = 2.)
-                pylab.text(test_time-10, center-0.05, '*',va = 'top',ha ='right')
+                pylab.text(test_time-10, center+0.05, '*',va = 'top',ha ='right',size = 6)
 
 
 
@@ -265,8 +265,10 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, redo=False):
                 bottom_val = pylab.nanmean(test_vals[i,:]) -offset_lst[i]
                 top_val = pylab.nanmean(test_vals[i+1,:]) - offset_lst[i+1]
                 center = 0.5 * (bottom_val+top_val)
-                pylab.plot([sig_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line/2,ms = 2.)
-                pylab.text(sig_time-10, center-0.05, sig_symbol,va = 'top',ha ='right')
+                pylab.plot([sig_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',
+                           lw =lw_line/2,ms = 2.)
+                pylab.text(sig_time-10, center+0.05, sig_symbol,
+                           va = 'top',ha ='right',size = 6)
 
     pylab.ylabel(r'$\Delta$FF',rotation=90)
     #pylab.xlabel('time [ms]')
@@ -302,7 +304,7 @@ def plot_cv2s(params,sig_time = 1000,plot = True,redo=False, lw_line=0.5):
         all_cv2s = pylab.array(all_cv2s)
         pylab.plot(time,pylab.nanmean(all_cv2s,axis=0),color = condition_colors[condition-1],label = 'condition '+str(condition))
 
-    pylab.ylabel("CV $_2$")
+    pylab.ylabel("CV$_2$",math_fontfamily='dejavusans')
     pylab.xlabel('time [ms]')
 
 
@@ -332,7 +334,7 @@ def plot_rates(params,plot,redo=False):
         rates_arr = np.array(list(map(lambda x: condition_scores[x], condition_scores.keys())))
         pylab.plot(time,pylab.nanmean(rates_arr,axis=0),color = condition_colors[condition-1])
     
-    pylab.ylabel('Rate', rotation=90)
+    pylab.ylabel('rate', rotation=90)
     pylab.xlabel('time [ms]')
 
     
@@ -366,7 +368,9 @@ def draw_hex_array(center,size=0.3,colors = [[0.5]*3]*6,axes = None,radius = 0.1
 
 
 
-def model_plot(ax, net_factor = 1.6,net_offset = 1.,offset_dir = [1.2,0.4],net_sigma = 0.12,N = 1200,decoder_factor = 0.7,decoder_offset = 1,randseed=0,colors = None):
+def model_plot(ax, net_factor = 1.6,net_offset = 1.,
+               offset_dir = [1.2,0.4],net_sigma = 0.12,N = 1200,
+               decoder_factor = 0.7,decoder_offset = 1,randseed=0,colors = None):
     pylab.seed(randseed)
 
     stim_center = [0,0]
@@ -389,7 +393,8 @@ def model_plot(ax, net_factor = 1.6,net_offset = 1.,offset_dir = [1.2,0.4],net_s
         new_pos[:,0] += coord[0]*net_factor + net_offset*offset_dir[0]
         new_pos[:,1] += coord[1]*net_factor + net_offset*offset_dir[1]
         
-        cluster_centers.append((coord[0]*net_factor + net_offset*offset_dir[0],coord[1]*net_factor + net_offset*offset_dir[1]))
+        cluster_centers.append((coord[0]*net_factor + net_offset*offset_dir[0],
+                                coord[1]*net_factor + net_offset*offset_dir[1]))
         positions = pylab.append(positions, new_pos,axis=0)
     
     ax.plot(positions[:,0],positions[:,1],'ok',ms = 0.2,zorder = 2 )
@@ -442,7 +447,9 @@ def model_plot(ax, net_factor = 1.6,net_offset = 1.,offset_dir = [1.2,0.4],net_s
     ax.add_patch(rectangle)
     pylab.text(stim_center[0],stim_center[1]-stim_size*1.5,'stimulus',ha = 'center',va = 'top',size = '10')
     pylab.text(decoder_center[0],decoder_center[1]+edge_length,'decoder',ha = 'center',va ='bottom',size = '10')
-    pylab.text(stim_center[0]-.7,(decoder_center[1] - stim_center[1])/2-1.,r'\textbf{E/I Clustered model}',ha = 'center',va ='bottom',size = '14',rotation=90,weight='bold')    
+    pylab.text(stim_center[0]-.7,(decoder_center[1] - stim_center[1])/2-1.,
+               'E/I Clustered model',ha = 'center',va ='bottom',
+               size = '14',rotation=90,weight='bold')    
     pylab.axis('equal')
 
 
@@ -454,7 +461,7 @@ def model_plot(ax, net_factor = 1.6,net_offset = 1.,offset_dir = [1.2,0.4],net_s
   
     
 if __name__ == '__main__':
-    labelsize = 8
+    labelsize = 6#8
     labelsize1 = 6    
     ticksize =2.
     size = 4
@@ -475,16 +482,17 @@ if __name__ == '__main__':
                 'axes.linewidth':0.2}
 
     fig = plotting.nice_figure(fig_width= 1.,ratio  =.5,rcparams = rcparams)
-    fig.subplots_adjust(hspace = .5,wspace = 0.9,bottom  =0.14,top  =0.9)
+    fig.subplots_adjust(hspace = .5,wspace = 0.6,bottom  =0.14,top  =0.95)
     tlim = [0,2000]
     xticks = [0,500,1000,1500,2000]
     nrow,ncol = 7, 3
     pad=.3
     x_label_val=-0.5
-    size_cond = 12
+    size_cond = 15
     ##########################
     ###EXPERIMENT PROTOCOL####
-    exp_ax = plotting.simpleaxis1(pylab.subplot2grid((nrow,ncol),(0,0),rowspan=3),labelsize,pad=pad)
+    exp_ax = plotting.simpleaxis1(pylab.subplot2grid((nrow,ncol),(0,0),rowspan=3),
+                                  labelsize,pad=pad)
     plotting.ax_label1(exp_ax,'a',x=x_label_val,size=labelsize)
     pylab.sca(exp_ax)
     pylab.axis('off')
@@ -515,7 +523,7 @@ if __name__ == '__main__':
     #pylab.xticks([])
     pylab.xticks(xticks)
     pylab.yticks([0.4,0.8,1.2])    
-    pylab.ylabel('CV$_2$',rotation=90)
+    pylab.ylabel('CV$_2$',rotation=90, math_fontfamily='dejavusans')
     pylab.xlabel('time [ms]')    
     pylab.xlim(tlim)
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
@@ -533,7 +541,8 @@ if __name__ == '__main__':
     pylab.ylim(-0.7,0.1)
     pylab.yticks([-0.5,0])
     #pylab.yticks([-0.8,-0.4,0])
-    pylab.legend(frameon = False,fontsize = labelsize1-2,loc = 'upper center',bbox_to_anchor=(1.2, 1.1))
+    pylab.legend(frameon = False,fontsize = labelsize1-1,loc = 'upper center',
+                 bbox_to_anchor=(1.2, 1.1))
     
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
     pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize1)
@@ -560,7 +569,7 @@ if __name__ == '__main__':
     pylab.xticks(xticks)
     pylab.ylim(0,40)
     pylab.yticks([10,30])
-    pylab.ylabel('Rate')
+    pylab.ylabel('rate')
     pylab.xlabel('time [ms]')
 
 
@@ -585,7 +594,9 @@ if __name__ == '__main__':
                  'trials':150}]    
 
     ax_model = plotting.ax_label1(plotting.simpleaxis1(
-        pylab.subplot2grid((nrow,ncol),(4,0),rowspan=3),labelsize,pad=pad),'d',x=x_label_val, size=labelsize)      
+        pylab.subplot2grid((nrow,ncol),(4,0),rowspan=3),labelsize,pad=pad),
+                                  'd',x=x_label_val, 
+                                  size=labelsize)      
     pylab.box('off')
     pylab.axis('off')
     print('axmodel xlim', ax_model.get_xlim())
@@ -665,50 +676,50 @@ if __name__ == '__main__':
     red = 'red'#'0.3'
     gray = '0.3'
     fig = plotting.nice_figure()
-    fig.subplots_adjust(bottom  =0.01,top  =0.99)    
+    fig.subplots_adjust(bottom  =0.01,top  =0.95)    
     hsep = 2. 
     vsep = 1. 
     draw_hex_array((0,0),colors = [green]+5*[off_color],edgecolor=None)
     draw_hex_array((hsep,0),colors = [red]+5*[off_color],show_numbers= True,
                    edgecolor=None)
-    pylab.text(-0.8,0,'condition 1',va = 'center',ha='right',color=condition_colors[0],
+    pylab.text(-0.7,0,'condition 1',va = 'center',ha='right',color=condition_colors[0],
                size = size_cond)
     draw_hex_array((0,-vsep),colors = [green]*2+4*[off_color],edgecolor=None)
     draw_hex_array((hsep,-vsep),colors = [red]+5*[off_color],edgecolor=None)
-    pylab.text(-0.8,-vsep,'condition 2',va = 'center',ha='right',color=condition_colors[1],
+    pylab.text(-0.7,-vsep,'condition 2',va = 'center',ha='right',color=condition_colors[1],
                size = size_cond)
 
     draw_hex_array((0,-2*vsep),colors = [green]*3+3*[off_color],edgecolor=None)
     draw_hex_array((hsep,-2*vsep),colors = [red]+5*[off_color],edgecolor=None)
-    pylab.text(-0.8,-vsep*2,'condition 3',va = 'center',ha='right',color=condition_colors[2],
+    pylab.text(-0.7,-vsep*2,'condition 3',va = 'center',ha='right',color=condition_colors[2],
                size = size_cond)
 
-    pylab.text(-2.3,-vsep+0.2,r'\textbf{Behaving monkey}',va = 'center',ha='right',
+    pylab.text(-2.3,-vsep+0.2,'Behaving monkey',va = 'center',ha='right',
                color='k',rotation=90,size=size_cond+2)#,weight='bold')
 
     txth = 0.8
     lw = 1.5
     pylab.plot([-0.6*hsep,1.6*hsep],[0.7]*2,'k',lw = lw)
-
+    epoch_size = 14
     pylab.arrow(0.4*hsep,0.57,0.3,0, width=0.004, head_width=0.03,fc ='k',lw=0.5)
     pylab.text(0.48*hsep,0.45,'time',ha='center',va = 'top',size=10)
     pylab.plot([-0.5*hsep]*2,[0.65,0.75],'k',lw = lw)
-    pylab.text(-0.5*hsep,txth,'TS',va = 'bottom',ha='center')
+    pylab.text(-0.5*hsep,txth,'TS',va = 'bottom',ha='center',size=epoch_size)
     pylab.plot([0.0]*2,[0.65,0.75],'k',lw = lw)
-    pylab.text(0,txth,'PS',va = 'bottom',ha='center')
+    pylab.text(0,txth,'PS',va = 'bottom',ha='center',size=epoch_size)
     pylab.plot([hsep]*2,[0.65,0.75],'k',lw = lw)
-    pylab.text(hsep,txth,'RS',va = 'bottom',ha='center')
-    pylab.plot([hsep+0.33]*2,[0.65,0.75],gray,lw = lw)
-    pylab.text(hsep+0.33,txth,'MO',va = 'bottom',ha='center',color = gray)
+    pylab.text(hsep,txth,'RS',va = 'bottom',ha='center',size=epoch_size)
+    #pylab.plot([hsep+0.33]*2,[0.65,0.75],gray,lw = lw)
+    #pylab.text(hsep+0.33,txth,'MO',va = 'bottom',ha='center',color = gray, size=epoch_size)
     pylab.plot([hsep+0.7]*2,[0.65,0.75],gray,lw = lw)
-    pylab.text(hsep+0.7,txth,'ME',va = 'bottom',ha='center',color = gray)
-    pylab.plot([hsep+1.05]*2,[0.65,0.75],gray,lw = lw)
-    pylab.text(hsep+1.05,txth,'RW',va = 'bottom',ha='center',color = gray)
+    pylab.text(hsep+0.7,txth,'MO',va = 'bottom',ha='center',color = gray, size=epoch_size)
+    #pylab.plot([hsep+1.05]*2,[0.65,0.75],gray,lw = lw)
+    #pylab.text(hsep+1.05,txth,'RW',va = 'bottom',ha='center',color = gray, size=epoch_size)
     pylab.axis('scaled')
     pylab.axis('off')
     pylab.subplots_adjust(left=0.1, bottom=0, right=1, top=1, wspace=0, hspace=0)    
     pylab.savefig('./experiment.eps')
-    pylab.savefig('./experiment.png', dpi=300)    
+    #pylab.savefig('./experiment.png', dpi=300)    
     pylab.close()
 
 
@@ -721,7 +732,7 @@ if __name__ == '__main__':
     pylab.box('off')
     pylab.subplots_adjust(left=0.1, bottom=0, right=1, top=1, wspace=0, hspace=0)        
     pylab.savefig('./model.eps')
-    pylab.savefig('./model.png',dpi=300)
+    pylab.savefig('./model.jpg',dpi=300)
     pylab.close()
 
 
@@ -731,24 +742,25 @@ if __name__ == '__main__':
     
     c = pyx.canvas.canvas()
     c.insert(pyx.epsfile.epsfile(0, 0.0, "compound_data_fig_cv2_corrected0.eps"))
-    c.insert(pyx.epsfile.epsfile(.3, 3.1,"experiment.eps",scale=0.3))
+    c.insert(pyx.epsfile.epsfile(.35, 3.5,"experiment.eps",scale=0.32))
     # c.insert(pyx.epsfile.epsfile(12., 2.1, "../figures/fig_1C.eps"))
     c.writeEPSfile("compound_data_fig_cv2_corrected1.eps")  
 
     #inser model
     c.insert(pyx.epsfile.epsfile(0, 0.0, "compound_data_fig_cv2_corrected1.eps"))
-    c.insert(pyx.epsfile.epsfile(.29, .3,"model.eps",scale=0.35))
-    #c.insert(pyx.bitmap.bitmap(0,0,"model.png"))
+    #c.insert(pyx.epsfile.epsfile(.29, .3,"model.eps",scale=0.35))
+    i = pyx.bitmap.jpegimage("model.jpg")
+    c.insert(pyx.bitmap.bitmap(.4, .3,i, compressmode=None,width=3.7, height=2.5))
     # c.insert(pyx.epsfile.epsfile(12., 2.1, "../figures/fig_1C.eps"))
-    c.writeEPSfile("fig5.eps")  
-    
+    #c.writeEPSfile("fig5.eps")  
+    c.writePDFfile('fig5.pdf')
     # remove intemittent files
     os.remove('compound_data_fig_cv2_corrected0.eps')
     os.remove('experiment.eps')
-    os.remove('experiment.png')
+    #os.remove('experiment.png')
     os.remove('compound_data_fig_cv2_corrected1.eps')
     os.remove('model.eps')
-    os.remove('model.png')
+    os.remove('model.jpg')
 
     
     #pylab.savefig('compound_data_fig_cv2.png',dpi  =400)

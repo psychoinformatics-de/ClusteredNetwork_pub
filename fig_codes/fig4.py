@@ -220,8 +220,8 @@ plt.fill_between(amp_uni, FF_nonstim[:,-1]-FF_nonstim_std[:,-1], FF_nonstim[:,-1
 
 
 plt.gca().set_title('E clustered network')
-plt.gca().set_ylabel(r'$\Delta${FF}')
-plt.xlabel('Stim. Amplitude [pA]')
+plt.gca().set_ylabel(r'$\Delta$FF')
+plt.xlabel('stim. Amplitude [pA]')
 plt.axvline(0.4, ls ='--', lw=0.8, color='gray')
 plt.axhline(0., ls ='--', lw=0.8, color='gray')
 plt.ylim(-2,20)
@@ -242,8 +242,8 @@ plt.fill_between(amp_uni, FF_nonstim[:,0]-FF_nonstim_std[:,0], FF_nonstim[:,0]+F
                  facecolor='plum', alpha=0.5,lw=0)
 
 
-plt.gca().set_ylabel(r'$\Delta${FF}')
-plt.xlabel('Stim. Amplitude [pA]')
+plt.gca().set_ylabel(r'$\Delta$FF')
+plt.xlabel('stim. Amplitude [pA]')
 plt.axvline(0.4, ls ='--', lw=0.8, color='gray')
 plt.axhline(0., ls ='--', lw=0.8, color='gray')
 plt.ylim(-2,1)
@@ -267,8 +267,8 @@ plt.plot(amp_uni, RATE_nonstim[:,-1], lw =lw, ls=ls, label = 'E non-stim. cluste
 
 
 plt.axhline(0,ls='--',lw=0.8,color='gray')
-plt.gca().set_ylabel(r'$\Delta${rate [1/s]}')
-plt.xlabel('Stim. Amplitude [pA]')
+plt.gca().set_ylabel(r'$\Delta$rate [1/s]')
+plt.xlabel('stim. Amplitude [pA]')
 plt.axvline(0.4, ls='--', lw=0.8, color='gray')
 plt.legend(loc=9,ncol=2,bbox_to_anchor=(.5, 1.48))
 
@@ -281,9 +281,10 @@ plt.legend(loc=9,ncol=2,bbox_to_anchor=(.5, 1.48))
 # plt.plot(amp_uni, act_prob_MAT[:,-1], lw =lw, label = 'E stim. clusters', c = CB_color_cycle[7])
 
 plt.savefig('../data/fig_StimAmp0.eps')
+plt.savefig('../data/fig_StimAmp0.jpg')
 import pyx
 c = pyx.canvas.canvas()
 c.insert(pyx.epsfile.epsfile(0, 0.0, "../data/fig_StimAmp0.eps"))
 c.insert(pyx.epsfile.epsfile(1.5, 5.2,"../data/sketch_ff.eps"))
-c.writeEPSfile("fig4.eps")  
+c.writePDFfile("fig4.pdf")  
 plt.show()

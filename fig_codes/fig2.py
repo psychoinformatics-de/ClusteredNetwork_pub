@@ -106,6 +106,11 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
     if plot:
         ffs = pylab.nanmean(ffs,axis=1)
         pylab.plot(jep_range,ffs,'k')
+        if jipfactor == 0.:
+            pylab.gca().set_ylim(-0.2, 4)
+        else:
+            pylab.gca().set_ylim(-0.2, 12)
+            
 
 
         n_boxes = len(spike_js)
@@ -201,8 +206,8 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
         y1 = pylab.ones_like(x)*Q_range.min()
         y2 = x
         pylab.fill_between(x,y1, y2,facecolor = 'w',hatch = '\\\\\\',edgecolor = global_params.colors['orange'])
-        pylab.xlabel('$J_{E+}$')
-        pylab.ylabel('$Q$')
+        pylab.xlabel(r'$J_{E+}$')
+        pylab.ylabel(r'$Q$')
         pylab.axis('tight')
     return ffs
     
@@ -248,7 +253,7 @@ if __name__ == '__main__':
             plot_ff_cv_vs_jep(params,reps = reps,jipfactor =jipfactor,
                               jep_range = jep_range,spike_js = spike_js,
                               plot = plot,spike_randseed = 3,spike_simtime = 2000.,markersize = 0.1,spikealpha= 0.3)
-            pylab.gca().text(-8, i, title_left[i], rotation=90, fontweight='bold')
+            pylab.gca().text(-7, i/3.+0.2, title_left[i], rotation=90)#, fontweight='bold')
         else:
             jipfactor = params.pop('jipfactor')
             jep_step = 0.5

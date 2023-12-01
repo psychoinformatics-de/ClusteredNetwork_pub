@@ -196,7 +196,7 @@ redo = False
   
     
 if __name__ == '__main__':
-    labelsize = 8
+    labelsize = 7
     labelsize1 = 6    
     ticksize =2.
     size = 4
@@ -286,7 +286,7 @@ if __name__ == '__main__':
   
     pylab.sca(count_dist_ax_list[6])
     pylab.xlabel('Spike Count')#
-    pylab.ylabel('\#')
+    pylab.ylabel('#')
 
 
     pylab.savefig('suppl_fig2.pdf')

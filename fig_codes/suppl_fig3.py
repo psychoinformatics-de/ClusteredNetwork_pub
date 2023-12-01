@@ -131,7 +131,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
                 center = 0.5 * (bottom_val+top_val) 
                 print('test_time' ,test_time)
                 pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line,ms = 2.)
-                pylab.text(test_time-10, center-0.05, '*',va = 'top',ha ='right')
+                pylab.text(test_time-10, center+0.01, '*',va = 'top',ha ='right',size = 5)
 
 
 
@@ -169,11 +169,12 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
         pylab.sca(RTs_ax)
         reaction_time_plot(extra_filters[0][2], condition_colors = condition_colors)
         #pylab.xlabel('reaction time [ms]')
-        pylab.ylabel('P')
+        pylab.ylabel('p.d.f')
         pylab.axvline(1500,linestyle = '-',color = 'k',lw = 0.5)
         pylab.ylim(0,0.015)    
         pylab.yticks([0,0.004,0.008,0.012])
-        pylab.legend(frameon = False,fontsize = 6,loc = 'upper right', bbox_to_anchor=(1.55, 1.1))
+        pylab.legend(frameon = False,fontsize = 6,loc = 'upper right', 
+                     bbox_to_anchor=(1.7, 1.1))
         pylab.xticks([1500,1600,1700,1800,1900,2000])
         pylab.gca().set_xticklabels(['RS', '100','200','300','400','500'])
 
@@ -250,7 +251,7 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5,
                 top_val = pylab.nanmean(test_vals[i+1,:]) - offset_lst[i+1]
                 center = 0.5 * (bottom_val+top_val)
                 pylab.plot([sig_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line/2,ms = 2.)
-                pylab.text(sig_time-10, center-0.05, sig_symbol,va = 'top',ha ='right')
+                pylab.text(sig_time-10, center+0.01, sig_symbol,va = 'top',ha ='right',size = 5)
 
     pylab.ylabel(r'$\Delta$FF',rotation=90)
     pylab.xlabel('time [ms]')
@@ -287,7 +288,7 @@ def plot_cv2s(params,sig_time = 1000,plot = True,redo=False, save=False,lw_line=
         pylab.plot(time,pylab.nanmean(all_cv2s,axis=0),color = condition_colors[condition-1],
             label = 'condition '+str(condition))
 
-    pylab.ylabel("CV$_2$")
+    pylab.ylabel("CV$_2$",math_fontfamily='dejavusans')
     pylab.xlabel('time [ms]')
 
 
@@ -303,7 +304,7 @@ def plot_rates(params,plot,redo=False, save=False):
         rates_arr = np.array(list(map(lambda x: condition_scores[x], condition_scores.keys())))
         pylab.plot(time,pylab.nanmean(rates_arr,axis=0),color = condition_colors[condition-1])
     
-    pylab.ylabel('Rate', rotation=90)
+    pylab.ylabel('rate', rotation=90)
     #pylab.xlabel('time [ms]')
 
 
@@ -348,7 +349,7 @@ def plot_RTs(params, redo=False,save=False):
                         pylab.gca().set_xticklabels(['RS', '100','200','300','400','500'])
                         pylab.ylim(0,0.01)
                         pylab.yticks([0,0.004,0.008])                            
-                        pylab.ylabel('P')
+                        pylab.ylabel('p.d.f')
                         pylab.xlabel('reaction time [ms]')
                         pylab.axvline(0,linestyle = '-',color = 'k',lw = 0.5)  
 
@@ -374,7 +375,7 @@ if __name__ == '__main__':
                 'axes.linewidth':0.2}
 
     fig = plotting.nice_figure(fig_width= 1.,ratio  =.5,rcparams = rcparams)
-    fig.subplots_adjust(hspace = .5,wspace = 0.9,bottom  =0.14,top  =0.9)
+    fig.subplots_adjust(hspace = .8,wspace = 0.9,bottom  =0.14,top  =0.9)
     tlim = [0,2000]
     xticks = [0,500,1000,1500,2000]
     nrow,ncol = 4, 3
@@ -419,7 +420,7 @@ if __name__ == '__main__':
     pylab.ylim(0.4,1.3)
     pylab.xticks(xticks)
     pylab.yticks([0.4,0.8,1.2])    
-    pylab.ylabel('CV$_2$',rotation=90)
+    pylab.ylabel('CV$_2$',rotation=90,math_fontfamily='dejavusans')
 
     pylab.xlim(tlim)
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
@@ -505,5 +506,6 @@ if __name__ == '__main__':
                 
 
 
-    pylab.savefig('suppl_fig3.eps')
+    pylab.savefig('suppl_fig3.pdf')
+    #pylab.savefig('suppl_fig3.png',dpi=600)
     pylab.close()
