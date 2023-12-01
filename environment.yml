@@ -8,9 +8,10 @@ dependencies:
   - notebook
   - ipython
   - nest-simulator=2.20.2
+  - ghostscript
   - pip
   - pip:
-    - latex
+    - pyx
   - python=3.10.6
   - joblib
   - networkx
@@ -18,4 +19,3 @@ dependencies:
   - matplotlib
   - pandas
   - cython=0.29.32
-
