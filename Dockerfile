@@ -21,12 +21,16 @@ RUN conda env create -f /tmp/environment.yml && \
 FROM continuumio/miniconda3:23.10.0-1
 RUN apt-get update && apt-get install -y \
 build-essential \
-ghostscript
+ghostscript \
+git \
+git-annex \
+openssh-client
 
 RUN mkdir /app
 
 COPY --from=builder /opt/conda/envs/ClusteredNetwork_pub /opt/conda/envs/ClusteredNetwork_pub
 COPY --from=builder /usr/local/lib /usr/local/lib
+
 
 RUN echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib" >> /root/.bashrc && \
     echo "export CFLAGS="-I/usr/local/include"" >> /root/.bashrc && \
