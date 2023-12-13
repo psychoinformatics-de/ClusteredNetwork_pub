@@ -47,7 +47,7 @@ git annex get *
 ```
 Alternatively, utilize the provided script to download the data:
 ```bash
-./download_data.sh
+./Download.sh
 ```
 This script creates a ***'data'*** folder in the repository and initiates the download. 
 It verifies if the data is already present and skips download if it exists. 
