@@ -62,7 +62,7 @@ The image is accessed via Docker Hub. To use:
 ```bash 
 docker pull fschmitt/clustered_network_pub:nest2_20
 docker run -d   -it   --name clusternet   --mount type=bind,source="$(pwd)"/ClusteredNetwork_pub,target=/app   fschmitt/clustered_network_pub:nest2_20
-docker exec -it clusternet2 /bin/bash
+docker exec -it clusternet /bin/bash
 ```
 
 Once inside the container, execute the download script or run the code as previously described. To exit the container:
