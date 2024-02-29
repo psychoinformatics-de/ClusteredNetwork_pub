@@ -4,6 +4,7 @@ from bisect import bisect_left,bisect_right
 cimport cython
 
 
+
 cdef double m_cv_two(double t1, double t2, double t3):
     cdef double i1 = t2 -t1
     cdef double i2 =  t3-t2

@@ -6,8 +6,13 @@ import organiser
 from organiser import *
 from copy import deepcopy
 import pylab
+import numpy as np
 import spiketools
 from sim_nest import simulate
+
+#from Helper import ClusterModelNEST
+#from Defaults import defaultSimulate as default
+
 import analyse_nest
 import default
 import cv_bias
@@ -36,7 +41,7 @@ def _simulate_stimulate(original_params):
     stim_ends = [stim_starts[-1] +params['stim_length']]
 
     for i in range(params['trials']-1):
-        stim_starts += [stim_ends[-1]+params['isi']+pylab.rand()*params['isi_vari']]
+        stim_starts += [stim_ends[-1]+params['isi']+np.int16(pylab.rand()*params['isi_vari'])]
         stim_ends += [stim_starts[-1] +params['stim_length']]
 
     params['stim_starts'] = stim_starts
@@ -63,19 +68,24 @@ def _simulate_stimulate(original_params):
     
 
     # sim_result = organiser.check_and_execute(sim_params,simulate,datafile+'_spiketimes')
-
+    print('simparamssss', sim_params)
+    #EI_Network = ClusterModelNEST.ClusteredNetwork(default, sim_params)
+    # Creates object which creates the EI clustered network in NEST
+    #sim_result = EI_Network.get_simulation() 
     sim_result = simulate(sim_params)
-    print(sim_result['I_xE'])
     spiketimes =  sim_result['spiketimes']
     
-    trial_spiketimes = analyse_nest.cut_trials(spiketimes, stim_starts, params['cut_window'])
+    trial_spiketimes = analyse_nest.cut_trials(spiketimes, 
+                                    stim_starts, params['cut_window'])
     
     return trial_spiketimes
     
 
 def get_spiketimes(params,save = True,fname = datafile):
     
-    return organiser.check_and_execute(params,_simulate_stimulate,fname +'_spiketimes',ignore_keys=['n_jobs'],save = save)
+    return organiser.check_and_execute(params,_simulate_stimulate,
+                                       fname +'_spiketimes',ignore_keys=['n_jobs'],
+                                       save = save)
 
 
 def _simulate_analyse(params):
@@ -103,27 +113,49 @@ def _simulate_analyse(params):
     cluster_inds = [list(range(i*cluster_size,(i+1)*cluster_size)) for i in range(Q)]
 
 
-    ff_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.kernel_fano)(unit_spiketimes[u],window = params['window'],tlim = tlim) for u in list(unit_spiketimes.keys()))
+    ff_result = Parallel(n_jobs,verbose = 2)(
+        delayed(spiketools.kernel_fano)(
+            unit_spiketimes[u],window = params['window'],tlim = tlim) for u in list(unit_spiketimes.keys()))
     all_ffs = pylab.array([r[0] for r in ff_result])
     cluster_ffs = pylab.array([pylab.nanmean(all_ffs[ci],axis=0) for ci in cluster_inds])
     results = {'ffs':cluster_ffs,'t_ff':ff_result[0][1]}
+    # mean matched ff
+    var_mean_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.kernel_fano)(
+        unit_spiketimes[u],window = params['window'],
+        tlim = tlim, components=True) for u in list(unit_spiketimes.keys()))
+    all_var = pylab.array([r[0] for r in var_mean_result])
+    all_mean = pylab.array([r[1] for r in var_mean_result])
+    #cluster_ffs = pylab.array([pylab.nanmean(all_ffs[ci],axis=0) for ci in inds])
+    for cnt, ci in enumerate(cluster_inds):
+        mask = all_mean[ci] < np.max(all_mean[ci,:300])
+        ff_all = (all_var[ci]*mask)/(all_mean[ci]*mask)
+        if cnt == 0:
+            cluster_ff_mm = np.nanmean(ff_all, 0)
+        else:
+            cluster_ff_mm = np.vstack((cluster_ff_mm, np.nanmean(ff_all, 0) ))
 
-    cv2_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.time_resolved_cv_two)(unit_spiketimes[u],window = params['window'],tlim = tlim,min_vals = params['sim_params']['min_vals_cv2']) for u in list(unit_spiketimes.keys()))
-    all_cv2s = pylab.array([r[0] for r in cv2_result])
+    results.update({'ff_mm':cluster_ff_mm, 
+                        'time':ff_result[0][1]})
+
+
+    cv_two_result = Parallel(n_jobs,verbose = 2)(
+        delayed(spiketools.time_resolved_cv_two)(
+            unit_spiketimes[u],window = params['window'],
+            tlim = tlim,
+            min_vals = params['sim_params']['min_vals_cv2']) for u in list(unit_spiketimes.keys()))
+    all_cv2s = pylab.array([r[0] for r in cv_two_result])
     cluster_cv2s = pylab.array([pylab.nanmean(all_cv2s[ci],axis=0) for ci in cluster_inds])
-    results.update({'cv2s':cluster_cv2s,'t_cv2':cv2_result[0][1]})
+    results.update({'cv2s':cluster_cv2s,'t_cv2':cv_two_result[0][1]})
    
     
     kernel = spiketools.triangular_kernel(sigma=params['sim_params']['rate_kernel'])
-    rate_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.kernel_rate)(unit_spiketimes[u],kernel = kernel,tlim = tlim) for u in list(unit_spiketimes.keys()))
+    rate_result = Parallel(n_jobs,verbose = 2)(
+        delayed(spiketools.kernel_rate)(
+            unit_spiketimes[u],kernel = kernel,tlim = tlim) for u in list(unit_spiketimes.keys()))
     all_rates = pylab.array([r[0][0] for r in rate_result])
     cluster_rates = pylab.array([pylab.nanmean(all_rates[ci],axis=0) for ci in cluster_inds])
     results.update({'rates':cluster_rates,'t_rate':rate_result[0][1]})
     
-    
-    
-
-   
 
     return results
 
@@ -156,17 +188,24 @@ def _simulate_analyse_subset(params):
     pylab.seed(0)
     inds = [i for i in pylab.randint(0,5000,100)]
 
-    ff_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.kernel_fano)(unit_spiketimes[u],window = params['window'],tlim = tlim) for u in list(unit_spiketimes.keys()))
+    ff_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.kernel_fano)(
+        unit_spiketimes[u],window = params['window'],tlim = tlim) for u in list(unit_spiketimes.keys()))
     all_ffs = pylab.array([r[0] for r in ff_result])
     #cluster_ffs = pylab.array([pylab.nanmean(all_ffs[ci],axis=0) for ci in inds])
     cluster_ffs = pylab.array([all_ffs[ci] for ci in inds])
     results = {'ffs':cluster_ffs,'t_ff':ff_result[0][1]}
+    ff_mm_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.kernel_fano)(
+        unit_spiketimes[u],window = params['window'],tlim = tlim, mean_matched=True) for u in list(unit_spiketimes.keys()))
+    all_ff_mms = pylab.array([r[0] for r in ff_mm_result])
+    #cluster_ffs = pylab.array([pylab.nanmean(all_ffs[ci],axis=0) for ci in inds])
+    cluster_ff_mms = pylab.array([all_ff_mms[ci] for ci in inds])
+    results.update({'ff_mms':cluster_ff_mms,'t_ff_mm':ff_mm_result[0][1]})
 
-    cv2_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.time_resolved_cv_two)(unit_spiketimes[u],window = params['window'],tlim = tlim,min_vals = params['sim_params']['min_vals_cv2']) for u in list(unit_spiketimes.keys()))
-    all_cv2s = pylab.array([r[0] for r in cv2_result])
+    cv_two_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.time_resolved_cv_two)(unit_spiketimes[u],window = params['window'],tlim = tlim,min_vals = params['sim_params']['min_vals_cv2']) for u in list(unit_spiketimes.keys()))
+    all_cv2s = pylab.array([r[0] for r in cv_two_result])
     #cluster_cv2s = pylab.array([pylab.nanmean(all_cv2s[ci],axis=0) for ci in inds])
     cluster_cv2s = pylab.array([all_cv2s[ci] for ci in inds])
-    results.update({'cv2s':cluster_cv2s,'t_cv2':cv2_result[0][1]})
+    results.update({'cv2s':cluster_cv2s,'t_cv2':cv_two_result[0][1]})
    
     
     kernel = spiketools.triangular_kernel(sigma=params['sim_params']['rate_kernel'])
@@ -179,13 +218,12 @@ def _simulate_analyse_subset(params):
 
     return results
 
-def get_analysed_spiketimes(params,window=400,calc_cv2s=True,save =False,do_not_simulate=False):
+def get_analysed_spiketimes(params,window=400,calc_cv2s=True,
+                                save =False,do_not_simulate=False):
     params = {'sim_params':deepcopy(params),'window':window,'calc_cv2s':calc_cv2s}
-    print(params)
     #spiketimes = get_spiketimes(params['sim_params'],fname = datafile,save = save)
     if do_not_simulate:
-        all_results = pd.read_pickle(organiser.datapath + datafile +'_analyses')
-        print(all_results.keys())
+        all_results = pd.read_pickle(os.path.join(organiser.datapath,datafile) + '_analyses')
         key_list = [k for k in sorted(params.keys())]
         key = key_from_params(params,key_list)
         results = all_results[key]
@@ -193,8 +231,10 @@ def get_analysed_spiketimes(params,window=400,calc_cv2s=True,save =False,do_not_
         #results = [all_results[result_key] for result_key in result_keys]
 
     else:
-        result =  organiser.check_and_execute(params,_simulate_analyse,datafile +'_analyses',
-                                          ignore_keys=['n_jobs'],save = save)
+        result =  organiser.check_and_execute(params,_simulate_analyse,
+                                            datafile +'_analyses',
+                                          ignore_keys=['n_jobs'],
+                                          redo=False, save = save)
     #result =  organiser.check_and_execute(params,_simulate_analyse,datafile +'_analyses',ignore_keys=['n_jobs'],save = save)
     #result['spiketimes'] = spiketimes
     #result['cluster_inds'] = analyse_nest.get_cluster_inds(params['sim_params'])

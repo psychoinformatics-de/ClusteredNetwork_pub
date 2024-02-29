@@ -1,15 +1,13 @@
-'''
-Created on Jul 2, 2011
-
-@author: thomas
-'''
-#numpy.seterr(all='raise')
 import pylab
+import numpy as np
 from scipy.signal import convolve2d
 from pylab import nanmean
 from bisect import bisect_right
-import pyximport; pyximport.install()
-#from  Cspiketools import time_resolved_cv_two as _time_resolved_cv_two
+import numpy
+import pyximport
+pyximport.install(setup_args={"include_dirs":numpy.get_include()}, reload_support=True)
+
+from Cspiketools import time_resolved_cv_two as _time_resolved_cv_two
 import numpy as np
 def spiketimes_to_binary(spiketimes,tlim = None,dt = 1.):
     """ takes a n array of spiketimes and turns it into a binary
@@ -384,10 +382,11 @@ def sliding_counts(spiketimes,window,dt = 1.,tlim = None):
     counts = convolve2d(binary,kernel,'valid')
     
     dif = time.shape[0]-counts.shape[1]
-    time =  time[int(dif/2):-int(dif/2)]
-    
-    return counts,time
-def kernel_fano(spiketimes,window,dt = 1.,tlim = None,components = False):
+    time =  time[int(dif//2):-int(dif//2)]
+    return counts,time[:-1]
+
+def kernel_fano(spiketimes,window,dt = 1.,tlim = None,
+        components = False):
     if tlim is None:
         tlim = _get_tlim(spiketimes)
     if tlim[1]-tlim[0]==window:
@@ -695,7 +694,6 @@ if __name__ == '__main__':
     time = pylab.arange(1000.)
     rate = 0.05+0.15*pylab.exp(-((500-time[pylab.newaxis,:])/200.)**2)
     spikes = 1.*(pylab.rand(trials,1000)<pylab.repeat(rate,trials,axis = 0))
-    print(spikes.mean())
     spiketimes = binary_to_spiketimes(spikes, time)
     
     warped,twarped = rate_warped_analysis(spiketimes,5,func = cv2,kwargs = {'pool':False},rate = (rate*1000,time))

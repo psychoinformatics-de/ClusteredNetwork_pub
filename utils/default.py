@@ -36,19 +36,19 @@ C_m = 1.
 tau_E = 20.
 tau_I = 10.
 t_ref = 5.
-V_th_E = 15. # 20.
-V_th_I = 15. # 20.
+V_th_E = 15. # 
+V_th_I = 15. #
 V_r = 0.
-I_xE = 2. # 5.
-I_xI = 1. #2.
+I_xE = 2. #2. # 5.
+I_xI = 1. #1. #2.
 delta_I_xE = 0.
 delta_I_xI = 0.
 I_th_E = 2.13 # 5.34  #
 I_th_I = 1.24 # 2.61 #
 V_m = 'rand'
 
-tau_syn_ex = 3. # 1. # 3.
-tau_syn_in = 2. #1. # 2.
+tau_syn_ex = 3. #3. # 1. # 2. --> 2.9 
+tau_syn_in = 2. #1. # 2. # 1. --> 1.9
 
 
 n_jobs = 1

@@ -7,6 +7,7 @@ import sys
 import default
 from scipy.sparse import csr_matrix
 import pylab
+#from Helper import GeneralHelper
 small = 1e-10
 
 
@@ -196,7 +197,8 @@ def simulate(params):
         js = calc_js(params)
     js *= s
 
-    # print js/np.sqrt(N)
+    # print (js/np.sqrt(N))
+    # print(GeneralHelper.mergeParams(params, default))
 
     # jminus is calculated so that row sums remain constant
     if Q > 1:
@@ -228,10 +230,10 @@ def simulate(params):
     E_pops = []
     I_pops = []
     for q in range(Q):
-        E_pops.append(nest.Create(neuron_type, cluster_units_E))
+        E_pops.append(nest.Create(neuron_type, int(cluster_units_E)))
         nest.SetStatus(E_pops[-1], [E_neuron_params])
     if background_units_E > 0:
-        E_pops.append(nest.Create(neuron_type, background_units_E))
+        E_pops.append(nest.Create(neuron_type, int(background_units_E)))
         nest.SetStatus(E_pops[-1], [E_neuron_params])
 
     # for q in range(Q):
@@ -242,12 +244,12 @@ def simulate(params):
     #     nest.SetStatus(I_pops[-1], [I_neuron_params])
 
     for q in range(int(Q/portion_I)):
-        I_pops.append(nest.Create(neuron_type, cluster_units_I))
+        I_pops.append(nest.Create(neuron_type, int(cluster_units_I)))
         nest.SetStatus(I_pops[-1], [I_neuron_params])
     
     if background_units_I > 0:
         print("!!!!!back_units_I more than 0!!!!!!!")
-        I_pops.append(nest.Create(neuron_type, background_units_I))
+        I_pops.append(nest.Create(neuron_type, int(background_units_I)))
         nest.SetStatus(I_pops[-1], [I_neuron_params])
 
     if delta_I_xE > 0:
@@ -446,8 +448,8 @@ def simulate(params):
                 multi_stim_clusters, multi_stim_amps, multi_stim_times):
             current_source = nest.Create('step_current_generator')
             nest.SetStatus(current_source,
-                           {'amplitude_times': times,
-                            'amplitude_values': amplitudes})
+                           {'amplitude_times': times[1:],
+                            'amplitude_values': amplitudes[1:]})
             stim_units = []
             for stim_cluster in stim_clusters:
                 stim_units += list(E_pops[stim_cluster])
@@ -833,7 +835,7 @@ def tune_rate_threshold(
 
 
 if __name__ == '__main__':
-    import plotting
+    #import plotting
     js_maz = pylab.array([[1.77, -3.18], [1.06, -4.24]])
 
     params = {'warmup':0,'simtime':2000.,'n_jobs':12,'Q':50,'rate_kernel':50,

@@ -75,18 +75,17 @@ print('datapath', datapath)
 @memoized
 def get_data_file(filename):
     try:
-        print('get_data_filename',filename)
         all_results = pd.read_pickle(filename)
     except:
         all_results = {}
     return all_results
 
-def key_from_params(params,key_list):
-    key = ''
-    for k in key_list:
-        key += '_'+params[k].__repr__()
-    key =key.replace(' ','')
-    return key
+# def key_from_params(params,key_list):
+#     key = ''
+#     for k in key_list:
+#         key += '_'+params[k].__repr__()
+#     key =key.replace(' ','')
+#     return key
 
 def params_from_keys(key,key_list):
     items = [eval(i.replace('array','')) for i in key.split('_')[1:]]
@@ -128,45 +127,50 @@ def check_and_execute_hetero(param_list,func,datafile,redo = False,n_jobs = 1):
     return [all_results[k] for k in return_keys]
 
     
-def check_and_execute(params,func,datafile,key_list=None,reps = None,redo = False,backup_file = None,n_jobs = 1,save = True,ignore_keys = []):
+def check_and_execute(params,func,datafile,key_list=None,reps = None,
+                    redo = False,backup_file = None,n_jobs = 1,
+                    save = True,ignore_keys = []):
     
-    if key_list is None:
-        key_list = [k for k in sorted(params.keys()) if k not in ignore_keys]
-    key = key_from_params(params,key_list)
+
+    #if key_list is None:
+    #    key_list = [k for k in sorted(params.keys()) if k not in ignore_keys]
+    key = key_from_params(params,reps,ignore_keys)
+
     datapath = '../data/'
-    full_datafile = os.path.join(datapath,datafile)
-                                                                        
+    full_datafile = os.path.join(datapath,datafile)                                                          
     try:
         if redo:
-            raise
-        all_results = get_data_file(full_datafile)
-        
+            raise ValueError
+        #try:
+        all_results = pd.read_pickle(full_datafile)
+        if reps is None:
+            if key not in all_results.keys():
+                key = compare_key(all_results.keys(), params)
+            else:
+                print(func)
+        #except:
+        #    all_results = {} 
+
         if reps is None and not redo:
             results = all_results[key]
             result_keys = [key]
-
+            
         elif not redo:
-            result_keys =  [key+'_'+str(r) for r in range(reps)]
+            result_keys =  key#[key+'_'+str(r) for r in range(reps)]
             results = [all_results[result_key] for result_key in result_keys]
         elif redo:
-            print('redo')
             raise 
-    
     except:
         cache_key = (full_datafile,)
         if cache_key in list(get_data_file.cache.keys()):
             get_data_file.cache.pop(cache_key)
         try:
-            print('in except!!!!!!', full_datafile)
             all_results = pd.read_pickle(full_datafile)
-            print(all_results.keys())
         except:
-            
             all_results = {}  
             if save:
                 pickle.dump(all_results,open(full_datafile,'wb'),protocol = 2)
         if reps is None:
-            print('no reps')     
             results = func(params)
             all_results[key] = results
         else:
@@ -187,7 +191,8 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,redo = Fals
                 copied_params = [deepcopy(params) for mk in missing_keys]
                 
                 
-                new_results = Parallel(n_jobs)(delayed(func)(cp) for cp in copied_params)
+                new_results = Parallel(n_jobs)(
+                    delayed(func)(cp) for cp in copied_params)
                 
                 for mk,nr in zip(missing_keys,new_results):
                     all_results[mk] = nr

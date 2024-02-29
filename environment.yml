@@ -7,14 +7,15 @@ dependencies:
   - scipy
   - notebook
   - ipython
-  - nest-simulator=2.16.0
+  - nest-simulator=2.20.2
+  - ghostscript
   - pip
   - pip:
-    - latex
     - pyx
-  - python=3.6
+  - python=3.10.6
   - joblib
   - networkx
   - scikit-learn
-  - matplotlib=3.1
-
+  - matplotlib
+  - pandas
+  - cython=0.29.32
