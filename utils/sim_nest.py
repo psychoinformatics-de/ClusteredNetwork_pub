@@ -7,6 +7,7 @@ import sys
 import default
 from scipy.sparse import csr_matrix
 import pylab
+#from Helper import GeneralHelper
 small = 1e-10
 
 
@@ -196,7 +197,8 @@ def simulate(params):
         js = calc_js(params)
     js *= s
 
-    # print js/np.sqrt(N)
+    # print (js/np.sqrt(N))
+    # print(GeneralHelper.mergeParams(params, default))
 
     # jminus is calculated so that row sums remain constant
     if Q > 1:
