@@ -130,10 +130,11 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
                     ffs[ff_conditions==test_conditions[1]],axis=0)[0]
                 center = 0.5 * (bottom_val+top_val) 
                 print('test_time' ,test_time)
-                pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line,ms = 2.)
-                pylab.text(test_time-10, center+0.01, '*',va = 'top',ha ='right',size = 5)
+                #pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line,ms = 2.)
+                #pylab.text(test_time-10, center+0.01, '*',va = 'top',ha ='right',size = 5)
 
-
+        pylab.text(-1500,-0.6,'Experiment',ha = 'center',va ='bottom',
+            size = '6',rotation=90,weight='bold')  
 
     if cv2_ax is not None:
         pylab.sca(cv2_ax)
@@ -174,7 +175,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
         pylab.ylim(0,0.015)    
         pylab.yticks([0,0.004,0.008,0.012])
         pylab.legend(frameon = False,fontsize = 6,loc = 'upper right', 
-                     bbox_to_anchor=(1.7, 1.1))
+                     bbox_to_anchor=(1.6, 1.1))
         pylab.xticks([1500,1600,1700,1800,1900,2000])
         pylab.gca().set_xticklabels(['RS', '100','200','300','400','500'])
 
@@ -250,8 +251,8 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5,
                 bottom_val = pylab.nanmean(test_vals[i,:]) -offset_lst[i]
                 top_val = pylab.nanmean(test_vals[i+1,:]) - offset_lst[i+1]
                 center = 0.5 * (bottom_val+top_val)
-                pylab.plot([sig_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line/2,ms = 2.)
-                pylab.text(sig_time-10, center+0.01, sig_symbol,va = 'top',ha ='right',size = 5)
+                #pylab.plot([sig_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line/2,ms = 2.)
+                #pylab.text(sig_time-10, center+0.01, sig_symbol,va = 'top',ha ='right',size = 5)
 
     pylab.ylabel(r'$\Delta$FF',rotation=90)
     pylab.xlabel('time [ms]')
@@ -375,7 +376,7 @@ if __name__ == '__main__':
                 'axes.linewidth':0.2}
 
     fig = plotting.nice_figure(fig_width= 1.,ratio  =.5,rcparams = rcparams)
-    fig.subplots_adjust(hspace = .8,wspace = 0.9,bottom  =0.14,top  =0.9)
+    fig.subplots_adjust(hspace = .8,wspace = 0.7,bottom  =0.14,top  =0.9,left=0.15, right=0.9)
     tlim = [0,2000]
     xticks = [0,500,1000,1500,2000]
     nrow,ncol = 4, 3
@@ -425,15 +426,14 @@ if __name__ == '__main__':
     pylab.xlim(tlim)
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
     pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
+    
     pylab.sca(ff_ax)
     pylab.xlim(tlim)
-
     pylab.xticks([])
     pylab.ylabel(r'$\Delta$FF',rotation=90)
 
     pylab.ylim(-0.7,0.1)
     pylab.yticks([-0.5,0])
-
 
     
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
@@ -482,6 +482,8 @@ if __name__ == '__main__':
         pylab.ylim(-.7,0.2)
         pylab.xlabel('')
         pylab.xlabel('time [ms]') 
+        pylab.text(-1400,-0.65,'E/I clustered\n model',ha = 'center',va ='bottom',
+                size = '6',rotation=90,weight='bold')  
         plotting.ax_label1(plotting.simpleaxis1(pylab.subplot2grid(
             (nrow,ncol),(3,1)),labelsize,pad=pad),'g',
             x=x_label_val,size=labelsize)          

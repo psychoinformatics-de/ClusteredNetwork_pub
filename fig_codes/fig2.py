@@ -107,7 +107,7 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
         ffs = pylab.nanmean(ffs,axis=1)
         pylab.plot(jep_range,ffs,'k')
         if jipfactor == 0.:
-            pylab.gca().set_ylim(-0.2, 4)
+            pylab.gca().set_ylim(-0.2, 3)
         else:
             pylab.gca().set_ylim(-0.2, 12)
             

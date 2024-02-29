@@ -469,13 +469,7 @@ if __name__ == '__main__':
     lw= 0.3
     rcparams = {'axes.labelsize': size*scale,
                 'xtick.major.size': ticksize,
-                'ytick.major.size': ticksize,
-              #'font.size':size,
-              #'legend.fontsize': size,
-                # 'xtick.major.width':ticksize/6.,                
-                # 'ytick.major.width':ticksize/6.,
-                # 'xtick.minor.size':(ticksize-1)/2,
-                # 'ytick.minor.size':(ticksize-1)/2,                
+                'ytick.major.size': ticksize,          
               'xtick.labelsize':size,
                 'ytick.labelsize': size,
                 'lines.linewidth':0.5,
@@ -575,19 +569,9 @@ if __name__ == '__main__':
 
     ########################################
     ###################MODEL###############
-    params = {'randseed':8721,'trials':150,'N_E':1200,'N_I':300,'I_th_E':1.25,'I_th_I':0.78,'Q':6,'rs_stim_amp':0,'n_jobs':12,'conditions':[1,2,3]}
-
-    settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400},
-                {'randseed':5362,'jep':2.8,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400}]
-
-    #settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':150}]
-    #settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400, 'trials':150}]    
-    #settings = [{'randseed':7745,'jep':2.5,'jipratio':0.,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':100}]
-    #settings = [{'randseed':7745,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'trials':300}]
-    #settings = [{'randseed':0,'jep':3.3,'jipratio':0.75,'condition_stim_amps':[0.15,0.15,0.15],'rs_stim_amp':0.15,'rs_length':400,'fixed_indegree':True}]
-    settings = [{'randseed':8721,'jep':3.31,'jipratio':0.75,'condition_stim_amps':[0.11,0.11,0.11],'rs_stim_amp':0.11,'rs_length':400, 'trials':150}]    
-    #settings = [{'randseed':8721,'jep':3.2,'jipratio':0.75,'condition_stim_amps':[0.1,0.1,0.1],'rs_stim_amp':0.1,'rs_length':400, 'trials':150}]    
-    #settings = [{'randseed':8721,'jep':2.,'jipratio':0.,'condition_stim_amps':[0.1,0.1,0.1],'rs_stim_amp':0.1,'rs_length':400, 'trials':150}]    
+    params = {'randseed':8721,'trials':150,'N_E':1200,'N_I':300,'I_th_E':1.25,
+              'I_th_I':0.78,'Q':6,'rs_stim_amp':0,'n_jobs':12,'conditions':[1,2,3]}
+ 
     settings = [{'randseed':8721,'jep':3.2,'jipratio':0.75,
                  'condition_stim_amps':[0.1,0.1,0.1],
                  'rs_stim_amp':0.1,'rs_length':400, 
