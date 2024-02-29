@@ -2,7 +2,7 @@
 
 This repository hosts the code necessary to reproduce the figures presented in our paper:
 
-**Vahid Rostami, Thomas Rost, Alexa Riehle, Sacha van Albada, Martin Nawrot. "Spiking attractor model of motor cortex explains modulation of neural and behavioral variability by prior target information."**
+**Vahid Rostami, Thomas Rost, Felix Schmitt, Alexa Riehle, Sacha van Albada, Martin Nawrot. "Spiking attractor model of motor cortex explains modulation of neural and behavioral variability by prior target information."**
 
 Should you utilize any segments of this code for your work, kindly acknowledge us by citing the above paper.
 
