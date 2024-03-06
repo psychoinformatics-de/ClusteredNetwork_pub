@@ -131,7 +131,7 @@ dmypy.json
 
 
 # data
-/data
+#/data
 
 
 # images
