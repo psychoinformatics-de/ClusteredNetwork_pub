@@ -1,0 +1,5 @@
+[submodule "inputs/joe_and_lili"]
+	path = inputs/joe_and_lili
+	url = https://github.com/psychoinformatics-de/joe_and_lili_pickle.git
+	datalad-id = 6d3cb1ac-967f-40a2-9c0e-ddd11b170f3f
+	datalad-url = https://github.com/psychoinformatics-de/joe_and_lili_pickle.git
