@@ -1,2 +1,4 @@
 [datalad "dataset"]
 	id = bfe12f51-3f30-4ceb-b4de-9b6f85f2ef6c
+[datalad "run.substitutions"]
+	python = python
