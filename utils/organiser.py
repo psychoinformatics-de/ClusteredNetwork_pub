@@ -70,7 +70,7 @@ class memoized_but_forgetful(object):
     def __get__(self, obj, objtype):
         '''Support instance methods.'''
         return functools.partial(self.__call__, obj)
-datapath = '../data/'
+datapath = 'cache/'
 print('datapath', datapath)
 @memoized
 def get_data_file(filename):
@@ -136,7 +136,7 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,
     #    key_list = [k for k in sorted(params.keys()) if k not in ignore_keys]
     key = key_from_params(params,reps,ignore_keys)
 
-    datapath = '../data/'
+    datapath = 'cache/'
     full_datafile = os.path.join(datapath,datafile)                                                          
     try:
         if redo:

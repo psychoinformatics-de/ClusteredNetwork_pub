@@ -1,4 +1,4 @@
-import sys;sys.path.append('../utils')
+import sys;sys.path.append('utils')
 import plotting_functions as plotting
 from copy import deepcopy
 import pylab
@@ -8,7 +8,7 @@ import analyse_nest
 import default
 from general_func import *
 import organiser
-datapath = '../data/'
+datapath = 'cache/'
 datafile = 'fig03_upstate_balance_reduced'
 
 def simulate_and_analyse(original_params):
