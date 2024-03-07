@@ -7,7 +7,7 @@ from sim_nest import simulate
 import analyse_nest
 import default
 from general_func import *
-
+import organiser
 datapath = '../data/'
 datafile = 'fig03_upstate_balance_reduced'
 
@@ -57,14 +57,15 @@ def simulate_and_analyse(original_params):
     results['V_m'] = sim_results['V_m'][focus_index]
     results['e_rate'] = sim_results['e_rate']
     results['i_rate'] = sim_results['i_rate']
-    results['focus_cluster_inds'] = list(range(params['focus_cluster']*cluster_size,(params['focus_cluster']+1)*cluster_size))
+    results['focus_cluster_inds'] = list(range(int(params['focus_cluster']*cluster_size),int((params['focus_cluster']+1)*cluster_size)))
     results['focus_spikes'] = spiketimes[:,spiketimes[1] == focus_unit-1]
 
     return results
 
 def do_plot(params,axes=None,redo = False,plot = True,markersize = 0.5,spikealpha = 1,box_color = 'k',cmap = 'jet',lw = 0.8,show_clusters = 4,
             legend = False,current_limits = [-15,18],voltage_limits = [-20,42],ylabel = False,rate_ticks = [],V_ticks = [],I_ticks = []):
-    result = load_data(datapath, datafile,params,old_key_code=True)
+    #result = load_data(datapath, datafile,params,old_key_code=True)
+    result = organiser.check_and_execute(params, simulate_and_analyse, datafile,reps = None)
     spiketimes = result['spiketimes']
     if plot:
         if axes is None:
