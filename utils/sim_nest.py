@@ -13,7 +13,7 @@ small = 1e-10
 
 def max_PSP_exp(tau_m, tau_syn, C_m=1., E_l=0.):
     tmax = np.log(tau_syn / tau_m) / (1 / tau_m - 1 / tau_syn)
-
+    print('tmax', tmax)
     B = tau_m * tau_syn / C_m / (tau_syn - tau_m)
     return (E_l - B) * np.exp(-tmax / tau_m) + B * np.exp(-tmax / tau_syn)
     """calculates the maximum psp amplitude for exponential synapses and unit J"""
@@ -435,9 +435,11 @@ def simulate(params):
             amplitude_values.append(stim_amp)
             amplitude_times.append(end + warmup)
             amplitude_values.append(0.)
+        print('amplitude_times', amplitude_times)
         nest.SetStatus(current_source,
                        {'amplitude_times': amplitude_times,
-                        'amplitude_values': amplitude_values})
+                        'amplitude_values': amplitude_values,
+                        'allow_offgrid_times':True})
         stim_units = []
         for stim_cluster in stim_clusters:
             stim_units += list(E_pops[stim_cluster])
@@ -447,9 +449,16 @@ def simulate(params):
         for stim_clusters, amplitudes, times in zip(
                 multi_stim_clusters, multi_stim_amps, multi_stim_times):
             current_source = nest.Create('step_current_generator')
+            #nest.SetStatus(current_source,
+            #               {'amplitude_times': np.ceil(np.array(times[1:])*10)/10,
+            #                'amplitude_values': amplitudes[1:]})
+            print('#####times', times[0:5], np.shape(times))
+            #times = np.ceil(np.array(times)*10)/10.
+            #times[0] += 0.1#sys.float_info.epsilon
             nest.SetStatus(current_source,
                            {'amplitude_times': times[1:],
-                            'amplitude_values': amplitudes[1:]})
+                            'amplitude_values': amplitudes[1:],
+                            'allow_offgrid_times':True})
             stim_units = []
             for stim_cluster in stim_clusters:
                 stim_units += list(E_pops[stim_cluster])
@@ -476,6 +485,7 @@ def simulate(params):
         nest.Connect(voltage_recorder, record_units)
 
     endbuild = time.time()
+    print('#####', simtime, warmup)
     print(('####', warmup + simtime, int(warmup + simtime)))
     nest.Simulate(int(warmup + simtime))
     endsim = time.time()

@@ -98,11 +98,15 @@ def _calc_direction_counts(params):
 
     return direction_counts,time
 
-def _get_direction_counts(gn,condition,window = 400,tlim = [0,2000],alignment = 'TS'):
+def _get_direction_counts(gn,condition,window = 400,
+                          tlim = [0,2000],alignment = 'TS'):
 
-    params = {'gn':gn,'condition':condition,'alignment':alignment,'tlim':tlim,'window':window}
+    params = {'gn':gn,'condition':condition,
+              'alignment':alignment,'tlim':tlim,'window':window}
 
-    return organiser.check_and_execute(params, _calc_direction_counts, 'direction_counts_file',reps = 1)
+    return organiser.check_and_execute(params, _calc_direction_counts, 
+                                       'direction_counts_file',
+                                       reps=1,save=False)
 
 def tuning_vector(counts):
     angles = 360 /float(len(counts))
@@ -119,7 +123,9 @@ def get_tuning(gn,condition,window = 400,tlim=[0,2000],alignment = 'TS',redo =Fa
 
 def _calc_tuning(params):
     
-    direction_counts,time = _get_direction_counts(params['gn'], params['condition'],params['window'],params['tlim'],params['alignment'])
+    direction_counts,time = _get_direction_counts(params['gn'], 
+                                                  params['condition'],params['window'],
+                                                  params['tlim'],params['alignment'])
     mean_direction_counts = pylab.zeros((6,direction_counts[0].shape[1]))
     min_direction_trials = 10000
     for direction in range(1,7):
@@ -191,12 +197,17 @@ def _calc_direction_score(params):
 
     return score,time
 
-def get_direction_score(gn,condition,window = 400,folds = 5,tlim = [0,2000],alignment = 'TS',redo = False,reps = 10,
-                        classifier = 'LogisticRegression',classifier_args = {},n_jobs = 1):
+def get_direction_score(gn,condition,window = 400,folds = 5,
+                        tlim = [0,2000],alignment = 'TS',
+                        redo = False,reps = 10,
+                        classifier = 'LogisticRegression',
+                        classifier_args = {},n_jobs = 1):
     params = {'gn':gn,'condition':condition,'alignment':alignment,
               'tlim':tlim,'window':window,'classifier':classifier,
               'folds':folds,'classifier_args':classifier_args}
-    result = organiser.check_and_execute(params, _calc_direction_score, 'direction_score_file_'+str(condition),redo  =redo,reps =reps,n_jobs = n_jobs)
+    result = organiser.check_and_execute(params, _calc_direction_score, 
+                                         'direction_score_file_'+str(condition),
+                                         redo  =redo,reps =reps,n_jobs = n_jobs)
 
     time = result[0][1]
     scores = pylab.array([r[0] for r in result])
@@ -386,11 +397,14 @@ def _calc_population_decoding(params):
     all_direction_counts = []
     min_trials = pylab.ones((6),dtype = int)*100000
     for gn in params['gns']:
-        direction_counts,time = _get_direction_counts(gn, params['condition'],params['window'],params['tlim'],params['alignment'])
+        print('gnsssss', gn)
+        direction_counts,time = _get_direction_counts(gn, params['condition'],
+                                                      params['window'],params['tlim'],
+                                                      params['alignment'])
         for i,d in enumerate(direction_counts):
             min_trials[i] = min(min_trials[i],d.shape[0])
         all_direction_counts.append(direction_counts)
-    print(min_trials)
+    print('--> min_trials', min_trials)
     gns = params['gns']
     feature_mat = pylab.zeros((0,len(gns),len(time)))
     
@@ -429,13 +443,18 @@ def _calc_population_decoding(params):
 
     
 
-def get_population_decoding(gns,condition,window =400.,folds = 5,tlim = [0,2000],alignment = 'TS',redo = False,reps = 10, classifier = 'LogisticRegression',classifier_args = {},n_jobs = 1):
+def get_population_decoding(gns,condition,window =400.,folds = 5,tlim = [0,2000],
+                            alignment = 'TS',redo = False,reps = 10, 
+                            classifier = 'LogisticRegression',
+                            classifier_args = {},n_jobs = 1):
     params = {'gns':tuple(sorted(gns)),'condition':condition,'alignment':alignment,
               'tlim':tlim,'window':window,'classifier':classifier,
               'folds':folds,'classifier_args':classifier_args}
     
-
-    return organiser.check_and_execute(params, _calc_population_decoding, 'population_decoding_file',redo = redo,reps = reps,n_jobs = n_jobs)
+    return organiser.check_and_execute(params, _calc_population_decoding, 
+                                       'population_decoding_file',
+                                       redo = redo,save=False,
+                                       reps = reps,n_jobs = n_jobs)
 if __name__ == '__main__':
     plot = True
     condition_colors = ['0.','0.3','0.6']

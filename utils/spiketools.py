@@ -35,8 +35,7 @@ def spiketimes_to_binary(spiketimes,tlim = None,dt = 1.):
     
     tlim_spikes = cut_spiketimes(spiketimes, tlim)
     tlim_spikes = tlim_spikes[:,pylab.isnan(tlim_spikes[0,:])==False]
-    
-    
+
     
     if tlim_spikes.shape[1]>0:
         binary = pylab.histogram2d(tlim_spikes[0,:],tlim_spikes[1,:],[time,trials])[0].T
@@ -377,7 +376,7 @@ def sliding_counts(spiketimes,window,dt = 1.,tlim = None):
     if tlim is None:
         tlim = _get_tlim(spiketimes)
     binary,time = spiketimes_to_binary(spiketimes, dt=dt,tlim = tlim) 
-    
+
     kernel = pylab.ones((1,int(window*dt)))
     counts = convolve2d(binary,kernel,'valid')
     
@@ -394,7 +393,6 @@ def kernel_fano(spiketimes,window,dt = 1.,tlim = None,
         counts = binary.sum(axis=1)
         return pylab.array([counts.var()/counts.mean()]),pylab.array(time.mean())
     counts,time = sliding_counts(spiketimes,window,dt,tlim)
-
 
     
     vars = counts.var(axis = 0)
@@ -567,6 +565,7 @@ def cut_spiketimes(spiketimes,tlim):
 
     alltrials = list(set(spiketimes[1,:]))
     cut_spikes = spiketimes[:,pylab.isfinite(spiketimes[0])]
+
     cut_spikes = cut_spikes[:,cut_spikes[0,:]>=tlim[0]]
     
     if cut_spikes.shape[1]>0:

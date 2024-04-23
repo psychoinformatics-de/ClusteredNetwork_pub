@@ -1,20 +1,19 @@
 import sys;sys.path.append('../utils/')
-#import sim_nest
 import pylab
-import plotting_functions as plotting
+
 import spiketools
 import organiser
 import default
-import time
 import sim_nest
 from copy import deepcopy
 from bisect import bisect_right
-import global_params
+import global_params_funcs as global_params
 from matplotlib.ticker import MaxNLocator
-from general_func import *
 import pandas as pd
 import pickle
-#from scipy.ndimage import gaussian_filter
+# Local modules (not installed packages)
+from general_func import *
+import plotting_functions as plotting
 
 datapath = '../data/'
 datafile = 'fig02_cluster_dynamics'
@@ -205,7 +204,8 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
         x = pylab.linspace(Q_range.min(), jep_range.max(),1000)
         y1 = pylab.ones_like(x)*Q_range.min()
         y2 = x
-        pylab.fill_between(x,y1, y2,facecolor = 'w',hatch = '\\\\\\',edgecolor = global_params.colors['orange'])
+        pylab.fill_between(x,y1, y2,facecolor = 'w',hatch = '\\\\\\',
+                           edgecolor = global_params.colors['orange'])
         pylab.xlabel(r'$J_{E+}$')
         pylab.ylabel(r'$Q$')
         pylab.axis('tight')
@@ -234,7 +234,8 @@ if __name__ == '__main__':
     x_label_val = -0.25
     num_row, num_col = 2,3
     if plot:
-        fig  =plotting.nice_figure(ratio = 0.8,latex_page=global_params.text_width_pts)
+        fig  =plotting.nice_figure(ratio = 0.8,
+                                   latex_page=global_params.text_width_pts)
         fig.subplots_adjust(bottom = 0.15,hspace = 0.4,wspace = 0.3)
         
         labels = ['a','b','c','d']

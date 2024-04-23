@@ -136,8 +136,9 @@ def _get_mo_times(params):
     condition = params['condition']
 
     toc = joe_and_lili.get_toc(extra_filters = [['monkey','=',monkey]])
+    print(toc)
     gns = pylab.unique(toc['global_neuron'])
-
+    print(gns)
     rts = []
     for gn in gns:
         data = analyses.load_data(gn,condition)

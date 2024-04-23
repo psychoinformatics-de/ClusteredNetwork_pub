@@ -2,10 +2,7 @@ import numpy as np
 import pandas as pd
 import ast 
 
-def find(condition):
-    """old pylab.find function"""
-    res, = np.nonzero(np.ravel(condition))
-    return res
+
 
 
 def key_from_params(params, reps=None,ignore_keys=['']):
@@ -16,6 +13,7 @@ def key_from_params(params, reps=None,ignore_keys=['']):
         key += '_'+params[k].__repr__()
     key =key.replace(' ','')
     if reps!=None:
+        print('keyyyy', key)
         key =  [key+'_'+str(r) for r in range(reps)]
     return key
 

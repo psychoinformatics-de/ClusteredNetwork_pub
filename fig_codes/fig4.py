@@ -7,20 +7,23 @@ import organiser
 import numpy as np
 import pandas as pd
 import plotting_functions as plotting
-import global_params
+import global_params_funcs as global_params
 from general_func import *
 import scipy.stats as ss
 from analyse_model import get_analysed_spiketimes
 
 organiser.datapath = './data'
-datafile = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s'
+#datafile = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s'
+datafile = 'fig4_simulated_data'
 
 
 
 
 data_path = '../data/'
-file_name_st_sw = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s_spiketimes'
-file_name_analysis_sw = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s_analyses'
+#file_name_st_sw = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s_spiketimes'
+#file_name_analysis_sw = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s_analyses'
+file_name_analysis_sw = datafile + '_analyses'
+file_name_st_sw = datafile + '_spiketimes'
 trial = 1
 fig_size = (4,3)
 fontsize = 18
@@ -67,7 +70,7 @@ except:
                 
                 result = get_analysed_spiketimes(
                     params, datafile,calc_cv2s=True,
-                    save=save, redo=redo)
+                    save=save)
     Anls = pd.read_pickle(data_path + file_name_analysis_sw)
 
     

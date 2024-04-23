@@ -81,6 +81,12 @@ def get_data_file(filename):
         all_results = {}
     return all_results
 
+# def key_from_params(params,key_list):
+#     key = ''
+#     for k in key_list:
+#         key += '_'+params[k].__repr__()
+#     key =key.replace(' ','')
+#     return key
 
 def params_from_keys(key,key_list):
     items = [eval(i.replace('array','')) for i in key.split('_')[1:]]

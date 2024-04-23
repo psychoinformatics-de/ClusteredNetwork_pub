@@ -1,4 +1,4 @@
-# Spiking Attractor Model of Motor Cortex: Modulating Neural and Behavioral Variability via Prior Target Information
+# Spiking attractor model of motor cortex explains modulation of neural and behavioral variability by prior target information
 
 This repository hosts the code necessary to reproduce the figures presented in our paper:
 

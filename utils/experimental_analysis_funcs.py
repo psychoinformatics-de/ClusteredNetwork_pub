@@ -2,15 +2,15 @@
 from matplotlib import pylab
 import joe_and_lili
 from matplotlib.markers import TICKDOWN
-from global_params import colors as global_colors
+from global_params_funcs import colors as global_colors
 import organiser
 import pickle 
 import os
-from general_func import find
+from global_params_funcs import find
 import spiketools 
 from time import process_time as clock
 from sklearn.model_selection import StratifiedKFold
-
+from sklearn.linear_model import LogisticRegression
 off_gray = global_colors['off_gray']
 yellow = global_colors['yellow']
 green = global_colors['green']
@@ -42,6 +42,15 @@ def load_data(gn,condition,direction  =None,alignment = 'TS'):
         data['spiketimes'] = spiketimes
 
     return data
+
+def balanced_accuray(targets,predictions):
+    classes = pylab.unique(targets)
+    accuracies = pylab.zeros(classes.shape)
+    for i in range(len(classes)):
+        class_inds= find(targets == classes[i])
+
+        accuracies[i] =(targets[class_inds]==predictions[class_inds]).mean()
+    return accuracies.mean()
 
 
 def _calc_cv_two(params):
@@ -183,9 +192,7 @@ def _calc_direction_counts(params):
     """calculate the direction counts for the given params"""
     data = load_data(params['gn'],params['condition'],
                      alignment= params['alignment'])
-
     spiketimes = data['spiketimes']
-    
     counts,time = spiketools.sliding_counts(spiketimes[:2], 
                                             params['window'],tlim = params['tlim'])
     
@@ -207,7 +214,7 @@ def _get_direction_counts(gn,condition,window = 400,tlim = [0,2000],
               'tlim':tlim,'window':window}
 
     return organiser.check_and_execute(params, _calc_direction_counts, 
-                                       'direction_counts_file',reps = 1)
+                                       'direction_counts_file',reps = None)
 
 
 def _calc_population_decoding(params):
@@ -216,11 +223,15 @@ def _calc_population_decoding(params):
     all_direction_counts = []
     min_trials = pylab.ones((6),dtype = int)*100000
     for gn in params['gns']:
-        direction_counts,time = _get_direction_counts(gn, params['condition'],params['window'],params['tlim'],params['alignment'])
+        
+        direction_counts,time = _get_direction_counts(gn, params['condition'],
+                                                      params['window'],params['tlim'],
+                                                      params['alignment'])
+        
         for i,d in enumerate(direction_counts):
             min_trials[i] = min(min_trials[i],d.shape[0])
         all_direction_counts.append(direction_counts)
-    print(min_trials)
+    print('got direction count')
     gns = params['gns']
     feature_mat = pylab.zeros((0,len(gns),len(time)))
     
@@ -240,17 +251,30 @@ def _calc_population_decoding(params):
 
 
     targets = pylab.array(targets)
-    print(feature_mat.shape)
 
     score = pylab.zeros_like(time).astype(float)
+    
+    
+    import warnings
+    from sklearn.exceptions import ConvergenceWarning
+
+    # Suppress specific warning
+    warnings.filterwarnings("ignore", category=ConvergenceWarning)
+    
     for i in range(len(time)):
         features = feature_mat[:,:,i]
         predictions = pylab.zeros_like(targets).astype(float)
-        for train,test in StratifiedKFold(targets,n_folds = params['folds']):
+        
+        n_splits = params['folds']
+        skf = StratifiedKFold(n_splits=n_splits)
+        
+        for train_index, test_index in skf.split(features, targets):
             cl = eval(params['classifier'])(**params['classifier_args'])
-            cl.fit(features[train],targets[train])
-            predictions[test] = cl.predict(features[test])
-        print(i)    
+            cl.fit(features[train_index],targets[train_index])
+            predictions[test_index] = cl.predict(features[test_index]) 
+        
+        #for train,test in StratifiedKFold(targets,n_folds = params['folds']):
+   
         score[i] = balanced_accuray(targets, predictions)
 
     return score,time
@@ -433,3 +457,17 @@ def plot_experiment(size,radius,direction =1,lw = 1.,y_pos = 0,condition = 1,wri
     draw_hex_array([1500,y_pos],colors = colors,size = size,radius = radius,lw = lw, epoch=epoch)
 
 
+def get_spike_counts(gn,condition,direction,window = 400,tlim = [0,2000],alignment = 'TS',redo = False):
+    params = {'gn':gn,'condition':condition,'direction':direction,
+              'window':window,'alignment':alignment,
+              'tlim':tlim}
+    return organiser.check_and_execute(params, _calc_spike_counts, 'spike_counts_file_'+str(condition)+'_'+str(direction),redo = redo)
+
+
+def _calc_spike_counts(params):
+    
+    data = load_data(params['gn'],params['condition'],params['direction'],params['alignment'])
+    spiketimes = data['spiketimes'][:2]
+    counts,tcounts = spiketools.sliding_counts(spiketimes, params['window'],dt=1,
+                                    tlim  =params['tlim'])
+    return counts,tcounts

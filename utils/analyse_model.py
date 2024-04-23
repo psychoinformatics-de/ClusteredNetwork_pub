@@ -8,15 +8,26 @@ import pylab
 import spiketools
 from simulate_experiment import get_simulated_data
 import default
+from Helper import ClusterModelNEST
 import organiser
 from joblib import Parallel,delayed
 from general_func import *
 from copy import deepcopy
 from sim_nest import simulate
+import numpy as np
+
+
+    
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+
+# Suppress specific warning
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
+
 
 def _calc_fanos(params):
     print('calculating ffs ...')
-    sim_params = params#['sim_params']
+    sim_params = params['sim_params']
     result = get_simulated_data(sim_params)
     
 
@@ -48,7 +59,7 @@ def _calc_fanos(params):
         unit_spiketimes = analyse_nest.split_unit_spiketimes(
                         trial_spiketimes,N_E)
         
-        
+
 
         trial_directions = dict(list(zip(trials,directions)))
         trial_conditions = dict(list(zip(trials,conditions)))
@@ -76,12 +87,15 @@ def _calc_fanos(params):
             condition_spiketimes = spiketimes[:,spiketimes[3]==condition]
             unit_ffs = []
             for direction in range(1,7):
-                direction_spiketimes = spiketools.cut_spiketimes(condition_spiketimes[:2,condition_spiketimes[2]==direction],tlim  =tlim)
+                direction_spiketimes = spiketools.cut_spiketimes(
+                    condition_spiketimes[:2,condition_spiketimes[2]==direction],
+                    tlim  =tlim)
                 direction_trials = pylab.unique(direction_spiketimes[1])
                 if len(direction_trials)<min_trials:
                     unit_ffs.append(pylab.zeros_like(time)*pylab.nan)
                     continue
                 count_rate = direction_spiketimes.shape[1]/float(len(direction_trials))/float(T)*1000.
+
                 if count_rate<min_count_rate:
                     unit_ffs.append(pylab.zeros_like(time)*pylab.nan)
                     continue
@@ -92,17 +106,19 @@ def _calc_fanos(params):
                 ff,tff = spiketools.kernel_fano(
                         direction_spiketimes,params.get(
                             'ff_window',window),tlim  =tlim)
+
                 unit_ffs.append(pylab.interp(
                     time,tff,ff,left = pylab.nan,right = pylab.nan))
+
             condition_ffs[condition][unit] = pylab.nanmean(
                 unit_ffs,axis=0)
     condition_ffs['time'] = time
     return condition_ffs
 
 
-def get_fanos(params,save = False,redo = False,datafile = 'model_fanos'):
+def get_fanos(params,save = True,redo = False,datafile = 'model_fanos'):
     #return load_data('../data/', 'model_fanos', params['sim_params'], old_key_code=False, ignore_keys=[''])
-    return organiser.check_and_execute(params['sim_params'], _calc_fanos, datafile,
+    return organiser.check_and_execute(params, _calc_fanos, datafile,
                 redo =redo,save = save)
 
 def _calc_cv_two(params):
@@ -192,7 +208,7 @@ def _calc_cv_two(params):
 
 
 
-def get_cv_two(params,save = False,redo = False,datafile = 'model_cv2s'):
+def get_cv_two(params,save = True,redo = False,datafile = 'model_cv2s'):
     #return load_data('../data/', datafile, params['sim_params'], old_key_code=False, ignore_keys=[''])
     return organiser.check_and_execute(params, _calc_cv_two, datafile, redo=redo,save = save)
 
@@ -244,7 +260,7 @@ def _calc_rates(params):
     return condition_rates
 
 
-def get_rates(params,save = False,redo = False,datafile = 'model_rates'):
+def get_rates(params,save = True,redo = False,datafile = 'model_rates'):
     return organiser.check_and_execute(params, _calc_rates, 
                 datafile,redo  =redo,save = save)
 
@@ -378,13 +394,23 @@ def _calc_classification_score(params):
     for i in range(0,len(time),timestep):
         features = feature_mat[:,[i]]
         predictions = pylab.zeros_like(targets)
-        for train,test in StratifiedKFold(n_splits =folds).split(features,targets):
-            cl = classifier(**classifier_args)
+        # for train,test in StratifiedKFold(n_splits =folds).split(features,targets):
+        #     cl = classifier(**classifier_args)
             
             
-            cl.fit(features[train],targets[train])
+        #     cl.fit(features[train],targets[train])
                            
-            predictions[test] = cl.predict(features[test])
+        #     predictions[test] = cl.predict(features[test])
+            
+            
+        n_splits = params['folds']
+        skf = StratifiedKFold(n_splits=n_splits)
+        
+        for train_index, test_index in skf.split(features, targets):
+            cl = classifier(**classifier_args)
+            cl.fit(features[train_index],targets[train_index])
+            predictions[test_index] = cl.predict(features[test_index]) 
+            
         real_time.append(time[i])  
         score.append(balanced_accuray(targets, predictions))
     return pylab.array(score),pylab.array(real_time)
@@ -451,6 +477,7 @@ def _calc_population_decoding(original_params):
         feature_mat = pylab.array(feature_mat)
         scores = []
         for r in range(reps):
+            print('reps in classifier ', r)
             score = pylab.zeros_like(time).astype(float)
             order = pylab.arange(len(targets))
             pylab.shuffle(order)
@@ -459,7 +486,8 @@ def _calc_population_decoding(original_params):
             for i in range(len(time)):
                 features = feature_mat[:,:,i].T
                 predictions = pylab.zeros_like(targets)
-                for train,test in StratifiedKFold(n_splits =folds).split(features,targets):
+                for train,test in StratifiedKFold(
+                    n_splits =folds).split(features,targets):
                     cl = classifier(**classifier_args)
                     cl.fit(features[train],targets[train])
                     predictions[test] = cl.predict(features[test])
@@ -472,10 +500,12 @@ def _calc_population_decoding(original_params):
         
 
 
-def get_population_decoding(params,save = False,redo = False,
+def get_population_decoding(params,save = True,redo = False,
                             datafile = 'population_decoding_file'):
-    return organiser.check_and_execute(params['sim_params'], _calc_population_decoding, 
-                                    datafile,redo  =redo,save = save)
+    # return organiser.check_and_execute(params['sim_params'], _calc_population_decoding, 
+    #                                 datafile,redo  =redo,save = save)
+    return organiser.check_and_execute(params, _calc_population_decoding, 
+                                    datafile,redo  =redo,save = save,n_jobs=12)
     #return load_data('../data/', 'population_decoding_file',params['sim_params'], old_key_code=False, ignore_keys=[''])
 
 
@@ -626,11 +656,12 @@ def _simulate_stimulate(original_params):
     stim_ends = [stim_starts[-1] +params['stim_length']]
 
     for i in range(params['trials']-1):
-        stim_starts += [stim_ends[-1]+params['isi']+np.int16(pylab.rand()*params['isi_vari'])]
+        stim_starts += [stim_ends[-1]+params['isi']+pylab.rand()*params['isi_vari']]
+        #stim_starts += [stim_ends[-1]+params['isi']+np.int16(pylab.rand()*params['isi_vari'])]
         stim_ends += [stim_starts[-1] +params['stim_length']]
 
-    params['stim_starts'] = stim_starts
-    params['stim_ends'] = stim_ends
+    params['stim_starts'] = np.array(stim_starts)# np.ceil(np.array(stim_starts)*10)/10
+    params['stim_ends'] = np.array(stim_ends)# np.ceil(np.array(stim_ends)*10)/10
      
     #print stim_starts
     #print stim_ends
@@ -644,16 +675,22 @@ def _simulate_stimulate(original_params):
     
     # remove all params not relevant to simulation
     sim_params = deepcopy(params)
-    drop_keys = ['cut_window','ff_window','cv_ot','stim_length','isi','isi_vari','rate_kernel','jipfactor','jep','trials','min_count_rate','pre_ff_only','ff_only']
+    drop_keys = ['cut_window','ff_window','cv_ot','stim_length',
+                 'isi','isi_vari','rate_kernel','jipfactor',
+                 'jep','trials','min_count_rate','pre_ff_only','ff_only']
     for dk in drop_keys:
         try:
             sim_params.pop(dk)
         except:
             pass
     
+    
+    #EI_Network = ClusterModelNEST.ClusteredNetwork(default, sim_params)
+    # Creates object which creates the EI clustered network in NEST
+    #sim_result = EI_Network.get_simulation() 
     sim_result = simulate(sim_params)
     spiketimes =  sim_result['spiketimes']
-    
+
     trial_spiketimes = analyse_nest.cut_trials(spiketimes, 
                                     stim_starts, params['cut_window'])
     
@@ -666,7 +703,6 @@ def get_spiketimes(params, fname,save = True):
     return organiser.check_and_execute(params,_simulate_stimulate,
                                        fname +'_spiketimes',ignore_keys=['n_jobs'],
                                        save = save)
-
 
 def _simulate_analyse(params):
     pylab.seed(None)
@@ -688,6 +724,7 @@ def _simulate_analyse(params):
     Q = params['sim_params'].get('Q',1)
     tlim = params['sim_params']['cut_window']
     unit_spiketimes = analyse_nest.split_unit_spiketimes(spiketimes,N = N_E)
+    print(unit_spiketimes[1])
     
     cluster_size = int(N_E/Q)
     cluster_inds = [list(range(i*cluster_size,(i+1)*cluster_size)) for i in range(Q)]
@@ -696,26 +733,26 @@ def _simulate_analyse(params):
     ff_result = Parallel(n_jobs,verbose = 2)(
         delayed(spiketools.kernel_fano)(
             unit_spiketimes[u],window = params['window'],tlim = tlim) for u in list(unit_spiketimes.keys()))
-    all_ffs = pylab.array([r[0] for r in ff_result])
-    cluster_ffs = pylab.array([pylab.nanmean(all_ffs[ci],axis=0) for ci in cluster_inds])
+    all_ffs = np.array([r[0] for r in ff_result])
+    cluster_ffs = np.array([np.nanmean(all_ffs[ci],axis=0) for ci in cluster_inds])
     results = {'ffs':cluster_ffs,'t_ff':ff_result[0][1]}
     # mean matched ff
-    var_mean_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.kernel_fano)(
-        unit_spiketimes[u],window = params['window'],
-        tlim = tlim, components=True) for u in list(unit_spiketimes.keys()))
-    all_var = pylab.array([r[0] for r in var_mean_result])
-    all_mean = pylab.array([r[1] for r in var_mean_result])
-    #cluster_ffs = pylab.array([pylab.nanmean(all_ffs[ci],axis=0) for ci in inds])
-    for cnt, ci in enumerate(cluster_inds):
-        mask = all_mean[ci] < np.max(all_mean[ci,:300])
-        ff_all = (all_var[ci]*mask)/(all_mean[ci]*mask)
-        if cnt == 0:
-            cluster_ff_mm = np.nanmean(ff_all, 0)
-        else:
-            cluster_ff_mm = np.vstack((cluster_ff_mm, np.nanmean(ff_all, 0) ))
+    # var_mean_result = Parallel(n_jobs,verbose = 2)(delayed(spiketools.kernel_fano)(
+    #     unit_spiketimes[u],window = params['window'],
+    #     tlim = tlim, components=True) for u in list(unit_spiketimes.keys()))
+    # all_var = pylab.array([r[0] for r in var_mean_result])
+    # all_mean = pylab.array([r[1] for r in var_mean_result])
+    # #cluster_ffs = pylab.array([pylab.nanmean(all_ffs[ci],axis=0) for ci in inds])
+    # for cnt, ci in enumerate(cluster_inds):
+    #     mask = all_mean[ci] < np.max(all_mean[ci,:300])
+    #     ff_all = (all_var[ci]*mask)/(all_mean[ci]*mask)
+    #     if cnt == 0:
+    #         cluster_ff_mm = np.nanmean(ff_all, 0)
+    #     else:
+    #         cluster_ff_mm = np.vstack((cluster_ff_mm, np.nanmean(ff_all, 0) ))
 
-    results.update({'ff_mm':cluster_ff_mm, 
-                        'time':ff_result[0][1]})
+    # results.update({'ff_mm':cluster_ff_mm, 
+    #                     'time':ff_result[0][1]})
 
 
     cv_two_result = Parallel(n_jobs,verbose = 2)(
@@ -723,8 +760,8 @@ def _simulate_analyse(params):
             unit_spiketimes[u],window = params['window'],
             tlim = tlim,
             min_vals = params['sim_params']['min_vals_cv2']) for u in list(unit_spiketimes.keys()))
-    all_cv2s = pylab.array([r[0] for r in cv_two_result])
-    cluster_cv2s = pylab.array([pylab.nanmean(all_cv2s[ci],axis=0) for ci in cluster_inds])
+    all_cv2s = np.array([r[0] for r in cv_two_result])
+    cluster_cv2s = np.array([np.nanmean(all_cv2s[ci],axis=0) for ci in cluster_inds])
     results.update({'cv2s':cluster_cv2s,'t_cv2':cv_two_result[0][1]})
    
     
@@ -742,10 +779,11 @@ def _simulate_analyse(params):
 
 def get_analysed_spiketimes(params,datafile,window=400, calc_cv2s=True,
                                 save =False,do_not_simulate=False):
+    datapath = '../data/'
     params = {'sim_params':deepcopy(params),'window':window,
               'calc_cv2s':calc_cv2s, 'datafile':datafile}
     if do_not_simulate:
-        all_results = pd.read_pickle(os.path.join(organiser.datapath,datafile) + '_analyses')
+        all_results = pd.read_pickle(os.path.join(datapath,datafile) + '_analyses')
         key_list = [k for k in sorted(params.keys())]
         key = key_from_params(params,key_list)
         results = all_results[key]
@@ -758,9 +796,62 @@ def get_analysed_spiketimes(params,datafile,window=400, calc_cv2s=True,
     return result
 
 
+def _simulate_and_analyse_fig3(original_params):
+    
+    params = deepcopy(original_params)
+    # add kernel length to simtime to have rates over the whole interval
+    kernel_width = spiketools.triangular_kernel(sigma = params['rate_kernel']).shape[0]
+    params['warmup']-= kernel_width/2
+    params['simtime'] += kernel_width
+    jep = params['jep']
+    jipfactor = params['jipfactor']
+    jip = 1. +(jep-1)*jipfactor
+    params['jplus'] = pylab.around(pylab.array([[jep,jip],[jip,jip]]),5)
+    params['record_voltage'] = True
+    params['record_from'] = params['focus_unit']
+
+    sim_results = simulate(params)
+    print(list(sim_results.keys()))
+    spiketimes = sim_results['spiketimes']
+    results = {}
+    
+    # compute average cluster rates
+    cluster_rates = []
+    cluster_size = params['N_E']/params['Q']
+    
+    
+    cluster_rates,t_rate = analyse_nest.compute_cluster_rates(spiketimes, params['N_E'], params['Q'],kernel_sigma=params['rate_kernel'],tlim = [0,params['simtime']+kernel_width])
+    results['cluster_rates'] = cluster_rates
+    results['t_rate'] = t_rate-kernel_width/2
+    
+    # remove added kernel width from spiketimes again
+    spiketimes[0,:] -= kernel_width/2
+    spiketimes = spiketimes[:,spiketimes[0]>0]
+    spiketimes = spiketimes[:,spiketimes[0]<=original_params['simtime']]
+    
+    results['spiketimes'] = spiketimes
+    # extract currents for focus unit
+
+    focus_unit = cluster_size * params['focus_cluster']+params['focus_unit']
+    focus_index = find(sim_results['senders'] == focus_unit)
+    
+    results['current_times'] = sim_results['times']-kernel_width/2
+    results['ex_current'] = sim_results['I_syn_ex'][focus_index]
+    results['inh_current'] = sim_results['I_syn_in'][focus_index]
+    results['Ixe'] = sim_results['I_xE']
+    results['V_m'] = sim_results['V_m'][focus_index]
+    results['e_rate'] = sim_results['e_rate']
+    results['i_rate'] = sim_results['i_rate']
+    results['focus_cluster_inds'] = list(range(int(params['focus_cluster']*cluster_size),int((params['focus_cluster']+1)*cluster_size)))
+    results['focus_spikes'] = spiketimes[:,spiketimes[1] == focus_unit-1]
+
+    return results
 
 
+def get_simulate_and_analyse_fig3(params,datafile):
 
+    return organiser.check_and_execute(params, _simulate_and_analyse_fig3, 
+                                         datafile,reps = None)
 
 if __name__ == '__main__':
 

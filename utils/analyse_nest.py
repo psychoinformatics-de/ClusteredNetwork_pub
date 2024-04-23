@@ -3,6 +3,30 @@ import spiketools
 from bisect import bisect_right,bisect_left
 import default
 
+# def bisect_right(a, x, lo=0, hi=None):
+#     """Replicates the behavior of bisect.bisect_right from Python 2."""
+#     if hi is None:
+#         hi = len(a)
+#     while lo < hi:
+#         mid = (lo + hi) // 2
+#         if a[mid] > x:
+#             hi = mid
+#         else:
+#             lo = mid + 1
+#     return lo
+
+# def bisect_left(a, x, lo=0, hi=None):
+#     """Replicates the behavior of bisect.bisect_left from Python 2."""
+#     if hi is None:
+#         hi = len(a)
+#     while lo < hi:
+#         mid = (lo + hi) // 2
+#         if a[mid] < x:
+#             lo = mid + 1
+#         else:
+#             hi = mid
+#     return lo
+
 def compute_cluster_rates(spiketimes,N_E,Q,kernel_sigma=50,kernel_type = 'tri',tlim = None):
     """ compute the avarage firing rate of the Q excitatory clusters in spiketimes. """
     cluster_rates = []
@@ -63,10 +87,8 @@ def split_unit_spiketimes(spiketimes,N = None):
         """
     trials = pylab.unique(spiketimes[1])
     spike_dict = {}
-
     order = pylab.argsort(spiketimes[2])
     spiketimes = spiketimes[:,order]
-    
     if N is None:
         units = pylab.unique(spiketimes[2])
     else:
@@ -78,10 +100,11 @@ def split_unit_spiketimes(spiketimes,N = None):
             spike_dict[unit] = spiketimes[:2,:unit_end]
         else:
             spike_dict[unit] = pylab.zeros((2,0))
-        missing_trials = list(set(trials).difference(spike_dict[unit][1,:]))
-        
+        missing_trials = list(set(trials).difference(spike_dict[unit][1,:])) 
         for mt in missing_trials:
-            spike_dict[unit] = pylab.append(spike_dict[unit], pylab.array([[pylab.nan],[mt]]),axis=1)
+            spike_dict[unit] = pylab.append(spike_dict[unit], 
+                                            pylab.array([[pylab.nan],[mt]]),
+                                            axis=1)
         spiketimes = spiketimes[:,unit_end:]
 
     return spike_dict

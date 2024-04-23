@@ -1,8 +1,6 @@
 import sys;sys.path.append('../')
 import os
 import pylab
-#import BiNet
-#import plotting_functions as plotting
 import matplotlib as mpl
 from matplotlib.patches import Polygon,Circle,Rectangle
 from scipy.spatial.distance import pdist,squareform

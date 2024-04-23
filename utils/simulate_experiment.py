@@ -56,7 +56,8 @@ def simulate(original_params):
 
     for i,condition in enumerate(conditions):
         for trial in range(trials):
-            t += isi + np.int16(np.random.rand()*isi_vari)
+            #t += isi + np.int16(np.random.rand()*isi_vari)
+            t += isi + np.random.rand()*isi_vari
             trial_starts.append(t)
             ps_directions = np.where(stimuli[i][trial,:,0])[0]
             rs_direction =  np.where(stimuli[i][trial,:,1])[0][0]
@@ -65,6 +66,7 @@ def simulate(original_params):
             # make the amplitudes for the preparatory period
             for ps_direction in ps_directions:
                 multi_stim_times[ps_direction].append(t)
+                #multi_stim_times[ps_direction].append(np.ceil(t*10)/10)
                 multi_stim_amps[ps_direction].append(ps_stim_amps[i])
 
             t += prep_length
@@ -72,14 +74,17 @@ def simulate(original_params):
                 if ps_direction == rs_direction:
                     continue
                 multi_stim_times[ps_direction].append(t)
+                #multi_stim_times[ps_direction].append(np.ceil(t*10)/10)
                 multi_stim_amps[ps_direction].append(0)
 
             # target stimulus
             t+=1
             multi_stim_times[rs_direction].append(t)
+            #multi_stim_times[rs_direction].append(np.ceil(t*10)/10)
             multi_stim_amps[rs_direction].append(rs_stim_amp)
             t+= rs_length
             multi_stim_times[rs_direction].append(t)
+            #multi_stim_times[rs_direction].append(np.ceil(t*10)/10)
             multi_stim_amps[rs_direction].append(0)
     
     multi_stim_amps =[ pylab.array(l) for l in multi_stim_amps]

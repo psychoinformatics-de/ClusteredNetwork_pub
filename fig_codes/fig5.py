@@ -68,7 +68,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
             pylab.plot(trate, pylab.nanmean(rates[rate_conditions==condition],axis=0),color = color,label = 'conditio\
 n '+str(condition))
         #pylab.legend(frameon = False,fontsize = 6,loc = 'upper center')
-    
+    print('DONE! first part of plot')
     if ff_ax is not None:
         pylab.sca(ff_ax)
         try:
@@ -143,7 +143,8 @@ n '+str(condition))
                 for j,condition in enumerate([1,2,3]):
                     for k,direction in enumerate([1,2,3,4,5,6]):
                         if good_directions[i,k]:
-                            cv2,tcv2 = analyses.get_cv_two(gn, condition, direction,alignment = alignment,tlim  =tlim)
+                            cv2,tcv2 = analyses.get_cv_two(gn, condition, direction,
+                                                           alignment = alignment,tlim  =tlim)
                             cv2s.append(cv2)
                             cv2_gns.append(gn)
                             cv2_conditions.append(condition)
@@ -160,6 +161,7 @@ n '+str(condition))
 
 
     if pop_score_ax is not None:
+        print('plotting pop score ... ')
         pylab.sca(pop_score_ax)
         pop_score_gns = []
         pop_score_conditions = [] 
@@ -231,9 +233,6 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, redo=False):
         test_vals = test_vals[:,good_inds]
         good_units = units[good_inds]
         
-              
-
-        
 
     print('good units: ', len(good_units))
     offset_lst = []
@@ -244,9 +243,9 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, redo=False):
             all_ffs.append(condition_ffs[u])
         all_ffs = pylab.array(all_ffs)
         mean_ffs = pylab.nanmean(all_ffs,axis=0)
-        print(mean_ffs[:220])
         offset_lst.append(pylab.nanmean(mean_ffs[:220]))
-        pylab.plot(time,mean_ffs - offset_lst[condition-1],color = condition_colors[condition-1],label = 'condition '+str(condition))
+        pylab.plot(time,mean_ffs - offset_lst[condition-1],color = condition_colors[condition-1],
+                   label = 'condition '+str(condition))
 
     if sig_time is not None:
         sigs = []
@@ -509,7 +508,6 @@ if __name__ == '__main__':
         do_plot(extra_filters = extra_filters,ff_ax = ff_ax,rate_ax = rate_ax, 
                     pop_score_ax = pop_score_ax,cv2_ax=cv2_ax,textsize=size,
                     lw=1,lw_line=0.3, condition_colors=condition_colors_exp)
-        #do_plot(extra_filters = extra_filters,ff_ax = ff_ax_mo,textsize=size,lw=1,lw_line=0.3, condition_colors=condition_colors_exp, tlim = [-1500,500],alignment ='MO', ff_test_point = None)
 
 
     pylab.sca(cv2_ax)
@@ -575,7 +573,7 @@ if __name__ == '__main__':
     settings = [{'randseed':8721,'jep':3.2,'jipratio':0.75,
                  'condition_stim_amps':[0.1,0.1,0.1],
                  'rs_stim_amp':0.1,'rs_length':400, 
-                 'trials':150}]    
+                 'trials':150}]  
 
     ax_model = plotting.ax_label1(plotting.simpleaxis1(
         pylab.subplot2grid((nrow,ncol),(4,0),rowspan=3),labelsize,pad=pad),

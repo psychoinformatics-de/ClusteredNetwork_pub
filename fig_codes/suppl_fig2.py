@@ -1,4 +1,4 @@
-import sys;sys.path.append('../utils')#;sys.path.append('../data')
+import sys;sys.path.append('../utils')
 from matplotlib import pylab
 import pandas as pd
 import plotting_functions as plotting
@@ -7,9 +7,6 @@ import joe_and_lili
 from scipy.stats import wilcoxon
 #import organiser
 import pickle as pickle
-import analyse_model
-from matplotlib.collections import LineCollection
-from matplotlib.patches import Rectangle
 from general_func import *
 import os
 
@@ -31,8 +28,10 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
     for i,gn in enumerate(gns):
         for j,condition in enumerate([1,2,3]):
             for k,direction in enumerate([1,2,3,4,5,6]):
-                count_rate_block[i,j,k] =  analyses.get_mean_direction_counts(gn,condition,direction,tlim  =tlim,alignment = alignment)
-                trial_count_block[i,j,k]  =analyses.get_trial_count(gn,condition,direction)
+                count_rate_block[i,j,k] =  analyses.get_mean_direction_counts(
+                    gn,condition,direction,tlim  =tlim,alignment = alignment)
+                trial_count_block[i,j,k]  =analyses.get_trial_count(
+                    gn,condition,direction)
     
     enough_counts = pylab.prod(count_rate_block>=min_count_rate,axis=1)
     enough_trials = pylab.prod(trial_count_block>=min_trials,axis=1)
@@ -54,16 +53,19 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
                for j,condition in enumerate([1,2,3]):
                     for k,direction in enumerate([1,2,3,4,5,6]):
                         if good_directions[i,k]:
-                            spike_count,tspike_count = analyses.get_spike_counts(gn, condition, direction,alignment = alignment,tlim  =tlim)
+                            spike_count,tspike_count = analyses.get_spike_counts(
+                                gn, condition, direction,alignment = alignment,
+                                tlim  =tlim)
                             spike_counts.append(spike_count)
                             spike_counts_gns.append(gn)
                             spike_counts_conditions.append(condition)
                             spike_counts_directions.append(direction)
-            spike_counts = pylab.array(spike_counts)
 
             spike_counts_conditions = pylab.array(spike_counts_conditions)
-            pickle.dump((spike_counts,tspike_count,spike_counts_conditions,spike_counts_gns,spike_counts_directions),
-                        open(path+'spike_counts_file_'+alignment,'wb'),protocol = 2)
+            pickle.dump((spike_counts,tspike_count,spike_counts_conditions,
+                         spike_counts_gns,spike_counts_directions),
+                        open(path+'spike_counts_file_'+alignment,'wb'),
+                        protocol = 2)
 
         for cnt, spk in enumerate(spike_counts):
             if cnt==0:

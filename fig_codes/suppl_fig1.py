@@ -107,8 +107,9 @@ def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),
                 # adjust for devisable N and Q
                 params['N_E'] = default.N_E - default.N_E%params['Q']
                 params['N_I'] = default.N_I - default.N_I%params['Q']
-                results = organiser.check_and_execute(params, simulate_spontaneous, datafile1,
-                                    reps = reps,ignore_keys=['n_jobs'],redo = redo)
+                results = organiser.check_and_execute(
+                    params, simulate_spontaneous, datafile1,
+                    reps = reps,ignore_keys=['n_jobs'],redo = redo)
                 ff = [r[0] for r in results]
                 count=[r[2] for r in results]
                 cv=[r[1] for r in results]
