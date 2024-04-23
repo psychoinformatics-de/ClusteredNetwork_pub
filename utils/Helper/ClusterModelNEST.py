@@ -3,6 +3,7 @@ import time
 import pickle
 import sys
 import signal
+sys.path.append("..")
 from Helper import ClusterHelper
 from Helper import GeneralHelper
 import nest
@@ -48,15 +49,17 @@ class ClusteredNetworkBase:
         """
         nest.ResetKernel()
         nest.set_verbosity('M_WARNING')
-        nest.local_num_threads = self.params.get('n_jobs', 1)
-        nest.resolution = self.params.get('dt')
-        self.params['randseed'] = self.params.get('randseed', 
+        self.params['randseed'] = self.params.get('randseed',
                                         np.random.randint(1000000))
-        print('rng_seed', self.params.get('randseed'))
-        if self.params.get('randseed') ==0:
-            self.params['randseed'] = 1
-            print('Seed changed from 0 to 1')
-        nest.rng_seed = self.params.get('randseed')
+
+
+        np.random.seed(self.params['randseed'])
+        randseeds = list(range(self.params['randseed'] + 2, self.params['randseed'] + 2 + self.params.get('n_jobs', 1)))
+        nest.SetKernelStatus({"resolution": self.params.get('dt', 0.1),
+                              "print_time": True, "overwrite_files": True,
+                              'local_num_threads': self.params.get('n_jobs', 1),
+                              'grng_seed': self.params['randseed']  + 1,
+                              'rng_seeds': randseeds})
 
     def create_populations(self):
         """
@@ -190,12 +193,12 @@ class ClusteredNetworkBase:
         if self.params['fixed_indegree']:
             K_EE = int(self.params['ps'][0, 0] * self.params['N_E'] / self.params['Q'])
             print('K_EE: ', K_EE)
-            conn_params_EE = {'rule': 'fixed_indegree', 'indegree': K_EE, 'allow_autapses': False,
-                              'allow_multapses': False}
+            conn_params_EE = {'rule': 'fixed_indegree', 'indegree': K_EE, 'autapses': False,
+                              'multapses': False}
 
         else:
-            conn_params_EE = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][0, 0], 'allow_autapses': False,
-                              'allow_multapses': False}
+            conn_params_EE = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][0, 0], 'autapses': False,
+                              'multapses': False}
         for i, pre in enumerate(self.Populations[0]):
             for j, post in enumerate(self.Populations[0]):
                 if i == j:
@@ -212,11 +215,11 @@ class ClusteredNetworkBase:
         if self.params['fixed_indegree']:
             K_EI = int(self.params['ps'][0, 1] * self.params['N_I'] / self.params['Q'])
             print('K_EI: ', K_EI)
-            conn_params_EI = {'rule': 'fixed_indegree', 'indegree': K_EI, 'allow_autapses': False,
-                              'allow_multapses': False}
+            conn_params_EI = {'rule': 'fixed_indegree', 'indegree': K_EI, 'autapses': False,
+                              'multapses': False}
         else:
-            conn_params_EI = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][0, 1], 'allow_autapses': False,
-                              'allow_multapses': False}
+            conn_params_EI = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][0, 1], 'autapses': False,
+                              'multapses': False}
         for i, pre in enumerate(self.Populations[1]):
             for j, post in enumerate(self.Populations[0]):
                 if i == j:
@@ -233,11 +236,11 @@ class ClusteredNetworkBase:
         if self.params['fixed_indegree']:
             K_IE = int(self.params['ps'][1, 0] * self.params['N_E'] / self.params['Q'])
             print('K_IE: ', K_IE)
-            conn_params_IE = {'rule': 'fixed_indegree', 'indegree': K_IE, 'allow_autapses': False,
-                              'allow_multapses': False}
+            conn_params_IE = {'rule': 'fixed_indegree', 'indegree': K_IE, 'autapses': False,
+                              'multapses': False}
         else:
-            conn_params_IE = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][1, 0], 'allow_autapses': False,
-                              'allow_multapses': False}
+            conn_params_IE = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][1, 0], 'autapses': False,
+                              'multapses': False}
         for i, pre in enumerate(self.Populations[0]):
             for j, post in enumerate(self.Populations[1]):
                 if i == j:
@@ -254,11 +257,11 @@ class ClusteredNetworkBase:
         if self.params['fixed_indegree']:
             K_II = int(self.params['ps'][1, 1] * self.params['N_I'] / self.params['Q'])
             print('K_II: ', K_II)
-            conn_params_II = {'rule': 'fixed_indegree', 'indegree': K_II, 'allow_autapses': False,
-                              'allow_multapses': False}
+            conn_params_II = {'rule': 'fixed_indegree', 'indegree': K_II, 'autapses': False,
+                              'multapses': False}
         else:
-            conn_params_II = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][1, 1], 'allow_autapses': False,
-                              'allow_multapses': False}
+            conn_params_II = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][1, 1], 'autapses': False,
+                              'multapses': False}
         for i, pre in enumerate(self.Populations[1]):
             for j, post in enumerate(self.Populations[1]):
                 if i == j:
@@ -295,7 +298,7 @@ class ClusteredNetworkBase:
         """
         Creates multiple current source as stimulation of the specified cluster/s.
         """
-        if self.params['stim_clusters'] is not None:
+        if self.params.get('stim_clusters') is not None:
             stim_amp = self.params['stim_amp']  # amplitude of the stimulation current in pA
             stim_starts = self.params['stim_starts']  # list of stimulation start times
             stim_ends = self.params['stim_ends']  # list of stimulation end times
@@ -307,6 +310,9 @@ class ClusteredNetworkBase:
                 amplitude_times.append(end + self.params['warmup'])
                 amplitude_values.append(0.)
             self.Currentsources = [nest.Create('step_current_generator')]
+
+            print(len(self.Populations[0][0]))
+            print(self.params['stim_clusters'])
             for stim_cluster in self.params['stim_clusters']:
                 nest.Connect(self.Currentsources[0], 
                                 self.Populations[0][stim_cluster])
@@ -333,8 +339,9 @@ class ClusteredNetworkBase:
         """
         Creates a spike recorder connected to all neuron populations created by create_populations
         """
-        self.RecordingDevices = [nest.Create("spike_recorder")]
-        self.RecordingDevices[0].record_to = "memory"
+        self.RecordingDevices = [nest.Create("spike_detector")]
+        nest.SetStatus(self.RecordingDevices[0], [
+            {'to_file': False, 'withtime': True, 'withgid': True}])
 
         all_units = self.Populations[0][0]
         for E_pop in self.Populations[0][1:]:
@@ -631,50 +638,12 @@ class ClusteredNetwork(ClusteredNetworkBase):
 if __name__ == "__main__":
     # np.random.seed(42)
     sys.path.append("..")
-    from Defaults import defaultSimulate as default
+    import default
     import matplotlib.pyplot as plt
 
     EI_cluster = ClusteredNetworkBase(default, 
-                        {'n_jobs': 4, 'warmup': 500, 'simtime': 1200, 'stim_clusters': [3],
-                        'stim_amp': 2.0, 'stim_starts': [600.], 'stim_ends': [1000.]})
+                        {'Q':20,'n_jobs': 4, 'warmup': 500, 'simtime': 1200, 'multi_stim_clusters': [[1], [2], [3], [4], [5], [6]],
+                        'multi_stim_amps': [[0.1, 0.] for i in range(6)],
+                        'multi_stim_times': [[100., 200.] for i in range(6)],
+                        })
     spikes = EI_cluster.create_and_simulate()
-    # print(EI_cluster.get_parameter())
-    # plt.plot(spikes[0,:], spikes[1,:], '.')
-    # plt.show()
-    '''EI_cluster.clean_network()
-    #EI_cluster.setup_nest()
-    #EI_cluster.create_populations()
-    #EI_cluster.connect()
-    EI_cluster.connect_from_file('Test.pkl')
-    EI_cluster.create_recording_devices()
-    nest.Prepare()  
-    EI_cluster.simulate()
-    spikes=EI_cluster.get_recordings()
-    print(EI_cluster.get_firing_rates(spikes))
-    print(EI_cluster.get_timing())
-    #plt.plot(spikes[0,:], spikes[1,:], '*')
-    #plt.show()
-    print(spikes[:,1000:1020])
-    print(EI_cluster.get_parameter())
-    #EI_cluster.save_conn_to_file("Test.pkl")
-    input("Press Enter to continue...")
-    '''
-    np.random.seed(42)
-    Cluster2 = ClusteredNetwork(default,
-                                {'n_jobs': 4, 'warmup': 500, 'simtime': 1200, 'stim_clusters': [3], 'stim_amp': 2.0,
-                                 'stim_starts': [600.], 'stim_ends': [1000.]})
-    Cluster2.set_model_build_pipeline([Cluster2.setup_nest, lambda: np.random.seed(42),Cluster2.create_populations, Cluster2.create_stimulation,
-                                       Cluster2.create_recording_devices, lambda: np.random.seed(42),
-                                       Cluster2.connect])
-    print(Cluster2.get_simulation())
-    Cluster2.save_conn_to_file("Cluster2.pkl")
-    Cluster3 = ClusteredNetwork(default,
-                                {'n_jobs': 4, 'warmup': 500, 'simtime': 1200, 'stim_clusters': [3], 'stim_amp': 2.0,
-                                 'stim_starts': [600.], 'stim_ends': [1000.]})
-    np.random.seed(45)
-    Cluster3.set_model_build_pipeline([Cluster3.setup_nest, lambda: np.random.seed(42),Cluster3.create_populations, Cluster3.create_stimulation,
-                                       Cluster3.create_recording_devices, lambda: np.random.seed(45),
-                                       lambda: Cluster3.connect_from_file("Cluster2.pkl")])
-    print(Cluster3.get_simulation())
-    # spikes = EI_cluster.get_recordings()
-    # plt.plot(spikes[0, :], spikes[1, :], '*')
