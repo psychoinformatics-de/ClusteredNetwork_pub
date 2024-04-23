@@ -312,7 +312,8 @@ class ClusteredNetworkBase:
                                 self.Populations[0][stim_cluster])
             nest.SetStatus(self.Currentsources[0],
                            {'amplitude_times': amplitude_times, 
-                           'amplitude_values': amplitude_values})
+                           'amplitude_values': amplitude_values,
+                           'allow_offgrid_times':True})
         elif self.params['multi_stim_clusters'] is not None:
             print('stimulating multi stim ...')
             for stim_clusters,amplitudes,times in zip(self.params['multi_stim_clusters'],
@@ -320,7 +321,8 @@ class ClusteredNetworkBase:
                                                     self.params['multi_stim_times']):
                 self.Currentsources.append(nest.Create('step_current_generator'))
                 nest.SetStatus(self.Currentsources[-1],{'amplitude_times':times[1:],
-                                                'amplitude_values':amplitudes[1:]})
+                                                'amplitude_values':amplitudes[1:],
+                                                'allow_offgrid_times':True})
                 stim_units = []
                 for stim_cluster in stim_clusters:
                     nest.Connect(self.Currentsources[-1], 
