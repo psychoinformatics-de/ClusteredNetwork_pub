@@ -362,6 +362,93 @@ class ClusteredNetworkBase:
             all_units += I_pop
         nest.Connect(all_units, self.RecordingDevices[0], "all_to_all")  # Spikerecorder
 
+        if self.params.get('record_voltage',False):
+            self.VoltageRecorder = nest.Create("multimeter")
+            recordables = self.params.get(
+                'recordables', [str(r) for r in nest.GetStatus(
+                    self.Populations[0][0], 'recordables')[0]])
+            self.RecordingDevices.append(nest.Create('multimeter',
+                                           params={'record_from': recordables,
+                                                   'interval': self.params.get('recording_interval', self.params.get('dt', 0.1))})
+                                             )
+            if self.params.get("record_from", 'all'):
+                record_units = []
+                for E_pop in self.Populations[0]:
+                    record_units += list(E_pop[:self.params.get("record_from", 'all')])
+                    print((E_pop[:self.params.get("record_from", 'all')]))
+                for I_pop in self.Populations[1]:
+                    record_units += list(I_pop[:self.params.get("record_from", 'all')])
+
+            else:
+                record_units = [u for u in all_units]
+
+            nest.Connect( self.RecordingDevices[1], record_units)
+
+    def get_voltage_recordings(self):
+        if self.params.get('record_voltage',False):
+
+            if self.params.get("record_from", 'all'):
+                record_units = []
+                for E_pop in self.Populations[0]:
+                    record_units += list(E_pop[:self.params.get("record_from", 'all')])
+                    print((E_pop[:self.params.get("record_from", 'all')]))
+                for I_pop in self.Populations[1]:
+                    record_units += list(I_pop[:self.params.get("record_from", 'all')])
+
+            else:
+                all_units = self.Populations[0][0]
+                for E_pop in self.Populations[0][1:]:
+                    all_units += E_pop
+                for I_pop in self.Populations[1]:
+                    all_units += I_pop
+                record_units = [u for u in all_units]
+
+            print('extracting recordables')
+            events = nest.GetStatus(self.RecordingDevices[1], 'events')[0]
+
+            times = events['times']
+            senders = events['senders']
+            usenders = np.unique(senders)
+            sender_ind_dict = {s: self.record_units.index(s) for s in usenders}
+            sender_inds = [sender_ind_dict[s] for s in senders]
+
+            utimes = np.unique(times)
+            time_ind_dict = {t: i for i, t in enumerate(utimes)}
+            time_inds = [time_ind_dict[t] for t in times]
+
+            if self.params.get("record_from", 'all') == 'all':
+                n_records = self.params.get('N_E', 0) + self.params.get('N_I', 0)
+            else:
+                n_records = self.params.get("record_from", 'all') * (len(self.Populations[0]) + len(self.Populations[1]))
+            print(('n_records', n_records))
+
+            recordables = self.params.get(
+                'recordables', [str(r) for r in nest.GetStatus(
+                    self.Populations[0][0], 'recordables')[0]])
+
+            results = {}
+            for recordable in recordables:
+                t0 = time.time()
+
+                results[recordable] = np.zeros((n_records, len(utimes)))
+                results[recordable][sender_inds, time_inds] = events[recordable]
+
+                results[recordable] = results[recordable][:, utimes >= self.params['warmup']]
+
+            utimes = utimes[utimes >= self.params['warmup']]
+            utimes -= self.params['warmup']
+            results['senders'] = np.array(record_units)
+            results['times'] = utimes
+
+            return results
+
+
+
+
+
+
+
+
     def setup_network(self):
         """
         Initializes NEST and creates the network in NEST, ready to be simulated.
