@@ -64,7 +64,8 @@ tlim = [-500,2000]
 result = get_reaction_time_analysis(params,tlim  =tlim,redo = False,
                         tau  =tau,integrate_from_go = integrate_from_go,
                         normalise_across_clusters=True,
-                        threshold_per_condition = threshold_per_condition)
+                        threshold_per_condition = threshold_per_condition,
+                        fname='fig6_reaction_time_analysis')
 
 rts = result['rts']
 conditions = result['conditions']
@@ -78,25 +79,22 @@ ax1 = plotting.ax_label1(plotting.simpleaxis(
     pylab.subplot(subplotspec)),'a',x=x_label_val/3)
 pylab.suptitle('Example trial of motor cortical attractor model')
 
-print('find correct cond==3', find(correct*(conditions==3)))
 plot_trial = find(correct*(conditions==3))[8]#[6]
-print('plot trial',plot_trial)
 pylab.xticks([-500,0,1000])
 pylab.gca().set_xticklabels(['0', '500','1500'])
 
-print('direction prediction condition',
-        directions[plot_trial],
-        predictions[plot_trial])
 
 data  = get_simulated_data(params['sim_params'],
-                datafile = 'simulated_data_fig6')
+                datafile = 'fig6_simulated_data')
 
 cut_window = [-500,2000]
 trial_starts = data['trial_starts']
 spiketimes = spiketools.cut_spiketimes(
-    data['spiketimes'],tlim = pylab.array(cut_window)+trial_starts[plot_trial])
+    data['spiketimes'],
+    tlim = pylab.array(cut_window)+trial_starts[plot_trial])
 spiketimes[0] -= trial_starts[plot_trial]
 pylab.plot(spiketimes[0],spiketimes[1],'.',ms =0.5,color = '0.5')
+pylab.show()
 pylab.xlim(cut_window)
 Q = params['sim_params']['Q']
 N_E = params['sim_params']['N_E']
@@ -142,14 +140,12 @@ pylab.ylabel('unit')
 pylab.xlabel('time [ms]')
 pylab.text(-50,1250,'PS')
 pylab.text(950,1250,'RS')
+
+
 subplotspec = gs.new_subplotspec((1,0), colspan=1,rowspan=1)
 ax2 = plotting.ax_label1(plotting.simpleaxis(
     pylab.subplot(subplotspec)),'b',x=x_label_val)
 ax2.set_title('Attractor model')
-
-
-
-
 for condition in [1,2,3]:
     
     rt = rts[(conditions == condition)*correct]

@@ -142,11 +142,11 @@ def simulate(params):
     # assert N_E%Q == 0, 'N_E needs to be evenly divisible by Q'
     # assert N_I%Q == 0, 'N_I needs to be evenly divisible by Q'
     # units per cluster
-    cluster_units_E = int(N_E) / int(Q)
+    cluster_units_E = int(N_E) // int(Q)
     background_units_E = N_E - Q * cluster_units_E
     # cluster_units_I = int(N_I) / int(Q)
     # background_units_I = N_I - Q * cluster_units_I
-    cluster_units_I = int(N_I) / (int(Q) / int(portion_I))
+    cluster_units_I = int(N_I) // (int(Q) / int(portion_I))
     background_units_I = N_I - int((Q/float(portion_I)) * cluster_units_I)
 
     fixed_indegree = params.get('fixed_indegree', default.fixed_indegree)

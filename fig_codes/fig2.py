@@ -16,8 +16,10 @@ from general_func import *
 import plotting_functions as plotting
 
 datapath = '../data/'
-datafile = 'fig02_cluster_dynamics'
-datafile1 = 'ff_cv2_spontaneous'
+#datafile = 'fig02_cluster_dynamics'
+datafile = 'fig2_simulated_data'
+#datafile1 = 'ff_cv2_spontaneous'
+#datafile1 = 'fig2_ff_cv2_spontaneous'
 
 def simulate_spontaneous(params):
     pylab.seed()
@@ -86,7 +88,9 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             jip = 1. +(jep-1)*jipfactor
             params['jplus'] = pylab.around(pylab.array([[jep,jip],[jip,jip]]),5)
             #results = load_data(datapath, datafile,params,old_key_code=True,reps=reps)
-            results = organiser.check_and_execute(params, simulate_spontaneous, datafile1,reps = reps)
+            results = organiser.check_and_execute(
+                params, simulate_spontaneous, 
+                datafile,reps = reps)
             ff = [r[0] for r in results]
             cv2 = [r[1] for r in results]
             count = [r[2] for r in results]
@@ -139,8 +143,9 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spike_params['simtime'] = spike_simtime
             print(spike_params)
             #spiketimes = load_data(datapath, datafile + '_spikes',spike_params,old_key_code=True, reps=None)['spiketimes']
-            spiketimes = organiser.check_and_execute(spike_params, sim_nest.simulate, datafile1 +'_spikes'
-                                                     ,redo = redo_spiketrains)['spiketimes']
+            spiketimes = organiser.check_and_execute(
+                spike_params, sim_nest.simulate, datafile +'_spikes'
+                ,redo = redo_spiketrains)['spiketimes']
             spiketimes = spiketimes[:,spiketimes[1]<plot_units[1]]
             spiketimes = spiketimes[:,spiketimes[1]>=plot_units[0]]
             spiketimes[1] -= plot_units[0]
@@ -182,10 +187,12 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
                 print('#################################################################################')
                 print(Q,jep,jip,'-------------------------------------------------------------------------')
                 print('#################################################################################')
-                params['jplus'] = pylab.around(pylab.array([[jep,jip],[jip,jip]]),5)
+                params['jplus'] = pylab.around(
+                    pylab.array([[jep,jip],[jip,jip]]),5)
                 params['Q'] = int(Q)
-                results = organiser.check_and_execute(params, simulate_spontaneous, datafile1,
-                                reps = reps,ignore_keys=['n_jobs'],redo = redo)
+                results = organiser.check_and_execute(
+                    params, simulate_spontaneous, datafile,
+                    reps = reps,ignore_keys=['n_jobs'],redo = redo)
                 #key = key_from_params(params, reps=reps,ignore_keys=['n_jobs'])
                 #results = [all_results[result_key] for result_key in key]
                 ff = [r[0] for r in results]

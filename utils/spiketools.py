@@ -567,12 +567,13 @@ def cut_spiketimes(spiketimes,tlim):
     cut_spikes = spiketimes[:,pylab.isfinite(spiketimes[0])]
 
     cut_spikes = cut_spikes[:,cut_spikes[0,:]>=tlim[0]]
-    
     if cut_spikes.shape[1]>0:
         cut_spikes = cut_spikes[:,cut_spikes[0,:]<tlim[1]]
     for trial in alltrials:
         if not trial in cut_spikes[1,:]:
-            cut_spikes = pylab.append(cut_spikes,pylab.array([[pylab.nan],[trial]]),axis = 1)
+            cut_spikes = pylab.append(
+                cut_spikes,pylab.array([[pylab.nan],
+                                        [trial]]),axis = 1)
     return cut_spikes
 
 def gamma_spikes(rates,order=[1],tlim = [0.,1000.],dt=0.1):

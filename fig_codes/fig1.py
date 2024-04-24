@@ -3,28 +3,28 @@ import os
 import pylab
 import numpy as np
 import matplotlib.image as mimage
+
 # Local modules (not installed packages)
 from experimental_analysis_funcs import get_stats, plot_experiment
 from analyse_model import get_analysed_spiketimes
-from global_params_funcs import colors,text_width_pts
 from global_params_funcs import (
     nice_figure, ax_label_fig1, ax_label_title,
-    simpleaxis)
+    simpleaxis,colors,text_width_pts)
 import network_schematic
 
+data_path = '../data/'
 
 # experimental data statistics for Moneky Joe (M1)
 try:
     monkey = b'joe'
-    d = np.load('../data/'+monkey.decode("utf-8") +'_ff_cv_twos_exp.npy',
-                allow_pickle=True).item()
+    fn = 'experiment_'+monkey.decode("utf-8") +'_ff_cv_twos.npy'
+    d = np.load(data_path + fn, allow_pickle=True).item()
     locals().update(d)
 except:
     tff,ffs,tlv,lvs,tcv_two,cv_twos, trate, count_rates = get_stats(
         gns=None,monkey=monkey)
     dict_ff_cv_twos = {'tff':tff, 'ffs':ffs, 'tcv_two':tcv_two,'cv_twos':cv_twos}
-    np.save('../data/'+monkey.decode("utf-8") +'_ff_cv_twos_exp.npy', 
-            dict_ff_cv_twos)
+    np.save(data_path + fn, dict_ff_cv_twos)
 
 fig = nice_figure(fig_width= 1.,ratio  =0.55,
                            latex_page = 1.2*text_width_pts)
@@ -54,7 +54,7 @@ data_path = '../data/'
 if os.path.exists(data_path+'drawing_small.png'):
     print('drawing exists')
 else:
-    raise ValueError('drawing file not found. Please download following the istructions in the README.md file.')
+    raise ValueError('drawing file not found1 Please download drawing_small.png file, following the istructions in the README.md file.')
 subplotspec = gs.new_subplotspec((0,0), colspan=int(ncols/3),rowspan=1)
 ax1 = pylab.subplot(subplotspec)
 ax_label_fig1(ax1, 'a')
@@ -159,7 +159,7 @@ params['fixed_indegree'] = False
 params['trials'] = 20
 params['n_jobs'] = 20
 save = True
-filename = 'figure1_model'
+filename = 'fig1_simulated_data'
 ########################################################################
 
 

@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 import ast 
 
+def find(condition):
+    """old pylab.find function"""
+    res, = np.nonzero(np.ravel(condition))
+    return res
 
 
 
@@ -13,7 +17,6 @@ def key_from_params(params, reps=None,ignore_keys=['']):
         key += '_'+params[k].__repr__()
     key =key.replace(' ','')
     if reps!=None:
-        print('keyyyy', key)
         key =  [key+'_'+str(r) for r in range(reps)]
     return key
 
@@ -23,8 +26,6 @@ def compare_key(all_keys, params):
     import ast
     for i in list(all_keys):
         test_string = '{' + i.split('{')[1].split('}')[0] + '}'
-        print('test_str',test_string)
-        print(params)
         try:
             dict_key_temp = ast.literal_eval(test_string)
             if dict_key_temp == params:
@@ -54,10 +55,15 @@ def load_data(datapath, datafile,params, old_key_code=False,
 def extract_info_from_keys(params, keys):
     """extract info from string keys"""
     keys_dic = keys[keys.find('{')+1: keys.find('}')]
-    for i, k in enumerate(keys_dic.split(",'")):
-        if i ==0:
-            params.update(ast.literal_eval("{"+k+'}'))
-        else:
-            params.update(ast.literal_eval("{'"+k+'}'))
+    
+    cleaned_string = "{" + keys_dic.replace("'", "\"") + "}"
+    data_dict = ast.literal_eval(cleaned_string)
+    for k in data_dict.keys():
+        params[k] = data_dict[k]
+    # for i, k in enumerate(keys_dic.split(",'")):
+    #     if i ==0:
+    #         params.update(ast.literal_eval("{"+k+'}'))
+    #     else:
+    #         params.update(ast.literal_eval("{'"+k+'}'))
 
     return params

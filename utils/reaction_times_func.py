@@ -8,15 +8,18 @@ import organiser
 import numpy as np
 from general_func import *
 
-def reaction_time_plot(monkey,nbins = 40,condition_colors = ['0','0.3','0.6']):
+def reaction_time_plot(monkey,nbins = 40,
+                       condition_colors = ['0','0.3','0.6']):
     
     rts = []
     minrt = 1000000
     maxrt = 0
     for condition in [1,2,3]:
         params = {'monkey':monkey,'condition':condition}
-        rt = organiser.check_and_execute(params, _get_mo_times, 
-                                         'reaction_times',redo  =False) 
+        rt = organiser.check_and_execute(
+            params, _get_mo_times, 
+            'experiment_'+monkey.decode("utf-8")+'_reaction_times',
+            redo  =False) 
         rts.append(rt)
         minrt = min(minrt,min(rts[-1]))
         maxrt = max(maxrt,max(rts[-1]))
@@ -111,11 +114,13 @@ def _calc_reaction_time_analysis(original_params):
 
 
 
-def get_reaction_time_analysis(original_params,threshold_per_condition = False,
-                    tlim = [-500,2000],tau = 10.,threshold_resolution = 0.01,
-                        score_reps =1,redo  =False,integrate_from_go  =False,
-                        normalise_across_clusters=False,save=False,
-                        fname='reaction_time_analyses'):
+def get_reaction_time_analysis(
+    original_params,threshold_per_condition = False,
+    tlim = [-500,2000],tau = 10.,threshold_resolution = 0.01,
+    score_reps =1,redo  =False,integrate_from_go  =False,
+    normalise_across_clusters=False,save=False,
+    fname='reaction_time_analyses'):
+    """Get the reaction time analysis for the model"""
     params = deepcopy(original_params)
 
     params['threshold_per_condition'] = threshold_per_condition
@@ -126,7 +131,6 @@ def get_reaction_time_analysis(original_params,threshold_per_condition = False,
     params['integrate_from_go'] =integrate_from_go
     params['normalise_across_clusters'] = normalise_across_clusters
     params['redo'] = redo
-    print('bbbb', params)
     return organiser.check_and_execute(params, _calc_reaction_time_analysis, 
                                 fname,redo = redo,save=save)
 
@@ -136,9 +140,7 @@ def _get_mo_times(params):
     condition = params['condition']
 
     toc = joe_and_lili.get_toc(extra_filters = [['monkey','=',monkey]])
-    print(toc)
     gns = pylab.unique(toc['global_neuron'])
-    print(gns)
     rts = []
     for gn in gns:
         data = analyses.load_data(gn,condition)
@@ -170,7 +172,8 @@ def get_count_integrals(params,tau = 100.,integrate_from_go  =False,
         cluster_params.pop('condition')
     except:
         pass
-    cluster_counts,time,conditions,directions = analyse_model.get_mean_cluster_counts(cluster_params,redo=redo)
+    cluster_counts,time,conditions,directions = analyse_model.get_mean_cluster_counts(
+        cluster_params,redo=redo)
     if integrate_from_go:
         go_time = params['sim_params'].get('prep_length',1000)
         go_ind = pylab.argmin(pylab.absolute(time-go_time))
@@ -309,8 +312,9 @@ def optimize_threshold(params,tau=100,thresh_range = pylab.arange(0,1.0,0.1),
     calc_params['reps'] = reps
     calc_params['integrate_from_go'] = integrate_from_go
     calc_params['normalise_across_clusters'] = normalise_across_clusters
-    return organiser.check_and_execute(calc_params,_calc_thresh_scores,
-                                       'race_to_threshold_scores',redo  =redo)
+    return organiser.check_and_execute(
+        calc_params,_calc_thresh_scores,
+        'model_race_to_threshold_scores',redo  =redo)
    
 
 

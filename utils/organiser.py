@@ -125,15 +125,12 @@ def check_and_execute_hetero(param_list,func,datafile,redo = False,n_jobs = 1):
 def check_and_execute(params,func,datafile,key_list=None,reps = None,
                     redo = False,backup_file = None,n_jobs = 1,
                     save = True,ignore_keys = []):
-    
-
-    #if key_list is None:
-    #    key_list = [k for k in sorted(params.keys()) if k not in ignore_keys]
-
+    # if 'sim_params' in params.keys():
+    #     params = deepcopy(params['sim_params'])
     key = key_from_params(params,reps,ignore_keys)
 
     datapath = '../data/'
-    full_datafile = os.path.join(datapath,datafile)                                                          
+    full_datafile = os.path.join(datapath,datafile)                                                      
     try:
         if redo:
             raise ValueError
@@ -144,7 +141,6 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,
                 key = compare_key(all_results.keys(), params)
             else:
                 pass
-
 
         if reps is None and not redo:
             results = all_results[key]
@@ -179,31 +175,24 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,
                 #all_keys = []
             all_keys = []
             #### REMOVE COMMEN: added str to key
-            print(func)
-            print('key', key)
+
             #possible_keys = [key+'_'+str(r) for r in range(reps)]
             possible_keys = key#[str(key)+'_'+str(r) for r in range(reps)]
             missing_keys = [k for k in possible_keys if k not in all_keys]
-            #print('misiing keys',missing_keys)
-            #print('############## keys', key)
+
             if n_jobs>1:
                 print('n_jobs: ', n_jobs)
                 print('careful: in parallel, randseeds need to be set')
                 copied_params = [deepcopy(params) for mk in missing_keys]
-                #print('copied params', copied_params)
+
 
                 # this sometimes breaks, so we need to catch the error and try again
                 max_retries = 2
                 retries = 0
                 while retries < max_retries:
-                    print('trying--> ', func)
-                    print('missing keays', missing_keys)
-                    print('params', params)
-                    print('len_copiedparams', len(copied_params))
                     try:
                         new_results = Parallel(n_jobs)(
                             delayed(func)(cp) for cp in copied_params)  # Call your parallel task function
-                        print('new_results', new_results)
                         break  # If successful, break out of the loop
                     except Exception as e:
                         print(f"Attempt {retries + 1} failed:", e)
@@ -219,18 +208,16 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,
             else:
                 for mk in missing_keys:
                     print('loop')
-                    print('--->', mk)
                     all_results[mk] = func(deepcopy(params))
-                    print(len(all_results[mk]))
                     if save:
                         pickle.dump(all_results,open(full_datafile,'wb'),
                                     protocol = 2)
             
             all_keys = sorted([k for k in list(all_results.keys()) if k in key])
-            print('----> all_keys', all_keys)
             results = [all_results[k] for k in all_keys[:reps]]
             
         if save:
+            print('saving results of ', func)
             pickle.dump(all_results,open(full_datafile,'wb'),protocol = 2)
 
     if backup_file is not None:

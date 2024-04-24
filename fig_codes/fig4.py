@@ -69,8 +69,8 @@ except:
                 params['s'] = 1. # s
                 
                 result = get_analysed_spiketimes(
-                    params, datafile,calc_cv2s=True,
-                    save=save)
+                    params, datafile,window=params['ff_window'],
+                    calc_cv2s=True, save=save)
     Anls = pd.read_pickle(data_path + file_name_analysis_sw)
 
     
@@ -97,6 +97,8 @@ act_prob1 = []
 portion_selected = [1,50]
 print('len keys', len(Anls.keys()))
 for k_cnt, keys in enumerate(Anls.keys()):
+    if keys is None:
+        continue
     sel_data = Anls[keys]
     params = {}
     params = extract_info_from_keys(params, keys)
@@ -108,8 +110,6 @@ for k_cnt, keys in enumerate(Anls.keys()):
         amp_lst.append(params['stim_amp'])
         ff_lst.append(np.nanmean(sel_data['ffs'][stim], 0)[2])
         ff_lst_std.append(ss.sem(sel_data['ffs'][stim], 0,nan_policy='omit')[2])
-        
-
 
         # include only high rate
         print('shape rate', sel_data['rates'][0].shape)
@@ -133,11 +133,8 @@ for k_cnt, keys in enumerate(Anls.keys()):
         CV_lst1.append(np.nanmean(sel_data['cv2s'][non_stim], 0)[0])
         CV_lst_std1.append(ss.sem(sel_data['cv2s'][non_stim], 0,nan_policy='omit')[0])
         portion_lst.append(portion_I)
-        plt.show()
 
-print(np.shape(sel_data['ffs']))
 
-print(params)
 print('stim clusters: ',stim)
 print('non stim clusters: ',non_stim)
 print('portion_I:', np.unique(portion_lst))

@@ -15,6 +15,7 @@ from general_func import *
 from copy import deepcopy
 from sim_nest import simulate
 import numpy as np
+from global_params_funcs import find
 
 
     
@@ -54,7 +55,8 @@ def _calc_fanos(params):
         trials = pylab.arange(len(directions))
 
 
-        trial_spiketimes = analyse_nest.cut_trials(result['spiketimes'], events,tlim)
+        trial_spiketimes = analyse_nest.cut_trials(result['spiketimes'], 
+                                                   events,tlim)
         N_E =sim_params.get('N_E',default.N_E) 
         unit_spiketimes = analyse_nest.split_unit_spiketimes(
                         trial_spiketimes,N_E)
@@ -424,7 +426,7 @@ def get_direction_scores(original_params,save = True,
 
 def _calc_population_decoding(original_params):
     params  =deepcopy(original_params)
-    
+    print('_calc_population_decoding params ---> ', params)
     sim_params = params['sim_params']
     result = get_simulated_data(sim_params)
     pylab.seed(None)
@@ -454,17 +456,14 @@ def _calc_population_decoding(original_params):
             condition_trials  = pylab.sort(pylab.unique(condition_spiketimes[1]))
             for i,t in enumerate(condition_trials):
                 condition_spiketimes[1,condition_spiketimes[1]==t] = i
-            #print condition,condition_spiketimes.shape
             crap = False
             for direction in range(1,7):
                 direction_spiketimes = spiketools.cut_spiketimes(condition_spiketimes[:2,condition_spiketimes[2]==direction],tlim  =tlim)
                 direction_trials = pylab.unique(direction_spiketimes[1])
                 if len(direction_trials)<min_trials:
-                    #print 'not enough trials, ',str(unit)
                     crap = True
                 count_rate = direction_spiketimes.shape[1]/float(len(direction_trials))/float(T)*1000.
                 if count_rate<min_count_rate:
-                    #print 'rate too low: ',unit,count_rateS
                     crap = True
             if crap:
                 continue
@@ -549,7 +548,8 @@ def _calc_mean_cluster_counts(params):
 
 
 
-def get_mean_cluster_counts(params,redo=False, datafile = 'mean_cluster_count_file'):
+def get_mean_cluster_counts(
+    params,redo=False, datafile = 'model_mean_cluster_count_file'):
     return organiser.check_and_execute(params, _calc_mean_cluster_counts, datafile,redo=redo)
 
 
@@ -724,7 +724,6 @@ def _simulate_analyse(params):
     Q = params['sim_params'].get('Q',1)
     tlim = params['sim_params']['cut_window']
     unit_spiketimes = analyse_nest.split_unit_spiketimes(spiketimes,N = N_E)
-    print(unit_spiketimes[1])
     
     cluster_size = int(N_E/Q)
     cluster_inds = [list(range(i*cluster_size,(i+1)*cluster_size)) for i in range(Q)]
@@ -811,7 +810,6 @@ def _simulate_and_analyse_fig3(original_params):
     params['record_from'] = params['focus_unit']
 
     sim_results = simulate(params)
-    print(list(sim_results.keys()))
     spiketimes = sim_results['spiketimes']
     results = {}
     
