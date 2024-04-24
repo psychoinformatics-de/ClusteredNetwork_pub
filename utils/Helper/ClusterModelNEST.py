@@ -117,11 +117,23 @@ class ClusteredNetworkBase:
         E_pops = []
         I_pops = []
         for q in range(self.params['Q']):
-            E_pops.append(nest.Create(self.params['neuron_type'], int(self.params['N_E'] / self.params['Q'])))
+            E_pops.append(nest.Create(
+                self.params['neuron_type'], 
+                int(self.params['N_E'] / self.params['Q'])))
             nest.SetStatus(E_pops[-1], E_neuron_params)
-        for q in range(self.params['Q']):
-            I_pops.append(nest.Create(self.params['neuron_type'], int(self.params['N_I'] / self.params['Q'])))
-            nest.SetStatus(I_pops[-1], I_neuron_params)
+            
+        # check if the model is E or EI clustered
+        jipfactor = self.params.get('jipfactor',None)
+        if jipfactor==0.:
+            I_pops = [nest.Create(self.params['neuron_type'], 
+                                int(self.params['N_I']))]
+            nest.SetStatus(I_pops[-1], I_neuron_params)         
+        else:
+            for q in range(self.params['Q']):
+                I_pops.append(
+                    nest.Create(self.params['neuron_type'], 
+                                int(self.params['N_I'] / self.params['Q'])))
+                nest.SetStatus(I_pops[-1], I_neuron_params)
 
         if self.params['delta_I_xE'] > 0:
             for E_pop in E_pops:

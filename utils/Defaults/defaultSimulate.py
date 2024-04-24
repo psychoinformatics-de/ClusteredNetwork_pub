@@ -43,19 +43,19 @@ C_m = 1.
 tau_E = 20.
 tau_I = 10.
 t_ref = 5.
-V_th_E = 20.#15
-V_th_I = 20.#15
+V_th_E = 15.
+V_th_I = 15.
 V_r = 0.
-I_xE = 2. #2.
-I_xI = 1.#1.
+I_xE = 2.
+I_xI = 1.
 delta_I_xE = 0.
 delta_I_xI = 0.
-I_th_E = 2.13#2.13
-I_th_I = 1.24#1.24
+I_th_E = 2.13
+I_th_I = 1.24
 V_m = 'rand'
 
-tau_syn_ex = 2.8 #4. #2.  #3.
-tau_syn_in = .8 #2. #1. # 2.
+tau_syn_ex = 3.
+tau_syn_in = 2.
 
 #Extra parameters
 lambda_0 = 1000. # intensity of point process at firing threshold V_T in 1/s

@@ -77,9 +77,11 @@ def get_cv_two(gn,condition,direction,window = 400,min_vals = 20,
               'window':window,'min_vals':min_vals,
               'alignment':alignment,'tlim':tlim}
     
-    return  organiser.check_and_execute(params, _calc_cv_two, 
-                                        monkey.decode("utf-8") + '_cv_two_file_'+str(condition)+'_'+str(direction),redo  =redo)
-
+    return  organiser.check_and_execute(
+        params, _calc_cv_two, 
+        'experiment_' + monkey.decode("utf-8") +\
+            '_cvtwos_file_condition'+str(condition)+\
+                '_direction'+str(direction),redo = redo)
 def get_ff(gn,condition,direction,window = 400,tlim = [0,2000],
            alignment = 'TS',redo = False, monkey = b'joe'):
     """try to load the ff for the given gn and direction and alignment
@@ -87,8 +89,11 @@ def get_ff(gn,condition,direction,window = 400,tlim = [0,2000],
     params = {'gn':gn,'condition':condition,'direction':direction,
               'window':window,'alignment':alignment,
               'tlim':tlim}
-    return organiser.check_and_execute(params, _calc_ff, 
-                                       monkey.decode("utf-8") + '_ff_file_'+str(condition)+'_'+str(direction),redo = redo)
+    return organiser.check_and_execute(
+        params, _calc_ff, 
+        'experiment_' + monkey.decode("utf-8") +\
+            '_ff_file_condition'+str(condition)+\
+                '_direction'+str(direction),redo = redo)
 
 def _calc_ff(params):
     """calculate the ff for the given params"""
@@ -111,8 +116,9 @@ def get_rate(gn,condition,direction,kernel = 'triangular',
               'tlim':tlim}
     return organiser.check_and_execute(
         params, _calc_rate, 
-        monkey.decode("utf-8") + '_rate_file_'+str(condition)+'_'+str(direction),
-        redo  =redo)
+        'experiment_' + monkey.decode("utf-8") +\
+            '_rate_file_condition'+str(condition)+\
+                '_direction'+str(direction),redo = redo)
 
 def _calc_rate(params):
     """calculate the rate for the given params"""
@@ -139,9 +145,9 @@ def get_trial_count(gn,condition,direction, monkey = b'joe'):
     """try to load the trial count for the given gn and direction and
     if not calculate it"""
     params = {'gn':gn,'condition':condition,'direction':direction}
-    return organiser.check_and_execute(params, 
-                                       _calc_trial_count, 
-                                       monkey.decode("utf-8") + '_trial_count_file')
+    return organiser.check_and_execute(
+        params, _calc_trial_count, 
+            'experiment_'+monkey.decode("utf-8") + '_trial_count_file')
     
 
 def _calc_mean_direction_counts(params):
@@ -159,8 +165,9 @@ def get_mean_direction_counts(gn,condition,direction,
     if not calculate it"""
     params = {'gn':gn,'condition':condition,'direction':direction,
               'alignment':alignment,'tlim':tlim}
-    return organiser.check_and_execute(params, _calc_mean_direction_counts, 
-                                       monkey.decode("utf-8") + '_direction_count_file')
+    return organiser.check_and_execute(
+        params, _calc_mean_direction_counts, 
+            'experiment_'+monkey.decode("utf-8") + '_direction_count_file')
     
     
 
@@ -185,9 +192,11 @@ def get_lv(gn,condition,direction,window = 400,
               'window':window,'min_vals':min_vals,
               'alignment':alignment,'tlim':tlim}
     
-    return organiser.check_and_execute(params, _calc_lv, 
-                                       monkey.decode("utf-8") + '_lv_file_'+str(condition)+'_'+str(direction),
-                                       redo  =redo)
+    return organiser.check_and_execute(
+        params, _calc_lv, 
+        'experiment_' + monkey.decode("utf-8") +\
+            '_lv_file_condition'+str(condition)+\
+                '_direction'+str(direction),redo = redo)
 def _calc_direction_counts(params):
     """calculate the direction counts for the given params"""
     data = load_data(params['gn'],params['condition'],
@@ -213,8 +222,9 @@ def _get_direction_counts(gn,condition,window = 400,tlim = [0,2000],
     params = {'gn':gn,'condition':condition,'alignment':alignment,
               'tlim':tlim,'window':window}
 
-    return organiser.check_and_execute(params, _calc_direction_counts, 
-                                       'direction_counts_file',reps = None)
+    return organiser.check_and_execute(
+        params, _calc_direction_counts, 
+            'direction_counts_file',reps = None)
 
 
 def _calc_population_decoding(params):
@@ -224,9 +234,9 @@ def _calc_population_decoding(params):
     min_trials = pylab.ones((6),dtype = int)*100000
     for gn in params['gns']:
         
-        direction_counts,time = _get_direction_counts(gn, params['condition'],
-                                                      params['window'],params['tlim'],
-                                                      params['alignment'])
+        direction_counts,time = _get_direction_counts(
+            gn, params['condition'], params['window'],
+            params['tlim'], params['alignment'])
         
         for i,d in enumerate(direction_counts):
             min_trials[i] = min(min_trials[i],d.shape[0])

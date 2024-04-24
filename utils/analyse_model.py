@@ -7,13 +7,15 @@ import analyse_nest
 import pylab
 import spiketools
 from simulate_experiment import get_simulated_data
-import default
+#import default
+from Defaults import defaultSimulate as default
 from Helper import ClusterModelNEST
 import organiser
 from joblib import Parallel,delayed
 from general_func import *
 from copy import deepcopy
-from sim_nest import simulate
+#from sim_nest import simulate
+from Helper import ClusterModelNEST
 import numpy as np
 from global_params_funcs import find
 
@@ -676,7 +678,7 @@ def _simulate_stimulate(original_params):
     # remove all params not relevant to simulation
     sim_params = deepcopy(params)
     drop_keys = ['cut_window','ff_window','cv_ot','stim_length',
-                 'isi','isi_vari','rate_kernel','jipfactor',
+                 'isi','isi_vari','rate_kernel',
                  'jep','trials','min_count_rate','pre_ff_only','ff_only']
     for dk in drop_keys:
         try:
@@ -684,11 +686,10 @@ def _simulate_stimulate(original_params):
         except:
             pass
     
-    
-    #EI_Network = ClusterModelNEST.ClusteredNetwork(default, sim_params)
+    EI_Network = ClusterModelNEST.ClusteredNetwork(default, sim_params)
     # Creates object which creates the EI clustered network in NEST
-    #sim_result = EI_Network.get_simulation() 
-    sim_result = simulate(sim_params)
+    sim_result = EI_Network.get_simulation() 
+    #sim_result = simulate(sim_params)
     spiketimes =  sim_result['spiketimes']
 
     trial_spiketimes = analyse_nest.cut_trials(spiketimes, 
@@ -808,8 +809,11 @@ def _simulate_and_analyse_fig3(original_params):
     params['jplus'] = pylab.around(pylab.array([[jep,jip],[jip,jip]]),5)
     params['record_voltage'] = True
     params['record_from'] = params['focus_unit']
-
-    sim_results = simulate(params)
+    print('-->', params)
+    EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
+    sim_results = EI_Network.get_simulation() 
+    print('---> sim results key', sim_results.keys())
+    #sim_results = simulate(params)
     spiketimes = sim_results['spiketimes']
     results = {}
     
