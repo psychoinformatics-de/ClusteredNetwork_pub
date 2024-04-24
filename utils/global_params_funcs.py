@@ -6,6 +6,7 @@ from matplotlib.text import Text
 from matplotlib.markers import TICKDOWN
 import matplotlib
 import networkx as nx
+import ast 
 
 
 ################################################################
@@ -23,7 +24,12 @@ colors = {'FF':'k',
           'red': pylab.array([200,35,35])/255.,
           'orange':pylab.array([233,105,44])/255.}
 
-
+CB_color_cycle = ['#377eb8', '#ff7f00', '#4daf4a',
+                  '#f781bf', '#a65628', '#984ea3',
+                  '#999999', '#e41a1c', '#dede00',
+                  '#377eb8', '#ff7f00', '#4daf4a',
+                  '#f781bf', '#a65628', '#984ea3',
+                  '#999999', '#e41a1c', '#dede00']
 
 ################################################################
 ####### global functions #######################################
@@ -32,7 +38,19 @@ def find(condition):
     res, = np.nonzero(np.ravel(condition))
     return res
 
+def round_to_resolution(x, dt):
+    """rounds x to the nearest multiple of dt"""
+    rounded_value = round(x / dt) * dt
+    return rounded_value
 
+def extract_info_from_keys(params, keys):
+    """extract info from string keys"""
+    keys_dic = keys[keys.find('{')+1: keys.find('}')]
+    cleaned_string = "{" + keys_dic.replace("'", "\"") + "}"
+    data_dict = ast.literal_eval(cleaned_string)
+    for k in data_dict.keys():
+        params[k] = data_dict[k]
+    return params
 
 ################################################################
 ####### global functions for plotting ##########################

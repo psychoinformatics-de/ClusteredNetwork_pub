@@ -128,17 +128,19 @@ def check_and_execute(params,func,datafile,key_list=None,reps = None,
     # if 'sim_params' in params.keys():
     #     params = deepcopy(params['sim_params'])
     key = key_from_params(params,reps,ignore_keys)
-
     datapath = '../data/'
-    full_datafile = os.path.join(datapath,datafile)                                                      
+    full_datafile = os.path.join(datapath,datafile)                                                          
     try:
         if redo:
             raise ValueError
         #try:
         all_results = pd.read_pickle(full_datafile)
+        
         if reps is None:
             if key not in all_results.keys():
                 key = compare_key(all_results.keys(), params)
+            elif key in all_results.keys():
+                pass
             else:
                 pass
 

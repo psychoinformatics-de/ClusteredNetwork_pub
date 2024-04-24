@@ -2,32 +2,25 @@ import sys; sys.path.append('../utils')
 epsilon = sys.float_info.epsilon
 import matplotlib.pyplot as plt
 from matplotlib import pylab
-import analyse_nest
-import organiser
 import numpy as np
 import pandas as pd
-import plotting_functions as plotting
-import global_params_funcs as global_params
-from general_func import *
 import scipy.stats as ss
+
+# Local imports (not installed packages)
+from global_params_funcs import (
+    text_width_pts, extract_info_from_keys,
+    nice_figure, simpleaxis, ax_label1, CB_color_cycle)
 from analyse_model import get_analysed_spiketimes
 
-#organiser.datapath = './data'
 #datafile = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s'
-datafile = 'fig4_simulated_data'
-
-
-
-
 data_path = '../data/'
-#file_name_st_sw = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s_spiketimes'
-#file_name_analysis_sw = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s_analyses'
+datafile = 'fig4_simulated_data'
 file_name_analysis_sw = datafile + '_analyses'
-file_name_st_sw = datafile + '_spiketimes'
 trial = 1
 fig_size = (4,3)
 fontsize = 18
-# plot cv, ff, rate
+
+# load data
 try:
     Anls = pd.read_pickle(data_path + file_name_analysis_sw)
 except:
@@ -42,8 +35,6 @@ except:
     trials = 100# 20
 
     params['n_jobs'] = n_jobs
-
-
     setting = {'randseed': 0, 'Q': 50,
                'stim_amp': 0.0000001, 'mazzucato_jminus': False,
                'mazzucato_js': False}  
@@ -54,7 +45,6 @@ except:
             for cnt, portion_I in enumerate([1,50]):  
                 for k in setting.keys():
                     params[k] = setting[k]
-
                 params['Q'] = Q
                 params['stim_clusters'] = [0,1,2,3,4] 
                 params["portion_I"] = portion_I
@@ -65,159 +55,96 @@ except:
                 if portion_I == 1:
                     params['jipfactor'] = 0.75
                     params['jep'] = 11.
-
                 params['s'] = 1. # s
-                
                 result = get_analysed_spiketimes(
                     params, datafile,window=params['ff_window'],
                     calc_cv2s=True, save=save)
     Anls = pd.read_pickle(data_path + file_name_analysis_sw)
-
     
-colors = plt.cm.get_cmap('rainbow', lut = 10)
-cl_cnt = np.linspace(0, 1, len(list(Anls.keys())))
-amp_lst = []
-ff_lst = []
-CV_lst = []
-rate_lst = []
-ff_lst_std = []
-CV_lst_std = []
-rate_lst_std = []
-portion_lst = []
-ff_lst1 = []
-CV_lst1 = []
-rate_lst1 = []
-ff_lst_std1 = []
-CV_lst_std1 = []
-rate_lst_std1 = []
+data_lists = {
+    'amp': [], 'ff': [], 'CV': [], 'rate': [], 'ff_std': [], 'CV_std': [], 'rate_std': [],
+    'portion': [], 'ff1': [], 'CV1': [], 'rate1': [], 'ff_std1': [], 'CV_std1': [], 'rate_std1': [],
+}
 
-act_prob = []
-act_prob1 = []
+def add_mean_std_to_data_lists(data_lists, key, data, stim, non_stim):
+    data_lists[key].append(np.nanmean(data[stim], axis=0)[0])
+    data_lists[key + '_std'].append(ss.sem(data[stim], axis=0, nan_policy='omit')[0])
+    data_lists[key + '1'].append(np.nanmean(data[non_stim], axis=0)[0])
+    data_lists[key + '_std1'].append(ss.sem(data[non_stim], axis=0, nan_policy='omit')[0])
 
-portion_selected = [1,50]
-print('len keys', len(Anls.keys()))
-for k_cnt, keys in enumerate(Anls.keys()):
-    if keys is None:
-        continue
-    sel_data = Anls[keys]
-    params = {}
-    params = extract_info_from_keys(params, keys)
+Anls = {key: value for key, value in Anls.items() if key is not None}
+for keys, sel_data in Anls.items():
+    params = extract_info_from_keys({}, keys)
     portion_I = params['portion_I']
-    print('------->portion_I', portion_I)
-    jep = params['jep']
     stim = params['stim_clusters']  # ids of stim clusters
     non_stim = [c for c in range(params['Q']) if c not in stim]
-    if portion_I in portion_selected:
-        amp_lst.append(params['stim_amp'])
-        ff_lst.append(np.nanmean(sel_data['ffs'][stim], 0)[2])
-        ff_lst_std.append(ss.sem(sel_data['ffs'][stim], 0,nan_policy='omit')[2])
+    data_lists['amp'].append(params['stim_amp'])
+    add_mean_std_to_data_lists(data_lists, 'ff', sel_data['ffs'], stim, non_stim)
+    add_mean_std_to_data_lists(data_lists, 'CV', sel_data['cv2s'], stim, non_stim)
+    # include only units with rate > median rate of non-stimulated clusters in the stim. clusters
+    mask = sel_data['rates'][stim] > np.median(sel_data['rates'][stim])
+    data_lists['rate'].append(np.nanmean(sel_data['rates'][stim][mask]))
+    data_lists['rate_std'].append(ss.sem(sel_data['rates'][stim][mask], nan_policy='omit'))
+    data_lists['rate1'].append(np.nanmean(sel_data['rates'][non_stim], axis=0)[0])
+    data_lists['rate_std1'].append(ss.sem(sel_data['rates'][non_stim], axis=0, nan_policy='omit')[0])
+    data_lists['portion'].append(portion_I)
 
-        # include only high rate
-        print('shape rate', sel_data['rates'][0].shape)
-        mask = sel_data['rates'][stim].mean(1) > np.nanmedian(sel_data['rates'][non_stim])#.mean() #sel_data['rates'][stim].mean() 
-        mask1 = sel_data['rates'][stim] > np.median(sel_data['rates'][stim])
-        rate_lst.append(np.nanmean(sel_data['rates'][stim][mask1]))#, 0)[0])
-        rate_lst_std.append(ss.sem(sel_data['rates'][stim][mask1],nan_policy='omit'))#[0])
-        
-        #plt.plot(sel_data['rates'][stim].T)
-        #plt.gca().set_title(str(portion_I) +' | ' + str(np.mean(sel_data['rates'][non_stim])))
-        #plt.show()
-        # activation prob
-        act_prob.append(mask1.sum()/(len(mask1[0])*len(mask1)))
+# Extract unique values
+amp_uni, portion_uni = np.unique(data_lists['amp']), np.unique(data_lists['portion'])
 
-        CV_lst.append(np.nanmean(sel_data['cv2s'][stim], 0)[0])
-        CV_lst_std.append(ss.sem(sel_data['cv2s'][stim], 0,nan_policy='omit')[0])        
-        ff_lst1.append(np.nanmean(sel_data['ffs'][non_stim], 0)[2])
-        ff_lst_std1.append(ss.sem(sel_data['ffs'][non_stim], 0,nan_policy='omit')[2])
-        rate_lst1.append(np.nanmean(sel_data['rates'][non_stim], 0)[0])
-        rate_lst_std1.append(ss.sem(sel_data['rates'][non_stim], 0,nan_policy='omit')[0])
-        CV_lst1.append(np.nanmean(sel_data['cv2s'][non_stim], 0)[0])
-        CV_lst_std1.append(ss.sem(sel_data['cv2s'][non_stim], 0,nan_policy='omit')[0])
-        portion_lst.append(portion_I)
+# Create matrices based on unique values
+def populate_matrix(key, data, unique_values):
+    mat = np.zeros((len(unique_values['amp']), len(unique_values['portion'])))
+    for i, amp_val in enumerate(data['amp']):
+        amp_idx = np.where(unique_values['amp'] == amp_val)[0]
+        por_idx = np.where(unique_values['portion'] == data['portion'][i])[0]
+        mat[amp_idx, por_idx] = data_lists[key][i]
+    return mat
 
 
-print('stim clusters: ',stim)
-print('non stim clusters: ',non_stim)
-print('portion_I:', np.unique(portion_lst))
-amp_uni = np.unique(amp_lst)
-portion_uni = np.unique(portion_lst)
-min_r, max_r = int(min(rate_lst)), int(max(rate_lst))
-ff_mat = np.zeros((len(amp_uni), len(portion_uni)))
-CV_mat = np.zeros((len(amp_uni), len(portion_uni)))
-rate_mat = np.zeros((len(amp_uni), len(portion_uni)))
-ff_mat_std = np.zeros((len(amp_uni), len(portion_uni)))
-CV_mat_std = np.zeros((len(amp_uni), len(portion_uni)))
-rate_mat_std = np.zeros((len(amp_uni), len(portion_uni)))
-ff_mat1 = np.zeros((max_r, len(portion_uni)))
-ff_mat_nonstim = np.zeros((len(amp_uni), len(portion_uni)))
-CV_mat_nonstim = np.zeros((len(amp_uni), len(portion_uni)))
-rate_mat_nonstim = np.zeros((len(amp_uni), len(portion_uni)))
-ff_mat_nonstim_std = np.zeros((len(amp_uni), len(portion_uni)))
-CV_mat_nonstim_std = np.zeros((len(amp_uni), len(portion_uni)))
-rate_mat_nonstim_std = np.zeros((len(amp_uni), len(portion_uni)))
+# Populate matrices with data
+ff_mat = populate_matrix('ff', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+CV_mat = populate_matrix('CV', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+rate_mat = populate_matrix('rate', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+ff_mat_std = populate_matrix('ff_std', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+CV_mat_std = populate_matrix('CV_std', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+rate_mat_std = populate_matrix('rate_std', data_lists, {'amp': amp_uni, 'portion': portion_uni})
 
-act_prob_MAT = np.zeros((len(amp_uni), len(portion_uni)))
+# Create non-stim matrices
+ff_mat_nonstim = populate_matrix('ff1', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+CV_mat_nonstim = populate_matrix('CV1', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+rate_mat_nonstim = populate_matrix('rate1', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+ff_mat_nonstim_std = populate_matrix('ff_std1', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+CV_mat_nonstim_std = populate_matrix('CV_std1', data_lists, {'amp': amp_uni, 'portion': portion_uni})
+rate_mat_nonstim_std = populate_matrix('rate_std1', data_lists, {'amp': amp_uni, 'portion': portion_uni})
 
-for i_cnt, i in enumerate(amp_lst):
-    amp_idx = np.where(amp_uni == i)[0]
-    por_idx = np.where(portion_uni == portion_lst[i_cnt])[0]
-    #rate_idx = int(rate_lst[i_cnt]) - 1
-    ff_mat[amp_idx, por_idx] = ff_lst[i_cnt]
-    CV_mat[amp_idx, por_idx] = CV_lst[i_cnt]    
-    rate_mat[amp_idx, por_idx] = rate_lst[i_cnt]
-    ff_mat_std[amp_idx, por_idx] = ff_lst_std[i_cnt]
-    CV_mat_std[amp_idx, por_idx] = CV_lst_std[i_cnt]    
-    rate_mat_std[amp_idx, por_idx] = rate_lst_std[i_cnt]
-
-    #ff_mat1[rate_idx, por_idx] = ff_lst[i_cnt]
-    #ff_mat1[amp_idx, por_idx] = ff_lst1[i_cnt]
-    ff_mat_nonstim[amp_idx, por_idx] = ff_lst1[i_cnt]
-    CV_mat_nonstim[amp_idx, por_idx] = CV_lst1[i_cnt]    
-    rate_mat_nonstim[amp_idx, por_idx] = rate_lst1[i_cnt]
-    ff_mat_nonstim_std[amp_idx, por_idx] = ff_lst_std1[i_cnt]
-    CV_mat_nonstim_std[amp_idx, por_idx] = CV_lst_std1[i_cnt]    
-    rate_mat_nonstim_std[amp_idx, por_idx] = rate_lst_std1[i_cnt]
-
-    act_prob_MAT[amp_idx, por_idx] = act_prob[i_cnt]
-cmap = plt.cm.get_cmap('RdGy', lut =8)
-XTICKS = np.arange(len(portion_uni))
-
-CB_color_cycle = ['#377eb8', '#ff7f00', '#4daf4a',
-                  '#f781bf', '#a65628', '#984ea3',
-                  '#999999', '#e41a1c', '#dede00',
-                  '#377eb8', '#ff7f00', '#4daf4a',
-                  '#f781bf', '#a65628', '#984ea3',
-                  '#999999', '#e41a1c', '#dede00']
-
-
-
-fig = plotting.nice_figure(ratio = 0.8,latex_page=global_params.text_width_pts)
+# Plot
+fig = nice_figure(ratio = 0.8,latex_page=text_width_pts)
 fig.subplots_adjust(bottom = 0.1,left = 0.1,top=0.85, wspace = 0.3,hspace=0.4)
 
 nrow,ncol = 2,2
-ax1 = plotting.simpleaxis(plt.subplot2grid((nrow,ncol), (0,0), colspan=1))
+ax1 = simpleaxis(plt.subplot2grid((nrow,ncol), (0,0), colspan=1))
 x_label_val=-0.15
-plotting.ax_label1(ax1, 'a',x=x_label_val)
+ax_label1(ax1, 'a',x=x_label_val)
 plt.axis('off')
 
-ax1 = plotting.simpleaxis(plt.subplot2grid((nrow,ncol), (1,0), rowspan=1))
+ax1 = simpleaxis(plt.subplot2grid((nrow,ncol), (1,0), rowspan=1))
 FF_ylim = (-2,8)
-plotting.ax_label1(ax1, 'c',x=x_label_val)
+ax_label1(ax1, 'c',x=x_label_val)
 
-colors = plt.cm.get_cmap('rainbow')
-cl_cnt = np.linspace(0, 1, 2)
 lw = 1.
 ls = '-'
-print('ffmat', ff_mat)
 FF = ff_mat-ff_mat[0]
 FF_std = ff_mat_std-ff_mat_std[0]
 FF_nonstim = ff_mat_nonstim-ff_mat_nonstim[0]
 FF_nonstim_std = ff_mat_nonstim_std-ff_mat_nonstim_std[0]
 fc ='0.9'
 plt.plot(amp_uni, FF[:,-1], lw =lw, label = 'E stim. clusters', c = CB_color_cycle[7])
-plt.fill_between(amp_uni, FF[:,-1]-FF_std[:,-1], FF[:,-1]+FF_std[:,-1], facecolor='lightcoral',lw=0, alpha=0.5)
+plt.fill_between(amp_uni, FF[:,-1]-FF_std[:,-1], FF[:,-1]+FF_std[:,-1], 
+                 facecolor='lightcoral',lw=0, alpha=0.5)
 plt.plot(amp_uni, FF_nonstim[:,-1], lw =lw, ls=ls, label = 'E non-stim. clusters', c = CB_color_cycle[1])
-plt.fill_between(amp_uni, FF_nonstim[:,-1]-FF_nonstim_std[:,-1], FF_nonstim[:,-1]+FF_nonstim_std[:,-1], facecolor='navajowhite', alpha=0.5,lw=0)
+plt.fill_between(amp_uni, FF_nonstim[:,-1]-FF_nonstim_std[:,-1], 
+                 FF_nonstim[:,-1]+FF_nonstim_std[:,-1], facecolor='navajowhite', alpha=0.5,lw=0)
 
 
 plt.gca().set_title('E clustered network')
@@ -228,14 +155,10 @@ plt.axhline(0., ls ='--', lw=0.8, color='gray')
 plt.ylim(-2,20)
 plt.yticks([-2,0,5,10,15,20])
 
-ax1 = plotting.simpleaxis(plt.subplot2grid((nrow,ncol), (1,1), rowspan=1))
-plotting.ax_label1(ax1, 'd',x=x_label_val)
-
+ax1 = simpleaxis(plt.subplot2grid((nrow,ncol), (1,1), rowspan=1))
+ax_label1(ax1, 'd',x=x_label_val)
 plt.gca().set_title('E/I clustered network')
-
-
 plt.plot(amp_uni, FF[:,0], lw = lw, label = 'E/I clustered network', c = CB_color_cycle[0])
-print(ff_mat_std[0])
 plt.fill_between(amp_uni, FF[:,0]-FF_std[:,0], FF[:,0]+FF_std[:,0],
                  facecolor='lightskyblue', alpha=0.5,lw=0)
 plt.plot(amp_uni, FF_nonstim[:,0], lw = lw, ls=ls,label = 'E/I non-stim. clusters', c = CB_color_cycle[5])
@@ -248,8 +171,8 @@ plt.xlabel('stim. Amplitude [pA]')
 plt.axvline(0.4, ls ='--', lw=0.8, color='gray')
 plt.axhline(0., ls ='--', lw=0.8, color='gray')
 plt.ylim(-2,1)
-ax1 = plotting.simpleaxis(plt.subplot2grid((nrow,ncol), (0,1), rowspan=1))
-plotting.ax_label1(ax1, 'b',x=x_label_val)
+ax1 = simpleaxis(plt.subplot2grid((nrow,ncol), (0,1), rowspan=1))
+ax_label1(ax1, 'b',x=x_label_val)
 
 RATE = rate_mat-rate_mat[0]
 RATE_nonstim = rate_mat_nonstim-rate_mat_nonstim[0]
@@ -259,30 +182,16 @@ plt.plot(amp_uni, RATE[:,0], lw = lw, label = 'E/I stim. clusters', c = CB_color
 plt.plot(amp_uni, RATE_nonstim[:,0], lw = lw, ls=ls, label = 'E/I non-stim. clusters', c = CB_color_cycle[5])
 plt.plot(amp_uni, RATE[:,-1], lw =lw, label = 'E stim. clusters', c = CB_color_cycle[7])
 plt.plot(amp_uni, RATE_nonstim[:,-1], lw =lw, ls=ls, label = 'E non-stim. clusters', c = CB_color_cycle[1])
-
-#plt.fill_between(amp_uni, RATE[:,0]-RATE_std[:,0], RATE[:,0]+RATE_std[:,0], facecolor='lightskyblue',lw=0, alpha=0.5)
-#plt.fill_between(amp_uni, RATE[:,-1]-RATE_std[:,-1], RATE[:,-1]+RATE_std[:,-1], facecolor='lightcoral',lw=0, alpha=0.5)
-
-#plt.fill_between(amp_uni, RATE_nonstim[:,0]-RATE_nonstim_std[:,0], RATE_nonstim[:,0]+RATE_nonstim_std[:,0], facecolor='lightskyblue',lw=0, alpha=0.5)
-#plt.fill_between(amp_uni, RATE_nonstim[:,-1]-RATE_nonstim_std[:,-1], RATE_nonstim[:,-1]+RATE_nonstim_std[:,-1], facecolor='lightcoral',lw=0, alpha=0.5)
-
-
 plt.axhline(0,ls='--',lw=0.8,color='gray')
 plt.gca().set_ylabel(r'$\Delta$rate [1/s]')
 plt.xlabel('stim. Amplitude [pA]')
 plt.axvline(0.4, ls='--', lw=0.8, color='gray')
 plt.legend(loc=9,ncol=2,bbox_to_anchor=(.5, 1.48))
 
-
-# # activation prob
-# ax1 = plotting.simpleaxis(plt.subplot2grid((nrow,ncol), (0,2), colspan=1))
-# x_label_val=-0.15
-# plotting.ax_label1(ax1, 'e',x=x_label_val)
-# plt.plot(amp_uni, act_prob_MAT[:,0], lw = lw, label = 'E/I stim. clusters', c = CB_color_cycle[0])
-# plt.plot(amp_uni, act_prob_MAT[:,-1], lw =lw, label = 'E stim. clusters', c = CB_color_cycle[7])
-
 plt.savefig('../data/fig_StimAmp0.eps')
 plt.savefig('../data/fig_StimAmp0.jpg')
+
+# combine figures
 import pyx
 c = pyx.canvas.canvas()
 c.insert(pyx.epsfile.epsfile(0, 0.0, "../data/fig_StimAmp0.eps"))

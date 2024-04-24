@@ -55,15 +55,8 @@ def load_data(datapath, datafile,params, old_key_code=False,
 def extract_info_from_keys(params, keys):
     """extract info from string keys"""
     keys_dic = keys[keys.find('{')+1: keys.find('}')]
-    
     cleaned_string = "{" + keys_dic.replace("'", "\"") + "}"
     data_dict = ast.literal_eval(cleaned_string)
     for k in data_dict.keys():
         params[k] = data_dict[k]
-    # for i, k in enumerate(keys_dic.split(",'")):
-    #     if i ==0:
-    #         params.update(ast.literal_eval("{"+k+'}'))
-    #     else:
-    #         params.update(ast.literal_eval("{'"+k+'}'))
-
     return params

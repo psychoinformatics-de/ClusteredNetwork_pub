@@ -1,4 +1,4 @@
-import sys;sys.path.append('../utils')#;sys.path.append('../data')
+import sys;sys.path.append('../utils')
 from matplotlib import pylab
 import pandas as pd
 import plotting_functions as plotting
@@ -29,7 +29,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
     for i,gn in enumerate(gns):
         for j,condition in enumerate([1,2,3]):
             for k,direction in enumerate([1,2,3,4,5,6]):
-                count_rate_block[i,j,k] =  analyses.get_mean_direction_counts(gn,condition,direction,tlim  =tlim,alignment = alignment)
+                count_rate_block[i,j,k] =  analyses.get_mean_direction_counts(
+                    gn,condition,direction,tlim  =tlim,alignment = alignment)
                 trial_count_block[i,j,k]  =analyses.get_trial_count(gn,condition,direction)
     
     enough_counts = pylab.prod(count_rate_block>=min_count_rate,axis=1)
@@ -68,13 +69,12 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
         for (condition,color) in zip([1,2,3],condition_colors):
             pylab.plot(trate, pylab.nanmean(rates[rate_conditions==condition],axis=0),
             color = color,label = 'condition '+str(condition))
-        #pylab.legend(frameon = False,fontsize = 6,loc = 'upper center')
     
     if ff_ax is not None:
         pylab.sca(ff_ax)
         try:
             ffs,tff,ff_conditions,ff_gns,ff_directions = pd.read_pickle(
-                path+'ff_file_'+alignment+'_'+monkey)#pickle.load(open('ff_file_'+alignment))
+                path+'ff_file_'+alignment+'_'+monkey)
         except:
         
             ff_gns = []
@@ -356,9 +356,6 @@ def plot_RTs(params, redo=False,save=False):
 
 ###########
 ##########
-
-
-  
     
 if __name__ == '__main__':
     labelsize = 8

@@ -28,8 +28,6 @@ min_count_rate = 7.5
 align_ts = False
 ########################################################################
 
-
-
 x_label_val=-0.5                            
 fig = plotting.nice_figure(ratio = 1.)
 nrows = 2
@@ -79,10 +77,9 @@ ax1 = plotting.ax_label1(plotting.simpleaxis(
     pylab.subplot(subplotspec)),'a',x=x_label_val/3)
 pylab.suptitle('Example trial of motor cortical attractor model')
 
-plot_trial = find(correct*(conditions==3))[6]#[8]#[6]
+plot_trial = find(correct*(conditions==3))[7]#[6]#[8]
 pylab.xticks([-500,0,1000])
 pylab.gca().set_xticklabels(['0', '500','1500'])
-
 
 data  = get_simulated_data(params['sim_params'],
                 datafile = 'fig6_simulated_data')
@@ -107,21 +104,16 @@ pylab.axvline(1000,linestyle = '--',color ='k',lw = 0.5)
 direction_clusters = pylab.array(direction_clusters).flatten()
 print(direction_clusters)
 for cluster in range(6):
-
     pylab.text(2000,(cluster+0.5)*cluster_size,str(cluster+1),
                 va = 'center',ha = 'left',weight='bold')
     direction = find(direction_clusters == cluster)[0]
-    
-    
     pylab.plot(
         time,
         cluster*cluster_size +integrals[direction,plot_trial]*cluster_size*0.8,
         color = 'k')
-    print(integrals[direction,plot_trial])
     pylab.plot([1000,2000],
                [cluster*cluster_size +threshold*cluster_size*0.8]*2,
                '--k',lw =0.5)
-    
     if (direction+1) == directions[plot_trial]:
         try:
             crossing = find(
@@ -153,7 +145,8 @@ for condition in [1,2,3]:
     bins = pylab.linspace(0,500,15)
     print('cond len_rt',condition,len(rt))
     print('mediann', pylab.median(rt))
-    pylab.hist(rt,bins,histtype = 'step',facecolor = cond_colors[condition-1],
+    pylab.hist(rt,bins,histtype = 'step',
+               facecolor = cond_colors[condition-1],
                 density = True,edgecolor  = cond_colors[condition-1],
                 label = 'condtion '+str(condition))
     pylab.xlim(1400,2000)

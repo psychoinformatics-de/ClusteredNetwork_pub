@@ -1,5 +1,4 @@
 import sys;sys.path.append('../utils/')
-#import sim_nest
 import pylab
 import plotting_functions as plotting
 import spiketools
@@ -7,7 +6,7 @@ import organiser
 import default
 from copy import deepcopy
 from bisect import bisect_right
-import global_params
+import global_params_funcs as global_params
 from matplotlib.ticker import MaxNLocator
 from general_func import *
 from Helper import ClusterModelNEST
@@ -17,8 +16,7 @@ import pandas as pd
 
 
 datapath = '../data/'
-datafile = 'fig02_cluster_dynamics_new'
-datafile1 = 'ff_cv2_spontaneous_new'
+datafile = 'ff_cv2_spontaneous_new'
 
 def simulate_spontaneous(params):
     pylab.seed()
@@ -87,7 +85,7 @@ def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),
     
     
     try:
-        ffs = pd.read_pickle(datapath + "ffs_supplyfig1")
+        ffs = pd.read_pickle(datapath + "supplyfig1_simulated_data")
     except:
         ffs = pylab.zeros((len(jep_range),len(Q_range),reps))
         counts = pylab.zeros((len(jep_range),len(Q_range),reps))
@@ -108,8 +106,8 @@ def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),
                 params['N_E'] = default.N_E - default.N_E%params['Q']
                 params['N_I'] = default.N_I - default.N_I%params['Q']
                 results = organiser.check_and_execute(
-                    params, simulate_spontaneous, datafile1,
-                    reps = reps,ignore_keys=['n_jobs'],redo = redo)
+                    params, simulate_spontaneous, datafile,
+                    reps = reps,ignore_keys=['n_jobs'],save=False, redo = redo)
                 ff = [r[0] for r in results]
                 count=[r[2] for r in results]
                 cv=[r[1] for r in results]
@@ -121,7 +119,7 @@ def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),
                 
                 if jep_>Q:
                     ffs[i,j,:] = pylab.nan
-        pickle.dump(ffs,open(datapath + "ffs_supplyfig1",'wb'))
+        pickle.dump(ffs,open(datapath + "supplyfig1_simulated_data",'wb'))
 
 
     if plot:
@@ -131,7 +129,8 @@ def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),
         x = pylab.linspace(Q_range.min(), jep_range.max(),1000)
         y1 = pylab.ones_like(x)*Q_range.min()
         y2 = x
-        pylab.fill_between(x,y1, y2,facecolor = 'w',hatch = '\\\\\\',edgecolor = global_params.colors['orange'])
+        pylab.fill_between(x,y1, y2,facecolor = 'w',
+                           hatch = '\\\\\\',edgecolor = global_params.colors['orange'])
         pylab.xlabel('$J_{E+}$',size = 14)
         pylab.ylabel('$Q$', size = 14)
         pylab.axis('tight')
@@ -164,14 +163,13 @@ if __name__ == '__main__':
             Q_range = pylab.arange(q_step,60+0.5*q_step,q_step)
             
             if plot:
-                ax = plotting.simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col)),labelsize = 10)          
-                #plotting.ax_label1(ax, labels[i], x=x_label_val)
+                ax = plotting.simpleaxis(
+                    pylab.subplot2grid((num_row,num_col),(row, col)),labelsize = 10) 
             plot_ff_jep_vs_Q_Litwin(params,jep_range,Q_range,jipfactor,plot=plot, redo=False)
             if plot:
                 cbar = pylab.colorbar()
                 cbar.set_label('FF', rotation=90,size = 14)
-    pylab.savefig('suppl_fig1.pdf')
-    #pylab.savefig('suppl_fig1.png', dpi=300)    
+    pylab.savefig('suppl_fig1.pdf')  
     pylab.show()
 
 

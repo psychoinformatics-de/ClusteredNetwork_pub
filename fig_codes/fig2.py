@@ -67,8 +67,6 @@ def simulate_spontaneous(params):
         else:
             ffs.append(pylab.nan)
             cv2s.append(pylab.nan)
-    print('ff',pylab.nanmean(ffs))
-    print('cv2',pylab.nanmean(cv2s))
     return pylab.nanmean(ffs),pylab.nanmean(cv2s),pylab.nanmean(counts)
 
 
@@ -76,7 +74,6 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
                       spike_js = [1.,2.,3.,4.],spike_simtime = 1000.,markersize = 0.5,
                       spikealpha = 0.5,plot_units = [0,4000],spike_randseed = 0,
                       plot = True,redo_spiketrains = False):
-    #print(params)
     ffs = []
     cv2s = []
     counts = []
@@ -141,8 +138,6 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spike_params['jplus'] = pylab.array([[jep,jip],[jip,jip]])
             spike_params['randseed'] = spike_randseed
             spike_params['simtime'] = spike_simtime
-            print(spike_params)
-            #spiketimes = load_data(datapath, datafile + '_spikes',spike_params,old_key_code=True, reps=None)['spiketimes']
             spiketimes = organiser.check_and_execute(
                 spike_params, sim_nest.simulate, datafile +'_spikes'
                 ,redo = redo_spiketrains)['spiketimes']
@@ -203,7 +198,6 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
         pickle.dump(ffs,open(datapath + "ffs_fig2_"+model,'wb'))
 
     if plot:
-        print(pylab.nanmean(ffs,axis=2).T)
         pylab.contourf(jep_range,Q_range,pylab.nanmean(ffs,axis=2).T,
                        levels = [0.5, 1.,1.5,2.],extend = 'both', 
                        cmap = 'Greys')#, algorithm = 'threaded',

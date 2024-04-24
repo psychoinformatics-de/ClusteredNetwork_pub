@@ -4,6 +4,7 @@ import sys;
 #from sim_nest import simulate as simulate_network
 from Helper import ClusterModelNEST
 from Defaults import defaultSimulate as default
+from global_params_funcs import round_to_resolution
 #import default
 import analyse_nest
 from copy import deepcopy
@@ -12,7 +13,7 @@ import matplotlib.pyplot as plt
 import pylab
 from experiment import stimulus_protocol
 import organiser
-from general_func import *
+#from general_func import *
 #organiser.datapath = os.path.join(abspath,'chapters/monkey_model/data')
 organiser.datapath = os.path.join(abspath,'data')
 
@@ -106,8 +107,8 @@ def simulate(original_params):
     params['multi_stim_times'] = multi_stim_times
     params['multi_stim_clusters'] = direction_clusters
             
-    
-    params['simtime'] = t+ 2*isi
+    # round to the resolution of the recording interval
+    params['simtime'] = round_to_resolution(t+ 2*isi, default.recording_interval)
 
     
 
