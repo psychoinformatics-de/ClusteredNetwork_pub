@@ -323,8 +323,7 @@ class ClusteredNetworkBase:
                 amplitude_values.append(0.)
             self.Currentsources = [nest.Create('step_current_generator')]
 
-            print(len(self.Populations[0][0]))
-            print(self.params['stim_clusters'])
+
             for stim_cluster in self.params['stim_clusters']:
                 nest.Connect(self.Currentsources[0], 
                                 self.Populations[0][stim_cluster])
@@ -375,7 +374,6 @@ class ClusteredNetworkBase:
                 record_units = []
                 for E_pop in self.Populations[0]:
                     record_units += list(E_pop[:self.params.get("record_from", 'all')])
-                    print((E_pop[:self.params.get("record_from", 'all')]))
                 for I_pop in self.Populations[1]:
                     record_units += list(I_pop[:self.params.get("record_from", 'all')])
 
@@ -391,7 +389,6 @@ class ClusteredNetworkBase:
                 record_units = []
                 for E_pop in self.Populations[0]:
                     record_units += list(E_pop[:self.params.get("record_from", 'all')])
-                    print((E_pop[:self.params.get("record_from", 'all')]))
                 for I_pop in self.Populations[1]:
                     record_units += list(I_pop[:self.params.get("record_from", 'all')])
 
@@ -409,7 +406,7 @@ class ClusteredNetworkBase:
             times = events['times']
             senders = events['senders']
             usenders = np.unique(senders)
-            sender_ind_dict = {s: self.record_units.index(s) for s in usenders}
+            sender_ind_dict = {s: record_units.index(s) for s in usenders}
             sender_inds = [sender_ind_dict[s] for s in senders]
 
             utimes = np.unique(times)
@@ -420,7 +417,7 @@ class ClusteredNetworkBase:
                 n_records = self.params.get('N_E', 0) + self.params.get('N_I', 0)
             else:
                 n_records = self.params.get("record_from", 'all') * (len(self.Populations[0]) + len(self.Populations[1]))
-            print(('n_records', n_records))
+
 
             recordables = self.params.get(
                 'recordables', [str(r) for r in nest.GetStatus(
@@ -637,12 +634,15 @@ class ClusteredNetwork(ClusteredNetworkBase):
                     pickle.dump(spiketimes, outfile)
 
             nest.Cleanup()
-            return {'e_rate': e_rate, 'i_rate': i_rate, 'Timing': self.get_timing(), 'params': self.get_parameter(),
+            return {'e_rate': e_rate, 'i_rate': i_rate, 
+                    'Timing': self.get_timing(), 
+                    'params': self.get_parameter(),
                     'spiketimes': spiketimes}
 
         except GeneralHelper.TimeoutException:
             print("Aborted - Timeout")
-            return {'e_rate': -1, 'i_rate': -1, 'Timing': self.get_timing(), 'params': self.get_parameter(),
+            return {'e_rate': -1, 'i_rate': -1, 'Timing': self.get_timing(), 
+                    'params': self.get_parameter(),
                     'spiketimes': [[], []]}
 
     def connect_from_file(self, Filename):

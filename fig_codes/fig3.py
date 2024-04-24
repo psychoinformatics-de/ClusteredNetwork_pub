@@ -135,7 +135,7 @@ settings = [{'warmup':0, 'jipfactor':0.,'jep':3.7,'randseed':3,
              'focus_cluster':8,'focus_interval':[200,600],'focus_unit':6}, 
             {'warmup':0, 'jipfactor':0.75,'jep':8.,'randseed':5,
              'focus_cluster':15,'focus_interval':[700,1000],'focus_unit':12}]  
-file_name = 'figure3_model'
+file_name = 'fig3_simulated_data'
 ########################################################################
 
 fig = nice_figure(ratio = 1.1)

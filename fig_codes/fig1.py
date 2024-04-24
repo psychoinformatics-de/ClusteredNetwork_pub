@@ -155,6 +155,7 @@ settings = [{'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 'stim_clusters':sti
             {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,'stim_clusters':stim_range,'stim_amp':0.2,'portion_I':1},
             {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,'stim_clusters':stim_range,'stim_amp':0.25,'portion_I':1},
             {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,'stim_clusters':stim_range,'stim_amp':0.3,'portion_I':1}]
+
 params['fixed_indegree'] = False
 params['trials'] = 20
 params['n_jobs'] = 20

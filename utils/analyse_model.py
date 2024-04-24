@@ -428,7 +428,6 @@ def get_direction_scores(original_params,save = True,
 
 def _calc_population_decoding(original_params):
     params  =deepcopy(original_params)
-    print('_calc_population_decoding params ---> ', params)
     sim_params = params['sim_params']
     result = get_simulated_data(sim_params)
     pylab.seed(None)
@@ -502,7 +501,7 @@ def _calc_population_decoding(original_params):
 
 
 def get_population_decoding(params,save = True,redo = False,
-                            datafile = 'population_decoding_file'):
+                            datafile = 'model_population_decoding_file'):
     # return organiser.check_and_execute(params['sim_params'], _calc_population_decoding, 
     #                                 datafile,redo  =redo,save = save)
     return organiser.check_and_execute(params, _calc_population_decoding, 
@@ -727,7 +726,8 @@ def _simulate_analyse(params):
     unit_spiketimes = analyse_nest.split_unit_spiketimes(spiketimes,N = N_E)
     
     cluster_size = int(N_E/Q)
-    cluster_inds = [list(range(i*cluster_size,(i+1)*cluster_size)) for i in range(Q)]
+    cluster_inds = [list(range(i*cluster_size,
+                               (i+1)*cluster_size)) for i in range(Q)]
 
 
     ff_result = Parallel(n_jobs,verbose = 2)(
@@ -806,13 +806,14 @@ def _simulate_and_analyse_fig3(original_params):
     jep = params['jep']
     jipfactor = params['jipfactor']
     jip = 1. +(jep-1)*jipfactor
+    params.pop('jipfactor')
     params['jplus'] = pylab.around(pylab.array([[jep,jip],[jip,jip]]),5)
     params['record_voltage'] = True
     params['record_from'] = params['focus_unit']
-    print('-->', params)
     EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
     sim_results = EI_Network.get_simulation() 
-    print('---> sim results key', sim_results.keys())
+    voltage_results = EI_Network.get_voltage_recordings() 
+    sim_results.update(voltage_results)
     #sim_results = simulate(params)
     spiketimes = sim_results['spiketimes']
     results = {}
@@ -822,7 +823,10 @@ def _simulate_and_analyse_fig3(original_params):
     cluster_size = params['N_E']/params['Q']
     
     
-    cluster_rates,t_rate = analyse_nest.compute_cluster_rates(spiketimes, params['N_E'], params['Q'],kernel_sigma=params['rate_kernel'],tlim = [0,params['simtime']+kernel_width])
+    cluster_rates,t_rate = analyse_nest.compute_cluster_rates(
+        spiketimes, params['N_E'], params['Q'],
+        kernel_sigma=params['rate_kernel'],
+        tlim = [0,params['simtime']+kernel_width])
     results['cluster_rates'] = cluster_rates
     results['t_rate'] = t_rate-kernel_width/2
     
@@ -836,11 +840,11 @@ def _simulate_and_analyse_fig3(original_params):
 
     focus_unit = cluster_size * params['focus_cluster']+params['focus_unit']
     focus_index = find(sim_results['senders'] == focus_unit)
-    
+    sim_results['params'].keys()
     results['current_times'] = sim_results['times']-kernel_width/2
     results['ex_current'] = sim_results['I_syn_ex'][focus_index]
     results['inh_current'] = sim_results['I_syn_in'][focus_index]
-    results['Ixe'] = sim_results['I_xE']
+    results['Ixe'] = sim_results['params']['I_xE']
     results['V_m'] = sim_results['V_m'][focus_index]
     results['e_rate'] = sim_results['e_rate']
     results['i_rate'] = sim_results['i_rate']

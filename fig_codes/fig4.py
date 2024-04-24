@@ -12,7 +12,7 @@ from general_func import *
 import scipy.stats as ss
 from analyse_model import get_analysed_spiketimes
 
-organiser.datapath = './data'
+#organiser.datapath = './data'
 #datafile = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s'
 datafile = 'fig4_simulated_data'
 
@@ -103,6 +103,7 @@ for k_cnt, keys in enumerate(Anls.keys()):
     params = {}
     params = extract_info_from_keys(params, keys)
     portion_I = params['portion_I']
+    print('------->portion_I', portion_I)
     jep = params['jep']
     stim = params['stim_clusters']  # ids of stim clusters
     non_stim = [c for c in range(params['Q']) if c not in stim]

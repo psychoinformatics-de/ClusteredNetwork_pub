@@ -1,10 +1,10 @@
 import os
 abspath = os.path.split(os.path.abspath(__file__))[0]
 import sys; 
-from sim_nest import simulate as simulate_network
-#from Helper import ClusterModelNEST
-#from Defaults import defaultSimulate as default
-import default
+#from sim_nest import simulate as simulate_network
+from Helper import ClusterModelNEST
+from Defaults import defaultSimulate as default
+#import default
 import analyse_nest
 from copy import deepcopy
 import numpy as np
@@ -118,11 +118,11 @@ def simulate(original_params):
     jipfactor = params['jipfactor']
     jip = 1. +(jep-1)*jipfactor
     params['jplus'] = np.around(np.array([[jep,jip],[jip,jip]]),5)
-    #EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
+    EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
     # Creates object which creates the EI clustered network in NEST
-    #result = EI_Network.get_simulation() 
+    result = EI_Network.get_simulation() 
 
-    result = simulate_network(params)
+    #result = simulate_network(params)
     
     result['trial_starts'] = trial_starts
     result['trial_types'] = trial_types

@@ -141,7 +141,8 @@ def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),
 if __name__ == '__main__':
     
     n_jobs = 22
-    settings = [{'jipfactor':0.75,'fixed_indegree':False, 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
+    settings = [{'jipfactor':0.75,'fixed_indegree':False, 
+                 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
                     'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
     
     plot = True

@@ -79,7 +79,7 @@ ax1 = plotting.ax_label1(plotting.simpleaxis(
     pylab.subplot(subplotspec)),'a',x=x_label_val/3)
 pylab.suptitle('Example trial of motor cortical attractor model')
 
-plot_trial = find(correct*(conditions==3))[8]#[6]
+plot_trial = find(correct*(conditions==3))[6]#[8]#[6]
 pylab.xticks([-500,0,1000])
 pylab.gca().set_xticklabels(['0', '500','1500'])
 
