@@ -1,25 +1,30 @@
-import sys;sys.path.append('../utils/')
+import sys;sys.path.append('../src/')
 import pylab
-
 import spiketools
-import organiser
-import default
-import sim_nest
+import defaultSimulate as default
 from copy import deepcopy
 from bisect import bisect_right
-import global_params_funcs as global_params
 from matplotlib.ticker import MaxNLocator
 import pandas as pd
 import pickle
+from joblib import Parallel, delayed
+import numpy as np
 # Local modules (not installed packages)
-from general_func import *
-import plotting_functions as plotting
+import ClusterModelNEST
+from GeneralHelper import ( Organiser,
+    colors, text_width_pts, simpleaxis, 
+    ax_label1, nice_figure, draw_box
+)
+
 
 datapath = '../data/'
-#datafile = 'fig02_cluster_dynamics'
-datafile = 'fig2_simulated_data'
-#datafile1 = 'ff_cv2_spontaneous'
-#datafile1 = 'fig2_ff_cv2_spontaneous'
+datafile = 'fig2_simulated_data1'
+
+def get_spikes_fig2(params):
+    EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
+    # Creates object which creates the EI clustered network in NEST
+    result = EI_Network.get_simulation() 
+    return result
 
 def simulate_spontaneous(params):
     pylab.seed()
@@ -28,19 +33,22 @@ def simulate_spontaneous(params):
     sim_params = deepcopy(params)
     sim_params['simtime'] = trials*trial_length
     ff_window = params['ff_window']
-    long_spiketimes = sim_nest.simulate(sim_params)['spiketimes']
+    EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
+    # Creates object which creates the EI clustered network in NEST
+    results = EI_Network.get_simulation()
+    long_spiketimes = results['spiketimes']
     order = pylab.argsort(long_spiketimes[0])
     long_spiketimes = long_spiketimes[:,order]
     # cut into trial pieces
     spiketimes = pylab.zeros((3,0))
-    trial_start = 0
     
     for trial in range(trials):
-
         trial_end = bisect_right(long_spiketimes[0], trial_length)
         trial_spikes = long_spiketimes[:,:trial_end].copy()
         long_spiketimes = long_spiketimes[:,trial_end:]
-        trial_spikes = pylab.concatenate([trial_spikes[[0],:],pylab.ones((1,trial_spikes.shape[1]))*trial,trial_spikes[[1],:]],axis=0)
+        trial_spikes = pylab.concatenate(
+            [trial_spikes[[0],:],pylab.ones((1,trial_spikes.shape[1]))*trial,
+             trial_spikes[[1],:]],axis=0)
         spiketimes = pylab.append(spiketimes, trial_spikes,axis=1)
         long_spiketimes[0]-= trial_length
 
@@ -78,16 +86,14 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
     cv2s = []
     counts = []
     for jep in jep_range:
-        print('###############################################################################')
-        print(jep,'-----------------------------------------------------------------------')
-        print('###############################################################################')
+        print('###############################################################')
+        print(jep,'-----------------------------------------------------------')
+        print('###############################################################')
         if jipfactor != 0. or jep<10:
             jip = 1. +(jep-1)*jipfactor
             params['jplus'] = pylab.around(pylab.array([[jep,jip],[jip,jip]]),5)
-            #results = load_data(datapath, datafile,params,old_key_code=True,reps=reps)
-            results = organiser.check_and_execute(
-                params, simulate_spontaneous, 
-                datafile,reps = reps)
+            ORG = Organiser(params, datafile, reps=reps)
+            results = ORG.check_and_execute(simulate_spontaneous)
             ff = [r[0] for r in results]
             cv2 = [r[1] for r in results]
             count = [r[2] for r in results]
@@ -128,7 +134,8 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             box_target_ind = pylab.argmin(pylab.absolute(j-jep_range))
             box_target = [jep_range[box_target_ind],ffs[box_target_ind]]
             box_left = box_lim[0]+i*(box_width+box_sep)
-            plotting.draw_box([box_left,box_bottom,box_width,box_height], box_target,[0.6,0.6,0.6,0.6])
+            draw_box([box_left,box_bottom,box_width,box_height], 
+                              box_target,[0.6,0.6,0.6,0.6])
 
             jep = round(j,4)
             
@@ -138,8 +145,9 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spike_params['jplus'] = pylab.array([[jep,jip],[jip,jip]])
             spike_params['randseed'] = spike_randseed
             spike_params['simtime'] = spike_simtime
+            ORG = Organiser(spike_params, datafile, reps=reps)
             spiketimes = organiser.check_and_execute(
-                spike_params, sim_nest.simulate, datafile +'_spikes'
+                spike_params, get_spikes_fig2, datafile +'_spikes'
                 ,redo = redo_spiketrains)['spiketimes']
             spiketimes = spiketimes[:,spiketimes[1]<plot_units[1]]
             spiketimes = spiketimes[:,spiketimes[1]>=plot_units[0]]
@@ -152,7 +160,8 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spiketimes[1] *= box_height
             spiketimes[1] += box_bottom
             
-            pylab.plot(spiketimes[0],spiketimes[1],'.k',markersize = markersize,alpha = spikealpha)
+            pylab.plot(spiketimes[0],spiketimes[1],'.k',
+                       markersize = markersize,alpha = spikealpha)
 
             pylab.xlim(jep_range.min(),jep_range.max())
         pylab.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
@@ -169,8 +178,6 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
         ffs = pd.read_pickle(datapath + "ffs_fig2_"+model)
     except:
         ffs = pylab.zeros((len(jep_range),len(Q_range),reps))
-        
-        #all_results = pd.read_pickle(datapath + datafile1)
         for i,jep_ in enumerate(jep_range):
             for j,Q in enumerate(Q_range):
                 jep = float(min(jep_,Q))
@@ -185,11 +192,10 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
                 params['jplus'] = pylab.around(
                     pylab.array([[jep,jip],[jip,jip]]),5)
                 params['Q'] = int(Q)
-                results = organiser.check_and_execute(
-                    params, simulate_spontaneous, datafile,
-                    reps = reps,ignore_keys=['n_jobs'],redo = redo)
-                #key = key_from_params(params, reps=reps,ignore_keys=['n_jobs'])
-                #results = [all_results[result_key] for result_key in key]
+                ORG = Organiser(params, datafile, 
+                                reps=reps,ignore_keys=['n_jobs'],
+                                redo = redo)
+                results = ORG.check_and_execute(simulate_spontaneous)
                 ff = [r[0] for r in results]
                 ffs[i,j,:] = ff
                 if jep_>Q:
@@ -200,13 +206,12 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
     if plot:
         pylab.contourf(jep_range,Q_range,pylab.nanmean(ffs,axis=2).T,
                        levels = [0.5, 1.,1.5,2.],extend = 'both', 
-                       cmap = 'Greys')#, algorithm = 'threaded',
-                       #antialiased=True, nchunk=0, norm="linear")
+                       cmap = 'Greys')
         x = pylab.linspace(Q_range.min(), jep_range.max(),1000)
         y1 = pylab.ones_like(x)*Q_range.min()
         y2 = x
         pylab.fill_between(x,y1, y2,facecolor = 'w',hatch = '\\\\\\',
-                           edgecolor = global_params.colors['orange'])
+                           edgecolor = colors['orange'])
         pylab.xlabel(r'$J_{E+}$')
         pylab.ylabel(r'$Q$')
         pylab.axis('tight')
@@ -214,18 +219,80 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
     
 
 
+def plot_ff_jep_vs_Q_parallel(params, jep_range=pylab.linspace(1, 4, 41),
+                     Q_range=pylab.arange(2, 20, 2), jipfactor=1, reps=40,
+                     plot=True, vrange=[0, 15], redo=False):
+
+    if jipfactor == 0.:
+        model = 'E_clustered'
+    else:
+        model = 'EI_clustered'
+
+    try:
+        ffs = pd.read_pickle(datapath + "fig2_ffs_" + model)
+    except FileNotFoundError:
+        ffs = np.zeros((len(jep_range), len(Q_range), reps))
+        def process_params(i, jep_, Q_idx, Q):
+            jep = float(min(jep_, Q))
+            if jipfactor == 0.:
+                params['portion_I'] = Q
+            else:
+                params['portion_I'] = 1
+            jip = 1. + (jep - 1) * jipfactor
+            print('##########################################################')
+            print(Q, jep, jip, '---------------------------------------------')
+            print('##########################################################')
+            params['jplus'] = np.around(np.array([[jep, jip], [jip, jip]]), 5)
+            params['Q'] = int(Q)
+            ORG = Organiser(params, datafile, reps=reps,
+                            ignore_keys=['n_jobs'], redo=redo)
+            results = ORG.check_and_execute(simulate_spontaneous)
+            ff = [r[0] for r in results]
+            ffs[i, Q_idx, :] = ff
+            if jep_ > Q:
+                ffs[i, Q_idx, :] = np.nan
+
+        # Parallelize the nested loop using joblib
+        Parallel(n_jobs=-1)(
+            delayed(process_params)(i, jep_, Q_idx, Q)
+            for i, jep_ in enumerate(jep_range)
+            for Q_idx, Q in enumerate(Q_range)
+        )
+        pickle.dump(ffs, open(datapath + "fig2_ffs_" + model, 'wb'))
+
+    if plot:
+        pylab.contourf(jep_range, Q_range, np.nanmean(ffs, axis=2).T,
+                       levels=[0.5, 1., 1.5, 2.], extend='both',
+                       cmap='Greys')
+        x = np.linspace(Q_range.min(), jep_range.max(), 1000)
+        y1 = np.ones_like(x) * Q_range.min()
+        y2 = x
+        pylab.fill_between(x, y1, y2, facecolor='w', hatch='\\\\\\',
+                           edgecolor='orange')
+        pylab.xlabel(r'$J_{E+}$')
+        pylab.ylabel(r'$Q$')
+        pylab.axis('tight')
+
+    return ffs
+
 
 
         
 if __name__ == '__main__':
     n_jobs = 12
-    settings = [{'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.,
-                 'jep_range':pylab.arange(1,50.001,0.1),'spike_js':[1.,3.,5., 8. ,10.], 'portion_I':50}, 
-                {'jipfactor':0.,'fixed_indegree':False, 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
+    settings = [{'warmup':200,'ff_window':400,'trials':20,
+                 'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.,
+                 'jep_range':pylab.arange(1,50.001,0.1),
+                 'spike_js':[1.,3.,5., 8. ,10.], 'portion_I':50}, 
+                {'jipfactor':0.,'fixed_indegree':False, 
+                 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
                  'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26},
-                {'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.75,
-                 'jep_range':pylab.arange(1.001,50.001, 0.1),'spike_js':[1.,8.,10.5,14.,50.], 'portion_I':1},
-                {'jipfactor':0.75,'fixed_indegree':False, 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
+                {'warmup':200,'ff_window':400,'trials':20,
+                 'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.75,
+                 'jep_range':pylab.arange(1.001,50.001, 0.1),
+                 'spike_js':[1.,8.,10.5,14.,50.], 'portion_I':1},
+                {'jipfactor':0.75,'fixed_indegree':False, 
+                 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
                  'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
 
     
@@ -235,8 +302,8 @@ if __name__ == '__main__':
     x_label_val = -0.25
     num_row, num_col = 2,3
     if plot:
-        fig  =plotting.nice_figure(ratio = 0.8,
-                                   latex_page=global_params.text_width_pts)
+        fig  =nice_figure(ratio = 0.8,
+                                   latex_page=text_width_pts)
         fig.subplots_adjust(bottom = 0.15,hspace = 0.4,wspace = 0.3)
         
         labels = ['a','b','c','d']
@@ -244,29 +311,30 @@ if __name__ == '__main__':
     for i,params in enumerate(settings):
         row = int(i/2)
         col= int(i%2)
+        jipfactor = params['jipfactor']
         if plot and i in [0,2]:
-            ax = plotting.simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col), colspan=2))
-            plotting.ax_label1(ax, labels[i],x=x_label_val)
+            ax = simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col), colspan=2))
+            ax_label1(ax, labels[i],x=x_label_val)
             pylab.ylabel('FF')
             pylab.xlabel('$J_{E+}$')
             jep_range = params.pop('jep_range')
             spike_js = params.pop('spike_js')
-            jipfactor = params.pop('jipfactor')
             plot_ff_cv_vs_jep(params,reps = reps,jipfactor =jipfactor,
                               jep_range = jep_range,spike_js = spike_js,
-                              plot = plot,spike_randseed = 3,spike_simtime = 2000.,markersize = 0.1,spikealpha= 0.3)
-            pylab.gca().text(-7, i/3.+0.2, title_left[i], rotation=90)#, fontweight='bold')
+                              plot = plot,spike_randseed = 3,
+                              spike_simtime = 2000.,markersize = 0.1,spikealpha= 0.3)
+            pylab.gca().text(-7, i/3.+0.2, title_left[i], rotation=90)
         else:
-            jipfactor = params.pop('jipfactor')
             jep_step = 0.5
             jep_range = pylab.arange(1.,15.+0.5*jep_step,jep_step)
             q_step = 1
             Q_range = pylab.arange(q_step,60+0.5*q_step,q_step)
             
             if plot:
-                ax = plotting.simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col+1)))          
-                plotting.ax_label1(ax, labels[i], x=x_label_val)
-            ffs = plot_ff_jep_vs_Q(params,jep_range,Q_range,jipfactor=jipfactor,plot=plot)
+                ax = simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col+1)))          
+                ax_label1(ax, labels[i], x=x_label_val)
+            ffs = plot_ff_jep_vs_Q_parallel(params,jep_range,Q_range,
+                                   jipfactor=jipfactor,plot=plot)
             if plot:
                 cbar = pylab.colorbar()
                 cbar.set_label('FF', rotation=90)
