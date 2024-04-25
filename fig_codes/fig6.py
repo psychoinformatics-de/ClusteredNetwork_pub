@@ -1,15 +1,14 @@
-import sys;sys.path.append('../utils')
+import sys;sys.path.append('../src')
 import pylab
 from simulate_experiment import get_simulated_data
-import plotting_functions as plotting
 import spiketools
-#import analyses
-from global_params_funcs import find
+from GeneralHelper import (
+    find, nice_figure, ax_label1, simpleaxis
+    )
 import scipy.stats as ss
-from reaction_times_func import reaction_time_plot, get_reaction_time_analysis
-
-
-
+from reaction_times_functions import (
+    reaction_time_plot, get_reaction_time_analysis
+)
 
 ########################################################################
 # network model and simulation parameters ##############################
@@ -29,13 +28,13 @@ align_ts = False
 ########################################################################
 
 x_label_val=-0.5                            
-fig = plotting.nice_figure(ratio = 1.)
+fig = nice_figure(ratio = 1.)
 nrows = 2
 ncols = 2
 gs = pylab.GridSpec(nrows,ncols,top=0.9,bottom=0.1,hspace = 0.4,
                     wspace = 0.9,left = 0.2,right = 0.88,height_ratios = [2,1])
 subplotspec = gs.new_subplotspec((1,1), colspan=1,rowspan=1)
-ax2 = plotting.ax_label1(plotting.simpleaxis(pylab.subplot(subplotspec)),
+ax2 = ax_label1(simpleaxis(pylab.subplot(subplotspec)),
                          'c',x=x_label_val)
 ax2.set_title('Behaving monkey')
 labelsize=5
@@ -73,7 +72,7 @@ correct= directions == predictions
 correct_inds = find(correct)
 incorrect_inds = find(correct==False)
 subplotspec = gs.new_subplotspec((0,0), colspan=2,rowspan=1)
-ax1 = plotting.ax_label1(plotting.simpleaxis(
+ax1 = ax_label1(simpleaxis(
     pylab.subplot(subplotspec)),'a',x=x_label_val/3)
 pylab.suptitle('Example trial of motor cortical attractor model')
 
@@ -102,7 +101,6 @@ time = result['time']
 threshold = result['condition_thresholds'][conditions[plot_trial]]
 pylab.axvline(1000,linestyle = '--',color ='k',lw = 0.5)
 direction_clusters = pylab.array(direction_clusters).flatten()
-print(direction_clusters)
 for cluster in range(6):
     pylab.text(2000,(cluster+0.5)*cluster_size,str(cluster+1),
                 va = 'center',ha = 'left',weight='bold')
@@ -135,7 +133,7 @@ pylab.text(950,1250,'RS')
 
 
 subplotspec = gs.new_subplotspec((1,0), colspan=1,rowspan=1)
-ax2 = plotting.ax_label1(plotting.simpleaxis(
+ax2 = ax_label1(simpleaxis(
     pylab.subplot(subplotspec)),'b',x=x_label_val)
 ax2.set_title('Attractor model')
 for condition in [1,2,3]:
@@ -143,8 +141,6 @@ for condition in [1,2,3]:
     rt = rts[(conditions == condition)*correct]
     mask = (rts > 100)*(rts < 400)
     bins = pylab.linspace(0,500,15)
-    print('cond len_rt',condition,len(rt))
-    print('mediann', pylab.median(rt))
     pylab.hist(rt,bins,histtype = 'step',
                facecolor = cond_colors[condition-1],
                 density = True,edgecolor  = cond_colors[condition-1],
@@ -153,13 +149,7 @@ for condition in [1,2,3]:
 
 min_len = min(len(rts[(conditions == 2)*correct]),
               len(rts[(conditions == 3)*correct]))
-print('sample size model:', min_len)
-print('wilcoxon test', ss.wilcoxon(
-    rts[(conditions == 2)*correct][:min_len],
-    rts[(conditions == 3)*correct][:min_len]))
-print('condition 1', rts[(conditions == 1)*correct])
 
-    
 pylab.xlim(-100,500)
 pylab.xticks([0,100,200,300,400,500])
 pylab.gca().set_xticklabels(['RS', '100','200','300','400','500'])

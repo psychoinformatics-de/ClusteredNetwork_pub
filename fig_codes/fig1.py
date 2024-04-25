@@ -1,13 +1,13 @@
-import sys;sys.path.append('../utils')
+import sys;sys.path.append('../src')
 import os
 import pylab
 import numpy as np
 import matplotlib.image as mimage
 
 # Local modules (not installed packages)
-from experimental_analysis_funcs import get_stats, plot_experiment
+from analyse_experiment import get_stats, plot_experiment
 from analyse_model import get_analysed_spiketimes
-from global_params_funcs import (
+from GeneralHelper import (
     nice_figure, ax_label_fig1, ax_label_title,
     simpleaxis,colors,text_width_pts)
 import network_schematic
@@ -22,8 +22,9 @@ try:
     locals().update(d)
 except:
     tff,ffs,tlv,lvs,tcv_two,cv_twos, trate, count_rates = get_stats(
-        gns=None,monkey=monkey)
-    dict_ff_cv_twos = {'tff':tff, 'ffs':ffs, 'tcv_two':tcv_two,'cv_twos':cv_twos}
+        gns=None,monkey=monkey, save_interim=False)
+    dict_ff_cv_twos = {'tff':tff, 'ffs':ffs, 'tcv_two':tcv_two,
+                       'cv_twos':cv_twos}
     np.save(data_path + fn, dict_ff_cv_twos)
 
 fig = nice_figure(fig_width= 1.,ratio  =0.55,
@@ -149,12 +150,18 @@ params = {'N_E':4000,'N_I':1000,'I_th_E':2.14,'I_th_I':1.26,
               'cut_window':[-500,1500],
           'rate_kernel':50.,'warmup':500,'trials':20}
 stim_range = [0,1,2]
-settings = [{'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 'stim_clusters':stim_range,'stim_amp':0.2, 'portion_I':50},
-            {'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 'stim_clusters':stim_range,'stim_amp':0.25, 'portion_I':50},
-            {'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 'stim_clusters':stim_range,'stim_amp':0.3, 'portion_I':50},
-            {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,'stim_clusters':stim_range,'stim_amp':0.2,'portion_I':1},
-            {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,'stim_clusters':stim_range,'stim_amp':0.25,'portion_I':1},
-            {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,'stim_clusters':stim_range,'stim_amp':0.3,'portion_I':1}]
+settings = [{'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 
+             'stim_clusters':stim_range,'stim_amp':0.2, 'portion_I':50},
+            {'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 
+             'stim_clusters':stim_range,'stim_amp':0.25, 'portion_I':50},
+            {'randseed':24,'Q':50,'jipfactor':0.,'jep':3.45, 
+             'stim_clusters':stim_range,'stim_amp':0.3, 'portion_I':50},
+            {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,
+             'stim_clusters':stim_range,'stim_amp':0.2,'portion_I':1},
+            {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,
+             'stim_clusters':stim_range,'stim_amp':0.25,'portion_I':1},
+            {'randseed':0,'Q':50,'jipfactor':0.75,'jep':11.,
+             'stim_clusters':stim_range,'stim_amp':0.3,'portion_I':1}]
 
 params['fixed_indegree'] = False
 params['trials'] = 20
@@ -174,7 +181,7 @@ def make_plot_ff_cv2(params,axes = None,plot = True,datafile=filename,
     """plot fano factor and cv2s from simulation data"""
     # get data (if not exist simulate and generate data)
     result = get_analysed_spiketimes(params,datafile, calc_cv2s=calc_cv2s,
-                                     save =save,do_not_simulate=False)
+                                     save =save)
     # plot fano factor
     stim_clusters = params['stim_clusters']
     non_stim_clusters = [i for i in range(params['Q']) if i not in stim_clusters]
@@ -200,7 +207,7 @@ def make_plot_ff_cv2(params,axes = None,plot = True,datafile=filename,
             axes[1].plot(result['t_cv2']+t_offset,pylab.nanmean(
                 result['cv2s'][non_stim_clusters],axis=0),
                          linestyle = ':',label = 'non stim',**cvtwo_plotargs)
-        return result
+        #return result
 
 
 # plot model data
@@ -220,9 +227,9 @@ for setno,setting in enumerate(settings):
     ff_plotargs = {'color':colors['red'], 'alpha':.5 + setno%3/4.}
     cv2_plotargs = {'color':(0,0,0), 'alpha':0.5+setno%3/4.}
     
-    make_plot_ff_cv2(params,axes = axes,save = save,plot = plot,split_ff_clusters=False,
-            ff_plotargs=ff_plotargs,cvtwo_plotargs = cv2_plotargs,
-            t_offset = 500)
+    make_plot_ff_cv2(params,axes = axes,save = save,plot = plot,
+                     split_ff_clusters=False,ff_plotargs=ff_plotargs,
+                     cvtwo_plotargs = cv2_plotargs, t_offset = 500)
     
     for ax in axes:
         ax.axvline(500,linestyle = '--',color = (0,0,0),lw = 0.5)

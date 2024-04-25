@@ -1,18 +1,16 @@
-import sys;sys.path.append('../utils')
+import sys;sys.path.append('../src')
 from matplotlib import pylab
 import pandas as pd
-import plotting_functions as plotting
-import experimental_analysis_funcs as analyses
+import analyse_experiment as analyses
 import joe_and_lili
 from scipy.stats import wilcoxon
-#import organiser
 import pickle as pickle
 import analyse_model
-from general_func import *
-from reaction_times_func import *
+from reaction_times_functions import (
+    reaction_time_plot, get_reaction_time_analysis)
 import numpy as np
-import os
-
+from GeneralHelper import (
+    find, nice_figure, ax_label1, simpleaxis1)
 path = '../data/'
 def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000],
                 alignment ='TS',ff_ax = None,cv2_ax = None,dir_score_ax = None,
@@ -31,7 +29,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
             for k,direction in enumerate([1,2,3,4,5,6]):
                 count_rate_block[i,j,k] =  analyses.get_mean_direction_counts(
                     gn,condition,direction,tlim  =tlim,alignment = alignment)
-                trial_count_block[i,j,k]  =analyses.get_trial_count(gn,condition,direction)
+                trial_count_block[i,j,k]  =analyses.get_trial_count(
+                    gn,condition,direction)
     
     enough_counts = pylab.prod(count_rate_block>=min_count_rate,axis=1)
     enough_trials = pylab.prod(trial_count_block>=min_trials,axis=1)
@@ -43,7 +42,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
         pylab.sca(rate_ax)
         try:
             rate_gns,rate_conditions,rate_directions,rates,trate = pickle.load(
-                open(path+'rate_file_'+monkey,'rb'))
+                open(path+'experiment_'+monkey+'_rate_file_'+alignment,'rb'))
             mask = rates < np.max(rates[:,:400])
         except:
             rate_gns = []
@@ -54,7 +53,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
                 for j,condition in enumerate([1,2,3]):
                     for k,direction in enumerate([1,2,3,4,5,6]):
                         if good_directions[i,k]:
-                            rate,trate = analyses.get_rate(gn, condition, direction,
+                            rate,trate = analyses.get_rate(
+                                gn, condition, direction,
                             alignment = alignment,tlim  =tlim)
                             rates.append(rate[0])
                             rate_gns.append(gn)
@@ -63,18 +63,21 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
             rates = pylab.array(rates)
             rate_conditions = pylab.array(rate_conditions)
             mask = rates < np.max(rates[:,:400])
-            pickle.dump((rate_gns,rate_conditions,rate_directions,rates,trate),open(
-                path+'rate_file_'+monkey,'wb'),protocol =2)
+            pickle.dump((rate_gns,rate_conditions,
+                         rate_directions,rates,trate),
+                        open(path+'experiment_'+monkey+'_rate_file_'+alignment,
+                             'wb'),protocol =2)
 
         for (condition,color) in zip([1,2,3],condition_colors):
-            pylab.plot(trate, pylab.nanmean(rates[rate_conditions==condition],axis=0),
+            pylab.plot(trate, pylab.nanmean(
+                rates[rate_conditions==condition],axis=0),
             color = color,label = 'condition '+str(condition))
     
     if ff_ax is not None:
         pylab.sca(ff_ax)
         try:
             ffs,tff,ff_conditions,ff_gns,ff_directions = pd.read_pickle(
-                path+'ff_file_'+alignment+'_'+monkey)
+                path+'experiment_'+monkey+'_ff_file_'+alignment)
         except:
         
             ff_gns = []
@@ -94,7 +97,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
             ffs = pylab.array(ffs)
             ff_conditions = pylab.array(ff_conditions)
             pickle.dump((ffs,tff,ff_conditions,ff_gns,ff_directions),open(
-                path+'ff_file_'+alignment+'_'+monkey,'wb'),protocol = 2)
+                path+'experiment_'+monkey+'_ff_file_'+alignment,'wb'),protocol = 2)
 
         for (condition,color) in zip([1,2,3],condition_colors):
             avg_ff = pylab.nanmean(ffs[ff_conditions==condition],axis=0)
@@ -129,9 +132,6 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
                 top_val = pylab.nanmean(test_vals2) - pylab.nanmean(
                     ffs[ff_conditions==test_conditions[1]],axis=0)[0]
                 center = 0.5 * (bottom_val+top_val) 
-                print('test_time' ,test_time)
-                #pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line,ms = 2.)
-                #pylab.text(test_time-10, center+0.01, '*',va = 'top',ha ='right',size = 5)
 
         pylab.text(-1500,-0.6,'Experiment',ha = 'center',va ='bottom',
             size = '6',rotation=90,weight='bold')  
@@ -140,7 +140,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
         pylab.sca(cv2_ax)
 
         try:
-            cv2_gns,cv2_conditions,cv2_directions,cv2s,tcv2 = pd.read_pickle(path+'cv2_file_'+monkey)
+            cv2_gns,cv2_conditions,cv2_directions,cv2s,tcv2 = pd.read_pickle(
+                path+'experiment_'+monkey+'_cv2_file_'+alignment)
         except:
             cv2_gns = []
             cv2_conditions = [] 
@@ -160,7 +161,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
 
             cv2_conditions = pylab.array(cv2_conditions)
             pickle.dump((cv2_gns,cv2_conditions,cv2_directions,cv2s,tcv2),open(
-                path+'cv2_file_'+monkey,'wb'),protocol =2)
+                path+'experiment_'+monkey+'_cv2_file_'+alignment,'wb'),protocol =2)
 
         for (condition,color) in zip([1,2,3],condition_colors):
             pylab.plot(tcv2, pylab.nanmean(cv2s[cv2_conditions==condition],axis=0),
@@ -168,8 +169,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
 
     if RTs_ax is not None:
         pylab.sca(RTs_ax)
-        reaction_time_plot(extra_filters[0][2], condition_colors = condition_colors)
-        #pylab.xlabel('reaction time [ms]')
+        reaction_time_plot(extra_filters[0][2], 
+                           condition_colors = condition_colors)
         pylab.ylabel('p.d.f')
         pylab.axvline(1500,linestyle = '-',color = 'k',lw = 0.5)
         pylab.ylim(0,0.015)    
@@ -183,11 +184,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
 
 ###################################
 ###########MODEL#################
-condition_colors = ['0','0.3','0.6']
 condition_colors = ['navy','royalblue','lightskyblue']
-#condition_colors = ['crimson','lightcoral','pink']
-    
-
 redo = False
 
 def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, 
@@ -212,12 +209,7 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5,
         good_inds = find(nan_rows==0)
         test_vals = test_vals[:,good_inds]
         good_units = units[good_inds]
-        
-              
 
-        
-
-    print('good units: ', len(good_units))
     offset_lst = []
     for cond_cnt, condition in enumerate(conditions):
         condition_ffs = ffs[condition]
@@ -233,15 +225,12 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5,
 
     if sig_time is not None:
         sigs = []
-
         for i,c in enumerate(conditions[:-1]):
             try:
                 s,p = wilcoxon(test_vals[i,:],test_vals[i+1,:])
             except:
                 s,p =0,0
             sigs.append(p)
-            print('p ',p)
-            
             if p<0.05:
                 sig_symbol = '*'
                 if p<0.01:
@@ -251,13 +240,12 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5,
                 bottom_val = pylab.nanmean(test_vals[i,:]) -offset_lst[i]
                 top_val = pylab.nanmean(test_vals[i+1,:]) - offset_lst[i+1]
                 center = 0.5 * (bottom_val+top_val)
-                #pylab.plot([sig_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line/2,ms = 2.)
-                #pylab.text(sig_time-10, center+0.01, sig_symbol,va = 'top',ha ='right',size = 5)
 
     pylab.ylabel(r'$\Delta$FF',rotation=90)
     pylab.xlabel('time [ms]')
 
-def plot_cv2s(params,sig_time = 1000,plot = True,redo=False, save=False,lw_line=0.5):
+def plot_cv2s(params,sig_time = 1000,plot = True,
+              redo=False, save=False,lw_line=0.5):
     cv2s = analyse_model.get_cv_two(params,redo=redo,save=save)
 
     if not plot:
@@ -286,7 +274,8 @@ def plot_cv2s(params,sig_time = 1000,plot = True,redo=False, save=False,lw_line=
         for u in good_units:
             all_cv2s.append(condition_cv2s[u])
         all_cv2s = pylab.array(all_cv2s)
-        pylab.plot(time,pylab.nanmean(all_cv2s,axis=0),color = condition_colors[condition-1],
+        pylab.plot(time,pylab.nanmean(all_cv2s,axis=0),
+                   color = condition_colors[condition-1],
             label = 'condition '+str(condition))
 
     pylab.ylabel("CV$_2$",math_fontfamily='dejavusans')
@@ -302,11 +291,11 @@ def plot_rates(params,plot,redo=False, save=False):
 
     for condition in params['sim_params']['conditions']:
         condition_scores = scores[condition]
-        rates_arr = np.array(list(map(lambda x: condition_scores[x], condition_scores.keys())))
-        pylab.plot(time,pylab.nanmean(rates_arr,axis=0),color = condition_colors[condition-1])
-    
+        rates_arr = np.array(list(map(lambda x: condition_scores[x], 
+                                      condition_scores.keys())))
+        pylab.plot(time,pylab.nanmean(rates_arr,axis=0),
+                   color = condition_colors[condition-1])
     pylab.ylabel('rate', rotation=90)
-    #pylab.xlabel('time [ms]')
 
 
 def plot_RTs(params, redo=False,save=False):
@@ -315,39 +304,38 @@ def plot_RTs(params, redo=False,save=False):
             for integrate_from_go in [False]:
                 for min_count_rate in [7.5]:
                     for align_ts in [False]:
-                        result = get_reaction_time_analysis(params,tlim  =tlim,redo = redo,
-                                                tau  =tau,integrate_from_go = integrate_from_go,
-                                                normalise_across_clusters=True,
-                                                threshold_per_condition = threshold_per_condition,save=save)
-
-                        
+                        result = get_reaction_time_analysis(
+                            params,tlim  =tlim,redo = redo,
+                            tau  =tau,integrate_from_go = integrate_from_go,
+                            normalise_across_clusters=True,
+                            threshold_per_condition = threshold_per_condition,
+                            save=save, 
+                            fname='supply_fig3_reaction_time_analysis')
                         rts = result['rts']
-
                         conditions = result['conditions']
                         directions = result['directions']
                         predictions = result['predictions']
                         correct= directions == predictions
-
                         correct_inds = np.where(correct)[0]
-                        incorrect_inds = np.where(correct==False)[0]
-                                                
+                        incorrect_inds = np.where(correct==False)[0]             
                         for condition in [1,2,3]:
-                            
                             rt = rts[(conditions == condition)*correct]
-                            #rts_thr = 0
-                            #rt = rt[rt>rts_thr]
                             bins = pylab.linspace(0,500,15)
-
-                            pylab.hist(rt,bins,histtype = 'step',facecolor = condition_colors[condition-1],
-                                        density = True,edgecolor  = condition_colors[condition-1],label = 'condtion '+str(condition))
+                            pylab.hist(
+                                rt,bins,histtype = 'step',
+                                facecolor = condition_colors[condition-1],
+                                density = True,
+                                edgecolor  = condition_colors[condition-1],
+                                label = 'condtion '+str(condition))
                             pylab.xlim(1400,2000)
-                        import scipy.stats as ss
-                        min_len = min(len(rts[(conditions == 2)*correct]),len(rts[(conditions == 3)*correct]))
+                        min_len = min(len(rts[(conditions == 2)*correct]),
+                                      len(rts[(conditions == 3)*correct]))
 
                             
                         pylab.xlim(-100,500)
                         pylab.xticks([0,100,200,300,400,500])
-                        pylab.gca().set_xticklabels(['RS', '100','200','300','400','500'])
+                        pylab.gca().set_xticklabels(
+                            ['RS', '100','200','300','400','500'])
                         pylab.ylim(0,0.01)
                         pylab.yticks([0,0.004,0.008])                            
                         pylab.ylabel('p.d.f')
@@ -372,8 +360,9 @@ if __name__ == '__main__':
                 'lines.linewidth':0.5,
                 'axes.linewidth':0.2}
 
-    fig = plotting.nice_figure(fig_width= 1.,ratio  =.5,rcparams = rcparams)
-    fig.subplots_adjust(hspace = .8,wspace = 0.7,bottom  =0.14,top  =0.9,left=0.15, right=0.9)
+    fig = nice_figure(fig_width= 1.,ratio  =.5,rcparams = rcparams)
+    fig.subplots_adjust(hspace = .8,wspace = 0.7,bottom  =0.14,
+                        top  =0.9,left=0.15, right=0.9)
     tlim = [0,2000]
     xticks = [0,500,1000,1500,2000]
     nrow,ncol = 4, 3
@@ -381,22 +370,19 @@ if __name__ == '__main__':
     x_label_val=-0.5
     size_cond = 12
     condition_colors_exp = ['navy','royalblue','lightskyblue']    
-
-
-    for monkey in ['lili']:#['joe']:#
-        
+    for monkey in ['lili']:
         extra_filters = [('monkey','=',str.encode(monkey))]
-        rate_ax = plotting.ax_label1(plotting.simpleaxis1(pylab.subplot2grid(
+        rate_ax = ax_label1(simpleaxis1(pylab.subplot2grid(
             (nrow,ncol),(0,1)),labelsize,pad=pad),'b',
                 x=x_label_val,size=labelsize)
-        ff_ax = plotting.ax_label1(plotting.simpleaxis1(
+        ff_ax = ax_label1(simpleaxis1(
             pylab.subplot2grid(
                 (nrow,ncol),(0,0),rowspan=2),labelsize,pad=pad),'a',
                 x=x_label_val,size=labelsize)
-        cv2_ax = plotting.ax_label1(plotting.simpleaxis1(pylab.subplot2grid(
+        cv2_ax = ax_label1(simpleaxis1(pylab.subplot2grid(
             (nrow,ncol),(1,1)),labelsize,pad=pad),'c',
                 x=x_label_val,size=labelsize)
-        RTs_ax = plotting.ax_label1(plotting.simpleaxis1(
+        RTs_ax = ax_label1(simpleaxis1(
             pylab.subplot2grid(
                 (nrow,ncol),(0,2),rowspan=2),labelsize,pad=pad),'d',
                 x=x_label_val,size=labelsize)
@@ -434,9 +420,11 @@ if __name__ == '__main__':
 
     
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
-    pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize1)
+    pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',
+               ha = 'center',size = labelsize1)
     pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
-    pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',ha = 'center',size = labelsize1)
+    pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',
+               ha = 'center',size = labelsize1)
 
     ########################################
     ###################MODEL###############
@@ -462,12 +450,13 @@ if __name__ == '__main__':
         plot_params['timestep'] = 5
 
         # plot rates
-        plotting.ax_label1(plotting.simpleaxis1(pylab.subplot2grid(
-            (nrow,ncol),(2,1)),labelsize,pad=pad),'f',x=x_label_val,size=labelsize)      
+        ax_label1(simpleaxis1(pylab.subplot2grid(
+            (nrow,ncol),(2,1)),labelsize,pad=pad),'f',
+                  x=x_label_val,size=labelsize)      
         plot_rates(plot_params,plot = plot,redo=redo_model,save=save)
         pylab.ylim(0,40)
         
-        plotting.ax_label1(plotting.simpleaxis1(
+        ax_label1(simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(2,0),rowspan=2),
             labelsize,pad=pad),'e',x=x_label_val,size=labelsize)            
         
@@ -479,9 +468,10 @@ if __name__ == '__main__':
         pylab.ylim(-.7,0.2)
         pylab.xlabel('')
         pylab.xlabel('time [ms]') 
-        pylab.text(-1400,-0.65,'E/I clustered\n model',ha = 'center',va ='bottom',
+        pylab.text(-1400,-0.65,'E/I clustered\n model',
+                   ha = 'center',va ='bottom',
                 size = '6',rotation=90,weight='bold')  
-        plotting.ax_label1(plotting.simpleaxis1(pylab.subplot2grid(
+        ax_label1(simpleaxis1(pylab.subplot2grid(
             (nrow,ncol),(3,1)),labelsize,pad=pad),'g',
             x=x_label_val,size=labelsize)          
     
@@ -491,20 +481,10 @@ if __name__ == '__main__':
         pylab.xlim(0,2000)
         pylab.ylim(0.4,1.3)
         pylab.yticks([0.4,0.8,1.2])
-
-
-        plotting.ax_label1(plotting.simpleaxis1(
+        ax_label1(simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(2,2),rowspan=2),
             labelsize,pad=pad),'h',x=x_label_val,size=labelsize) 
         plot_RTs(plot_params,redo=redo_model,save=save)
 
-
-           
-                            
-                            
-                
-
-
     pylab.savefig('suppl_fig3.pdf')
-    #pylab.savefig('suppl_fig3.png',dpi=600)
     pylab.close()

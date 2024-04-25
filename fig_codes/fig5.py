@@ -1,5 +1,6 @@
-import sys;sys.path.append('../utils')#;sys.path.append('../data')
+import sys;sys.path.append('../src')#;sys.path.append('../data')
 from matplotlib import pylab
+import os
 import pandas as pd
 from scipy.stats import wilcoxon
 import pickle as pickle
@@ -8,13 +9,13 @@ from matplotlib.patches import Rectangle
 
 # Local modules (not installed packages)
 import analyse_model
-import experimental_analysis_funcs as analyses
+import analyse_experiment as analyses
 import joe_and_lili
-from global_params_funcs import (
+from GeneralHelper import (
     nice_figure, ax_label1, simpleaxis1, find
 )
 
-import os
+
 path = '../data/'
 
 ########################################
@@ -22,10 +23,14 @@ path = '../data/'
 ########################################
 
 # function to plot the results of the experiment analysis
-def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000],
-            alignment ='TS',ff_ax = None,cv2_ax = None,dir_score_ax = None,pop_score_ax=None,
-            rate_ax=None, condition_colors = ['0','0.3','0.6'],ff_test_interval = None,
-            ff_test_point = 1000.,ff_test_ys = [0.1,2.],textsize=6,lw=3,lw_line=0.5):
+def do_plot(extra_filters = [],min_count_rate = 5,
+            min_trials  =10,tlim = [0,2000],
+            alignment ='TS',ff_ax = None,cv2_ax = None,
+            dir_score_ax = None,pop_score_ax=None,
+            rate_ax=None, condition_colors = ['0','0.3','0.6'],
+            ff_test_interval = None,
+            ff_test_point = 1000.,ff_test_ys = [0.1,2.],
+            textsize=6,lw=3,lw_line=0.5):
     """plot the results of the experiment analysis"""
     toc = joe_and_lili.get_toc(extra_filters = extra_filters)
     gns = pylab.unique(toc['global_neuron'])
@@ -53,7 +58,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
 
         try:
             rate_gns,rate_conditions,rate_directions,rates,trate = pd.read_pickle(
-                path+'rate_file_'+alignment)
+                path+'experiment_'+monkey+'_rate_file_'+alignment)
         except:
             rate_gns = []
             rate_conditions = []
@@ -63,15 +68,20 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
                 for j,condition in enumerate([1,2,3]):
                     for k,direction in enumerate([1,2,3,4,5,6]):
                         if good_directions[i,k]:
-                            rate,trate = analyses.get_rate(gn, condition, direction,alignment = alignment,tlim  =tlim)
+                            rate,trate = analyses.get_rate(
+                                gn, condition, direction,alignment = alignment,
+                                tlim  =tlim)
                             rates.append(rate[0])
                             rate_gns.append(gn)
                             rate_conditions.append(condition)
                             rate_directions.append(direction)
             rates = pylab.array(rates)
             rate_conditions = pylab.array(rate_conditions)
-            pickle.dump((rate_gns,rate_conditions,rate_directions,rates,trate),
-                        open(path+'rate_file_'+alignment,'wb'),protocol =2)
+            pickle.dump(
+                (rate_gns,rate_conditions,rate_directions,rates,trate),
+                open(
+                    path+'experiment_'+monkey+'_rate_file_'+alignment,
+                    'wb'),protocol =2)
         for (condition,color) in zip([1,2,3],condition_colors):
             pylab.plot(
                 trate, 
@@ -83,7 +93,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
         pylab.sca(ff_ax)
         try:
             ffs,tff,ff_conditions,ff_gns,ff_directions = pd.read_pickle(
-                path+'ff_file_'+alignment)
+                path+'experiment_'+monkey+'_ff_file_'+alignment)
         except:
         
             ff_gns = []
@@ -105,7 +115,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
             ff_conditions = pylab.array(ff_conditions)
             pickle.dump(
                 (ffs,tff,ff_conditions,ff_gns,ff_directions),
-                open(path+'ff_file_'+alignment,'wb'),protocol = 2)
+                open(path+'experiment_'+monkey+'_ff_file_'+alignment,
+                     'wb'),protocol = 2)
         for (condition,color) in zip([1,2,3],condition_colors):
             avg_ff = pylab.nanmean(ffs[ff_conditions==condition],axis=0)
             pylab.plot(tff, avg_ff-avg_ff[0],
@@ -123,8 +134,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
                     s,p = wilcoxon(test_vals1[:,i],test_vals2[:,i])
                     scores[i] = p
                 sigplot=pylab.zeros_like(scores)*pylab.nan
-                sigplot[scores <0.05] = ff_test_ys[ntest]
-                print('test_time' ,test_time)                
+                sigplot[scores <0.05] = ff_test_ys[ntest]            
                 pylab.plot(test_time,sigplot,lw = lw)
 
         if ff_test_point is not None:
@@ -135,7 +145,6 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
                 test_vals1 = test_vals[ff_conditions == test_conditions[0]]
                 test_vals2 = test_vals[ff_conditions == test_conditions[1]]
                 s,p = wilcoxon(test_vals1[:],test_vals2[:])
-                print(test_conditions,p)
                 bottom_val = pylab.nanmean(test_vals1) - pylab.nanmean(
                     ffs[ff_conditions==test_conditions[0]],axis=0)[0]
                 top_val = pylab.nanmean(test_vals2) - pylab.nanmean(
@@ -152,7 +161,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
 
         try:
             cv2_gns,cv2_conditions,cv2_directions,cv2s,tcv2 = pd.read_pickle(
-                path+'cv2_file_'+alignment)
+                path+'experiment_'+monkey+'_cv2_file_'+alignment)
         except:
             cv2_gns = []
             cv2_conditions = [] 
@@ -175,7 +184,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
 
             pickle.dump(
                 (cv2_gns,cv2_conditions,cv2_directions,cv2s,tcv2),
-                open(path+'cv2_file_'+alignment,'wb'),protocol =2)
+                open(path+'experiment_'+monkey+'_cv2_file_'+alignment,'wb'),
+                protocol =2)
 
         for (condition,color) in zip([1,2,3],condition_colors):
             pylab.plot(
@@ -187,30 +197,39 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
     if pop_score_ax is not None:
         print('plotting decoding accuracy of experiments ... ')
         pylab.sca(pop_score_ax)
-        pop_score_gns = []
-        pop_score_conditions = [] 
-        pop_scores = []
-        for i,gn in enumerate(gns):
-            for j,condition in enumerate([1,2,3]):
-                # params = {'gns':tuple(sorted(gns)),'condition':condition,'alignment':'TS',
-                #           'tlim':tlim,'window':400.0,'classifier':'LogisticRegression',
-                #           'folds':5,'classifier_args':{}}
-                result= analyses.get_population_decoding(gns, condition,alignment = alignment,
-                                                         tlim=tlim,n_jobs = 12,reps=10)
+        try:
+            pop_score_gns,pop_score_conditions,pop_scores,tpop_score = pd.read_pickle(
+                path+'experiment_'+monkey+'_pop_score_file_'+alignment)
+        except:
+            pop_score_gns = []
+            pop_score_conditions = [] 
+            pop_scores = []
+            for i,gn in enumerate(gns):
+                for j,condition in enumerate([1,2,3]):
+                    result= analyses.get_population_decoding(
+                        gns, condition,alignment = alignment,
+                        tlim=tlim,n_jobs = 12,reps=10,save=False)
 
-                pop_score = pylab.array([r[0] for r in result]).mean(axis=0)
-                tpop_score = result[0][1]
-                
-                pop_scores.append(pop_score)
-                pop_score_gns.append(gn)
-                pop_score_conditions.append(condition)
-                
-        pop_scores = pylab.array(pop_scores)
-        print(pop_scores.shape,tpop_score.shape)
-        pop_score_conditions = pylab.array(pop_score_conditions)
+                    pop_score = pylab.array([r[0] for r in result]).mean(axis=0)
+                    tpop_score = result[0][1]
+                    
+                    pop_scores.append(pop_score)
+                    pop_score_gns.append(gn)
+                    pop_score_conditions.append(condition)
+                    
+            pop_scores = pylab.array(pop_scores)
+            pop_score_conditions = pylab.array(pop_score_conditions)
+            pickle.dump(
+                (pop_score_gns,pop_score_conditions,pop_scores,tpop_score),
+                open(path+'experiment_'+monkey+'_pop_score_file_'+alignment,'wb'),
+                protocol =2)
 
         for (condition,color) in zip([1,2,3],condition_colors):
-            pylab.plot(tpop_score, pylab.nanmean(pop_scores[pop_score_conditions==condition],axis=0),color = color,label = 'condition '+str(condition))
+            pylab.plot(
+                tpop_score, 
+                pylab.nanmean(pop_scores[pop_score_conditions==condition],
+                              axis=0),color = color,
+                label = 'condition '+str(condition))
         
         pylab.ylim(0,1)
         pylab.axhline(1/6.,linestyle = '--',lw = lw_line,color = '0.4',zorder = -1)
@@ -234,7 +253,7 @@ redo = False
 
 def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, redo=False):
     """plot fano factors of the model"""
-    ffs = analyse_model.get_fanos(params, redo=redo)
+    ffs = analyse_model.get_fanos(params, redo=redo,datafile='fig5_model_fanos')
 
     if not plot:
         return
@@ -264,7 +283,8 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, redo=False):
         all_ffs = pylab.array(all_ffs)
         mean_ffs = pylab.nanmean(all_ffs,axis=0)
         offset_lst.append(pylab.nanmean(mean_ffs[:220]))
-        pylab.plot(time,mean_ffs - offset_lst[condition-1],color = condition_colors[condition-1],
+        pylab.plot(time,mean_ffs - offset_lst[condition-1],
+                   color = condition_colors[condition-1],
                    label = 'condition '+str(condition))
 
     if sig_time is not None:
@@ -273,8 +293,6 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, redo=False):
         for i,c in enumerate(conditions[:-1]):
             s,p = wilcoxon(test_vals[i,:],test_vals[i+1,:])
             sigs.append(p)
-            print('p ',p)
-            
             if p<0.05:
                 sig_symbol = '*'
                 if p<0.01:
@@ -293,7 +311,8 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, redo=False):
 
 def plot_cv2s(params,sig_time = 1000,plot = True,redo=False, lw_line=0.5):
     """plot cv2s of the model"""
-    cv2s = analyse_model.get_cv_two(params,redo=redo)
+    cv2s = analyse_model.get_cv_two(params,redo=redo,
+                                    datafile='fig5_model_cv_twos')
 
     if not plot:
         return
@@ -320,7 +339,9 @@ def plot_cv2s(params,sig_time = 1000,plot = True,redo=False, lw_line=0.5):
         for u in good_units:
             all_cv2s.append(condition_cv2s[u])
         all_cv2s = pylab.array(all_cv2s)
-        pylab.plot(time,pylab.nanmean(all_cv2s,axis=0),color = condition_colors[condition-1],label = 'condition '+str(condition))
+        pylab.plot(time,pylab.nanmean(all_cv2s,axis=0),
+                   color = condition_colors[condition-1],
+                   label = 'condition '+str(condition))
 
     pylab.ylabel("CV$_2$",math_fontfamily='dejavusans')
     pylab.xlabel('time [ms]')
@@ -328,7 +349,8 @@ def plot_cv2s(params,sig_time = 1000,plot = True,redo=False, lw_line=0.5):
 
 def plot_population_decoding(params,plot, redo=False):
     """plot population decoding of the model"""
-    scores = analyse_model.get_population_decoding(params,redo  =redo)
+    scores = analyse_model.get_population_decoding(
+        params,redo  =redo, datafile='fig5_model_popdecoding')
     print('pop decoding score', scores)
     if not plot:
         return 
@@ -344,7 +366,8 @@ def plot_population_decoding(params,plot, redo=False):
 
 def plot_rates(params,plot,redo=False):
     """plot firing rates of the model"""
-    scores = analyse_model.get_rates(params,redo  =redo)
+    scores = analyse_model.get_rates(params,redo  =redo,
+                                     datafile='fig5_model_rates')
     if not plot:
         return 
     time = scores.pop('time') + 500
@@ -353,7 +376,8 @@ def plot_rates(params,plot,redo=False):
         condition_scores = scores[condition]
         rates_arr = pylab.array(list(map(lambda x: condition_scores[x], 
                                       condition_scores.keys())))
-        pylab.plot(time,pylab.nanmean(rates_arr,axis=0),color = condition_colors[condition-1])
+        pylab.plot(time,pylab.nanmean(rates_arr,axis=0),
+                   color = condition_colors[condition-1])
     
     pylab.ylabel('rate', rotation=90)
     pylab.xlabel('time [ms]')
@@ -372,14 +396,16 @@ def draw_hex_array(center,size=0.3,colors = [[0.5]*3]*6,
     number = 6
     for x,y in zip(X,Y):
         coords.append((x+center[0],y+center[1]))
-        circ = pylab.Circle((x+center[0],y+center[1]), radius=radius,  fc=colors[i], edgecolor=edgecolor)
+        circ = pylab.Circle((x+center[0],y+center[1]), radius=radius,  
+                            fc=colors[i], edgecolor=edgecolor)
         if axes is None:
             axes = pylab.gca()
         if add:
             axes.add_patch(circ)
         circs.append(circ)
         if show_numbers:
-            pylab.text(x+center[0],y+center[1],str(number),size = 6,ha ='center',va = 'center')
+            pylab.text(x+center[0],y+center[1],str(number),size = 6,
+                       ha ='center',va = 'center')
             if number == 6:
                 number =1
             else:
@@ -433,8 +459,11 @@ def model_plot(ax, net_factor = 1.6,net_offset = 1.,
                 )
     cluster_center_center = pylab.array(cluster_centers).mean(axis=0)
     edge_length = stim_size * decoder_factor
-    decoder_center = pylab.array((cluster_center_center[0] + decoder_offset*offset_dir[0],cluster_center_center[1] + decoder_offset*offset_dir[1]))
-    rectangle = Rectangle(decoder_center-0.5*edge_length, edge_length, edge_length,ec ='k',fc ='w')
+    decoder_center = pylab.array(
+        (cluster_center_center[0] + decoder_offset*offset_dir[0],
+         cluster_center_center[1] + decoder_offset*offset_dir[1]))
+    rectangle = Rectangle(decoder_center-0.5*edge_length, edge_length, 
+                          edge_length,ec ='k',fc ='w')
 
     for i in range(6):
         ax.annotate('', xy=decoder_center, xycoords='data',
@@ -496,10 +525,12 @@ for monkey in ['joe']:
     
     extra_filters = [('monkey','=',str.encode(monkey))]
     pop_score_ax = ax_label1(simpleaxis1(
-        pylab.subplot2grid((nrow,ncol),(0,1),rowspan=2),labelsize,pad=pad),'b',x=x_label_val,size=labelsize)
+        pylab.subplot2grid((nrow,ncol),(0,1),rowspan=2),labelsize,pad=pad),
+                             'b',x=x_label_val,size=labelsize)
     rate_ax = simpleaxis1(pylab.subplot2grid((nrow,ncol),(2,1)),labelsize,pad=pad)
     ff_ax = ax_label1(simpleaxis1(
-        pylab.subplot2grid((nrow,ncol),(0,2),rowspan=2),labelsize,pad=pad),'c',x=x_label_val,size=labelsize)
+        pylab.subplot2grid((nrow,ncol),(0,2),rowspan=2),labelsize,pad=pad),
+                      'c',x=x_label_val,size=labelsize)
     cv2_ax = simpleaxis1(pylab.subplot2grid((nrow,ncol),(2,2)),labelsize,pad=pad)
     do_plot(extra_filters = extra_filters,ff_ax = ff_ax,rate_ax = rate_ax, 
                pop_score_ax = pop_score_ax,cv2_ax=cv2_ax,textsize=size,
@@ -566,7 +597,7 @@ settings = [{'randseed':8721,'jep':3.2,'jipratio':0.75,
                 'trials':150}]  
 #######################################################################
 
-
+print('PLOT MODEL ...')
 ax_model = ax_label1(simpleaxis1(
     pylab.subplot2grid((nrow,ncol),(4,0),rowspan=3),labelsize,pad=pad),
                                 'd',x=x_label_val, 

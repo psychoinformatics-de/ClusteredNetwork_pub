@@ -1,4 +1,4 @@
-import sys; sys.path.append('../utils')
+import sys; sys.path.append('../src')
 epsilon = sys.float_info.epsilon
 import matplotlib.pyplot as plt
 from matplotlib import pylab
@@ -7,7 +7,7 @@ import pandas as pd
 import scipy.stats as ss
 
 # Local imports (not installed packages)
-from global_params_funcs import (
+from GeneralHelper import (
     text_width_pts, extract_info_from_keys,
     nice_figure, simpleaxis, ax_label1, CB_color_cycle)
 from analyse_model import get_analysed_spiketimes
@@ -60,7 +60,7 @@ except:
                     params, datafile,window=params['ff_window'],
                     calc_cv2s=True, save=save)
     Anls = pd.read_pickle(data_path + file_name_analysis_sw)
-    
+
 data_lists = {
     'amp': [], 'ff': [], 'CV': [], 'rate': [], 'ff_std': [], 'CV_std': [], 'rate_std': [],
     'portion': [], 'ff1': [], 'CV1': [], 'rate1': [], 'ff_std1': [], 'CV_std1': [], 'rate_std1': [],
@@ -198,3 +198,7 @@ c.insert(pyx.epsfile.epsfile(0, 0.0, "../data/fig_StimAmp0.eps"))
 c.insert(pyx.epsfile.epsfile(1.5, 5.2,"../data/sketch_ff.eps"))
 c.writePDFfile("fig4.pdf")  
 plt.show()
+# remove intermediate files
+import os
+os.remove('../data/fig_StimAmp0.eps')
+os.remove('../data/fig_StimAmp0.jpg')

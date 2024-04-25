@@ -1,10 +1,11 @@
-import sys;sys.path.append('../utils')
+import sys;sys.path.append('../src')
 import pylab
 # Local modules (not installed packages)
 import analyse_model
-import default
-from global_params_funcs import (
-    nice_figure, make_color_list, ax_label1, ax_label_title,
+import defaultSimulate as default
+from GeneralHelper import (
+    nice_figure, make_color_list, 
+    ax_label1, ax_label_title,
     simpleaxis, find)
 
 

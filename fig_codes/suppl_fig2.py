@@ -1,14 +1,12 @@
-import sys;sys.path.append('../utils')
+import sys;sys.path.append('../src')
 from matplotlib import pylab
 import pandas as pd
-import plotting_functions as plotting
-import experimental_analysis_funcs as analyses
+import numpy as np
+import analyse_experiment as analyses
 import joe_and_lili
 from scipy.stats import wilcoxon
-#import organiser
 import pickle as pickle
-from general_func import *
-import os
+from GeneralHelper import nice_figure, ax_label1, simpleaxis1
 
 path = '../data/'
 
@@ -42,9 +40,11 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
 
     if count_dist_ax is not None:
         try:
-            spike_counts,tspike_counts,spike_counts_conditions,spike_counts_gns,spike_counts_directions = pd.read_pickle(path+'spike_counts_file_'+alignment)#pickle.load(open('ff_file_'+alignment))
+            (spike_counts,tspike_counts,spike_counts_conditions,
+             spike_counts_gns,spike_counts_directions) = pd.read_pickle(
+                 path+'suppl_fig2_spike_counts_'+alignment)
         except:
-            print('calculating counts ...')
+            print('calculating spike counts ...')
             spike_counts_gns = []
             spike_counts_conditions = [] 
             spike_counts_directions = []
@@ -64,7 +64,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
             spike_counts_conditions = pylab.array(spike_counts_conditions)
             pickle.dump((spike_counts,tspike_count,spike_counts_conditions,
                          spike_counts_gns,spike_counts_directions),
-                        open(path+'spike_counts_file_'+alignment,'wb'),
+                        open(path+'suppl_fig2_spike_counts_'+alignment,'wb'),
                         protocol = 2)
 
         for cnt, spk in enumerate(spike_counts):
@@ -74,11 +74,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
             else:
                 means = np.vstack((means, np.mean(spk,0)))
                 vars = np.vstack((vars, np.var(spk,0)))
-        
-        
-        
         slices = [200,800,1400]
-
         max_count_mask_per_cond = []
         for (condition,color) in zip([1,2,3],condition_colors):
             means_sel = means[spike_counts_conditions==condition]
@@ -93,22 +89,20 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
 
                 if mean_matching_ff:
                     mask = means_sel[:,slices[col]]<max_count
-                    # pylab.plot(means_sel[mask,slices[col]],
-                    #             vars_sel[mask,slices[col]], ',',color=color) 
-                    pylab.hist(means_sel[mask,slices[col]],bins=np.arange(0,50,1),color=color)
+                    pylab.hist(means_sel[mask,slices[col]],
+                               bins=np.arange(0,50,1),color=color)
                     if condition==1 and col==1:
                         pylab.gca().set_title('Mean Matched Count Distribution')
                 else:
-                    # pylab.plot(means_sel[:,slices[col]],
-                    #             vars_sel[:,slices[col]], ',',color=color)
-                    pylab.hist(means_sel[:,slices[col]],bins=np.arange(0,50,1),color=color)
+                    pylab.hist(means_sel[:,slices[col]],
+                               bins=np.arange(0,50,1),color=color)
                     if condition==1 and col==1:
                         pylab.gca().set_title('Count Distribution')
                 if condition==1:
-                    pylab.fill_betweenx([60,64],10,40,color=colors_hbar[col],alpha=0.4)
+                    pylab.fill_betweenx(
+                        [60,64],10,40,color=colors_hbar[col],alpha=0.4)
                 pylab.xlim(0,50)      
                 pylab.ylim(0,60)     
-
 
     if ff_ax is not None:
         pylab.sca(ff_ax)
@@ -117,10 +111,9 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
         else:
             pylab.gca().set_title('Fano Factor')
         try:
-            ffs,tff,ff_conditions,ff_gns,ff_directions = pd.read_pickle(path+'ff_file_'+alignment)#pickle.load(open('ff_file_'+alignment))
-
+            ffs,tff,ff_conditions,ff_gns,ff_directions = pd.read_pickle(
+                path+'experiment_'+monkey+'_ff_file_'+alignment)
         except:
-        
             ff_gns = []
             ff_conditions = [] 
             ff_directions = []
@@ -129,7 +122,9 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
                for j,condition in enumerate([1,2,3]):
                     for k,direction in enumerate([1,2,3,4,5,6]):
                         if good_directions[i,k]:
-                            ff,tff = analyses.get_ff(gn, condition, direction,alignment = alignment,tlim  =tlim)
+                            ff,tff = analyses.get_ff(
+                                gn, condition, direction,
+                                alignment = alignment,tlim  =tlim)
                             ffs.append(ff)
                             ff_gns.append(gn)
                             ff_conditions.append(condition)
@@ -147,12 +142,16 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
             else:
                 avg_ff = pylab.nanmean(ffs[ff_conditions==condition],axis=0)
             offset = pylab.nanmean(ffs[ff_conditions==condition],axis=0)[0]
-            pylab.plot(tff, avg_ff-offset,color = color,label = 'condition '+str(condition))
-            pylab.fill_betweenx([-.7,-0.68],slices[condition-1],slices[condition-1]+400,color=colors_hbar[condition-1],alpha=0.4)
+            pylab.plot(tff, avg_ff-offset,
+                       color = color,label = 'condition '+str(condition))
+            pylab.fill_betweenx([-.7,-0.68],
+                                slices[condition-1],slices[condition-1]+400,
+                                color=colors_hbar[condition-1],alpha=0.4)
         if ff_test_interval is not None:
             
             for ntest,test_conditions in enumerate([[1,2],[2,3]]):
-                interval_mask = (tff>ff_test_interval[0]) * (tff<ff_test_interval[1])
+                interval_mask = (
+                    tff>ff_test_interval[0]) * (tff<ff_test_interval[1])
                 test_time = tff[interval_mask]
                 test_vals = ffs[:,interval_mask]
                 test_vals1 = test_vals[ff_conditions == test_conditions[0]]
@@ -162,8 +161,7 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
                     s,p = wilcoxon(test_vals1[:,i],test_vals2[:,i])
                     scores[i] = p
                 sigplot=pylab.zeros_like(scores)*pylab.nan
-                sigplot[scores <0.05] = ff_test_ys[ntest]
-                print('test_time' ,test_time)                
+                sigplot[scores <0.05] = ff_test_ys[ntest]             
                 pylab.plot(test_time,sigplot,lw = lw)
         if ff_test_point is not None:
             for ntest,test_conditions in enumerate([[1,2],[2,3]]):
@@ -173,12 +171,15 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
                 test_vals1 = test_vals[ff_conditions == test_conditions[0]]
                 test_vals2 = test_vals[ff_conditions == test_conditions[1]]
                 s,p = wilcoxon(test_vals1[:],test_vals2[:])
-                print(test_conditions,p)
-                bottom_val = pylab.nanmean(test_vals1) - pylab.nanmean(ffs[ff_conditions==test_conditions[0]],axis=0)[0]
-                top_val = pylab.nanmean(test_vals2) - pylab.nanmean(ffs[ff_conditions==test_conditions[1]],axis=0)[0]
+                bottom_val = pylab.nanmean(
+                    test_vals1) - pylab.nanmean(
+                        ffs[ff_conditions==test_conditions[0]],axis=0)[0]
+                top_val = pylab.nanmean(
+                    test_vals2) - pylab.nanmean(
+                        ffs[ff_conditions==test_conditions[1]],axis=0)[0]
                 center = 0.5 * (bottom_val+top_val) 
-                print('test_time' ,test_time)
-                pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line,ms = 2.)
+                pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',
+                           lw =lw_line,ms = 2.)
                 pylab.text(test_time-10, center, '*',va = 'top',ha ='right')
 
 
@@ -189,14 +190,6 @@ condition_colors = ['0','0.3','0.6']
 condition_colors = ['navy','royalblue','lightskyblue']
     
 
-redo = False
-
-###########
-##########
-
-
-  
-    
 if __name__ == '__main__':
     labelsize = 7
     labelsize1 = 6    
@@ -212,7 +205,7 @@ if __name__ == '__main__':
                 'lines.linewidth':0.5,
                 'axes.linewidth':0.2}
 
-    fig = plotting.nice_figure(fig_width= 1.2,ratio  =.7,rcparams = rcparams)
+    fig = nice_figure(fig_width= 1.2,ratio  =.7,rcparams = rcparams)
     fig.subplots_adjust(hspace = .5,wspace = 0.9,bottom  =0.14,top  =0.9)
     tlim = [0,2000]
     xticks = [0,500,1000,1500,2000]
@@ -221,17 +214,15 @@ if __name__ == '__main__':
     x_label_val=-0.6
     size_cond = 12
 
-    condition_colors_exp = ['navy','royalblue','lightskyblue']    
-
-
+    condition_colors_exp = ['navy','royalblue','lightskyblue']
     for monkey in ['joe']:
         
         extra_filters = [('monkey','=',str.encode(monkey))]
-        ff_ax = plotting.ax_label1(plotting.simpleaxis1(
+        ff_ax = ax_label1(simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(0,0),rowspan=3, colspan=3),
             labelsize,pad=pad),'a',x=x_label_val/5,size=labelsize)
 
-        mean_matched_ff_ax = plotting.ax_label1(plotting.simpleaxis1(
+        mean_matched_ff_ax = ax_label1(simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(0,3),rowspan=3, colspan=3),
             labelsize,pad=pad),'b',x=x_label_val/5,size=labelsize)
         count_dist_ax_list=[]
@@ -243,11 +234,11 @@ if __name__ == '__main__':
             if row == 4 and col ==0:
                 label_axis = 'c'
                 label_axis_mm = 'd'                
-            count_dist_ax = plotting.ax_label1(plotting.simpleaxis1(
+            count_dist_ax = ax_label1(simpleaxis1(
                 pylab.subplot2grid((nrow,ncol),(row,col),rowspan=1, colspan=1),
                 labelsize,pad=pad),label_axis,x=x_label_val,size=labelsize)
             count_dist_ax_list.append(count_dist_ax)
-            count_dist_ax_mm = plotting.ax_label1(plotting.simpleaxis1(
+            count_dist_ax_mm = ax_label1(simpleaxis1(
                 pylab.subplot2grid((nrow,ncol),(row,col+3),rowspan=1, colspan=1),
                 labelsize,pad=pad),label_axis_mm,x=x_label_val,size=labelsize)
             count_dist_ax_mm_list.append(count_dist_ax_mm) 
@@ -289,8 +280,6 @@ if __name__ == '__main__':
     pylab.sca(count_dist_ax_list[6])
     pylab.xlabel('Spike Count')#
     pylab.ylabel('#')
-
-
     pylab.savefig('suppl_fig2.pdf')
     pylab.show()
 

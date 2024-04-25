@@ -1,25 +1,23 @@
 import joe_and_lili
-import organiser
-import experimental_analysis_funcs as analyses
+import analyse_experiment as analyses
 import pylab
 from copy import deepcopy
 import analyse_model
-import organiser
 import numpy as np
-from general_func import *
+from GeneralHelper import Organiser
+
+
 
 def reaction_time_plot(monkey,nbins = 40,
                        condition_colors = ['0','0.3','0.6']):
-    
     rts = []
     minrt = 1000000
     maxrt = 0
     for condition in [1,2,3]:
         params = {'monkey':monkey,'condition':condition}
-        rt = organiser.check_and_execute(
-            params, _get_mo_times, 
-            'experiment_'+monkey.decode("utf-8")+'_reaction_times',
-            redo  =False) 
+        ORG = Organiser(params, 
+                        'experiment_'+monkey.decode("utf-8")+'_reaction_times',)
+        rt = ORG.check_and_execute(monkey.decode("utf-8")+'_reaction_times') 
         rts.append(rt)
         minrt = min(minrt,min(rts[-1]))
         maxrt = max(maxrt,max(rts[-1]))
@@ -105,15 +103,6 @@ def _calc_reaction_time_analysis(original_params):
 
     return result
     
-
-
-    
-
-        
-
-
-
-
 def get_reaction_time_analysis(
     original_params,threshold_per_condition = False,
     tlim = [-500,2000],tau = 10.,threshold_resolution = 0.01,
@@ -122,7 +111,6 @@ def get_reaction_time_analysis(
     fname='reaction_time_analyses'):
     """Get the reaction time analysis for the model"""
     params = deepcopy(original_params)
-
     params['threshold_per_condition'] = threshold_per_condition
     params['tlim']  = tlim
     params['tau'] = tau
@@ -131,8 +119,8 @@ def get_reaction_time_analysis(
     params['integrate_from_go'] =integrate_from_go
     params['normalise_across_clusters'] = normalise_across_clusters
     params['redo'] = redo
-    return organiser.check_and_execute(params, _calc_reaction_time_analysis, 
-                                fname,redo = redo,save=save)
+    ORG = Organiser(params, fname, redo=redo, save=save)
+    return ORG.check_and_execute(_calc_reaction_time_analysis)
 
 
 def _get_mo_times(params):
@@ -309,9 +297,9 @@ def optimize_threshold(params,tau=100,thresh_range = pylab.arange(0,1.0,0.1),
     calc_params['reps'] = reps
     calc_params['integrate_from_go'] = integrate_from_go
     calc_params['normalise_across_clusters'] = normalise_across_clusters
-    return organiser.check_and_execute(
-        calc_params,_calc_thresh_scores,
-        'model_race_to_threshold_scores',redo  =redo)
+    ORG = Organiser(calc_params, 
+                    'model_race_to_threshold_scores',redo  =redo)
+    return ORG.check_and_execute(_calc_thresh_scores)
    
 
 
