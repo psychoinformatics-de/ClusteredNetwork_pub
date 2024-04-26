@@ -28,13 +28,9 @@ def reaction_time_plot(monkey,nbins = 40,
         plotbins = (bins[1:]+bins[:-1])/2.
         pylab.hist(pylab.array(rts[condition-1]),bins,histtype = 'step',
                         label = 'condition '+str(condition),
-                        color = condition_colors[condition-1],lw = 1.,density = True)
+                        color = condition_colors[condition-1],
+                        lw = 1.,density = True)
     
-    ##############
-    ##test#######
-    import scipy.stats as ss
-    min_len = min(len(rts[1]),len(rts[2]))
-    pylab.xlim(1400,2000)
         
 
 

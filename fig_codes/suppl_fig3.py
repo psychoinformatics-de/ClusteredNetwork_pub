@@ -189,7 +189,8 @@ redo = False
 
 def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, 
                 redo=False, save=False):
-    ffs = analyse_model.get_fanos(params, redo=redo, save=save)
+    ffs = analyse_model.get_fanos(params, redo=redo, save=save,
+                                  datafile='supplfig3_model_ffs')
 
     if not plot:
         return
@@ -246,7 +247,8 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5,
 
 def plot_cv2s(params,sig_time = 1000,plot = True,
               redo=False, save=False,lw_line=0.5):
-    cv2s = analyse_model.get_cv_two(params,redo=redo,save=save)
+    cv2s = analyse_model.get_cv_two(
+        params,redo=redo,save=save, datafile='supplfig3_model_cv_twos')
 
     if not plot:
         return
@@ -284,7 +286,8 @@ def plot_cv2s(params,sig_time = 1000,plot = True,
 
 
 def plot_rates(params,plot,redo=False, save=False):
-    scores = analyse_model.get_rates(params,redo  =redo,save=save)
+    scores = analyse_model.get_rates(params,redo  =redo,save=save,
+                                     datafile='supplfig3_model_rates')
     if not plot:
         return 
     time = scores.pop('time') + 500

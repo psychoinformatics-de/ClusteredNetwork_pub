@@ -98,7 +98,8 @@ def _calc_fanos(params):
     return condition_ffs
 
 
-def get_fanos(params,save = True,redo = False,datafile = 'model_fanos'):
+def get_fanos(params,save = True,redo = False,
+              datafile = 'model_fanos'):
     ORG = Organiser(params,datafile,redo=redo,save=save)
     return ORG.check_and_execute(_calc_fanos)
 
