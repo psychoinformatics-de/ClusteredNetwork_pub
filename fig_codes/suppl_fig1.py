@@ -149,7 +149,8 @@ if __name__ == '__main__':
     x_label_val = -0.25
     num_row, num_col = 1,1
     if plot:
-        fig  =plotting.nice_figure(ratio = 0.8,latex_page=global_params.text_width_pts)
+        fig  =plotting.nice_figure(ratio = 0.8,
+                                   latex_page=global_params.text_width_pts)
         fig.subplots_adjust(bottom = 0.15,hspace = 0.4,wspace = 0.3)
 
     for i,params in enumerate(settings):
@@ -164,8 +165,10 @@ if __name__ == '__main__':
             
             if plot:
                 ax = plotting.simpleaxis(
-                    pylab.subplot2grid((num_row,num_col),(row, col)),labelsize = 10) 
-            plot_ff_jep_vs_Q_Litwin(params,jep_range,Q_range,jipfactor,plot=plot, redo=False)
+                    pylab.subplot2grid((num_row,num_col),
+                                       (row, col)),labelsize = 10) 
+            plot_ff_jep_vs_Q_Litwin(params,jep_range,Q_range,jipfactor,
+                                    plot=plot, redo=False)
             if plot:
                 cbar = pylab.colorbar()
                 cbar.set_label('FF', rotation=90,size = 14)

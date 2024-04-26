@@ -104,9 +104,11 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             ffs.append(ff)
             cv2s.append(cv2)
             counts.append(count)
-            
+    print('len ff', len(ffs))
     ffs = pylab.array(ffs)
+    print('len ff', len(cv2s))
     cv2s = pylab.array(cv2s)
+    print('cv2sss', cv2s)
     cv2s = pylab.nanmean(cv2s,axis=1)
     
     if plot:
@@ -145,10 +147,10 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spike_params['jplus'] = pylab.array([[jep,jip],[jip,jip]])
             spike_params['randseed'] = spike_randseed
             spike_params['simtime'] = spike_simtime
-            ORG = Organiser(spike_params, datafile, reps=reps)
-            spiketimes = organiser.check_and_execute(
-                spike_params, get_spikes_fig2, datafile +'_spikes'
-                ,redo = redo_spiketrains)['spiketimes']
+            ORG = Organiser(spike_params, datafile +'_spikes')
+            results = ORG.check_and_execute(get_spikes_fig2)[0]
+            print('results', results)
+            spiketimes = results['spiketimes']
             spiketimes = spiketimes[:,spiketimes[1]<plot_units[1]]
             spiketimes = spiketimes[:,spiketimes[1]>=plot_units[0]]
             spiketimes[1] -= plot_units[0]
@@ -245,7 +247,7 @@ def plot_ff_jep_vs_Q_parallel(params, jep_range=pylab.linspace(1, 4, 41),
             params['jplus'] = np.around(np.array([[jep, jip], [jip, jip]]), 5)
             params['Q'] = int(Q)
             ORG = Organiser(params, datafile, reps=reps,
-                            ignore_keys=['n_jobs'], redo=redo)
+                            ignore_keys=['n_jobs'], redo=redo, save=False)
             results = ORG.check_and_execute(simulate_spontaneous)
             ff = [r[0] for r in results]
             ffs[i, Q_idx, :] = ff
@@ -295,10 +297,25 @@ if __name__ == '__main__':
                  'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
                  'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
 
+    settings = [{'warmup':200,'ff_window':400,'trials':20,
+                 'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.,
+                 'jep_range':pylab.arange(1,1.001,0.1),
+                 'spike_js':[1.,3.,5., 8. ,10.], 'portion_I':50}, 
+                {'jipfactor':0.,'fixed_indegree':False, 
+                 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
+                 'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26},
+                {'warmup':200,'ff_window':400,'trials':20,
+                 'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.75,
+                 'jep_range':pylab.arange(1.001,1.001, 0.1),
+                 'spike_js':[1.,8.,10.5,14.,50.], 'portion_I':1},
+                {'jipfactor':0.75,'fixed_indegree':False, 
+                 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
+                 'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
+
     
     
     plot = True
-    reps = 20
+    reps = 2#0
     x_label_val = -0.25
     num_row, num_col = 2,3
     if plot:
