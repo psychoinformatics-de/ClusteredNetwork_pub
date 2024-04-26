@@ -91,7 +91,8 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
         print('###############################################################')
         if jipfactor != 0. or jep<10:
             jip = 1. +(jep-1)*jipfactor
-            params['jplus'] = pylab.around(pylab.array([[jep,jip],[jip,jip]]),5)
+            params['jplus'] = pylab.around(pylab.array([[jep,jip],
+                                                        [jip,jip]]),5)
             ORG = Organiser(params, datafile, reps=reps)
             results = ORG.check_and_execute(simulate_spontaneous)
             ff = [r[0] for r in results]
@@ -148,7 +149,7 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spike_params['randseed'] = spike_randseed
             spike_params['simtime'] = spike_simtime
             ORG = Organiser(spike_params, datafile +'_spikes')
-            results = ORG.check_and_execute(get_spikes_fig2)[0]
+            results = ORG.check_and_execute(get_spikes_fig2)
             print('results', results)
             spiketimes = results['spiketimes']
             spiketimes = spiketimes[:,spiketimes[1]<plot_units[1]]

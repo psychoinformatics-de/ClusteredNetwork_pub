@@ -97,13 +97,11 @@ class Organiser:
     def _execute_parallel(self, func, params_list):
         """Execute tasks in parallel using joblib."""
         try:
-            print('type', type(params_list))
             if type(params_list) != list and self.n_jobs > 1:
                 print('running single job in parallel mode')
                 return Parallel(n_jobs=self.n_jobs)(delayed(
                     self._execute_function)(func, params_list))
             elif type(params_list) != list and self.n_jobs == 1:
-                print('r--> unning single job in serial mode')
                 return self._execute_function(func, params_list)
             else:
                 return Parallel(n_jobs=self.n_jobs)(delayed(
@@ -149,7 +147,7 @@ class Organiser:
                 results_dict.update(zip(keys_to_execute, results))
             self._save_results(results_dict)
         if self.reps is None:
-            return [results_dict.get(key)]
+            return results_dict.get(key)
         else:
             return [results_dict.get(k) for k in sorted(
                 results_dict.keys())]
