@@ -130,8 +130,6 @@ class Organiser:
         else:
             if key not in results_dict:
                 rerun = True
-        print('reps', self.reps,'jobs', self.n_jobs,
-              'rerun',rerun)
         if rerun:
             self.logger.info(f"Key '{key}' not found in results. Executing function '{func.__name__}'.")
             if self.reps is None:

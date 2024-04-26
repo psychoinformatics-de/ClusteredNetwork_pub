@@ -775,7 +775,7 @@ def _simulate_and_analyse_fig3(original_params):
 
 def get_simulate_and_analyse_fig3(params,datafile):
     """ get results for fig 3"""
-    ORG = Organiser(params,datafile,redo=False,save=False)
+    ORG = Organiser(params,datafile,redo=False,save=True)
     return ORG.check_and_execute(_simulate_and_analyse_fig3)
 
 

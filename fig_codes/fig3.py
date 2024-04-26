@@ -34,17 +34,24 @@ def do_plot(params,file_name,axes=None,redo = False,plot = True,markersize = 0.5
         
         x_margin = 2.
         y_margin = 2.
-        pylab.fill([left,right,right,left,left],[bottom,bottom,top,top,bottom],color = "r",lw = 0,alpha=0.1)
-        pylab.plot(spiketimes[0],spiketimes[1],'.k',markersize = markersize,alpha = spikealpha)
+        pylab.fill([left,right,right,left,left],[bottom,bottom,top,top,bottom],
+                   color = "r",lw = 0,alpha=0.1)
+        pylab.plot(spiketimes[0],spiketimes[1],'.k',markersize = markersize,
+                   alpha = spikealpha)
         pylab.xlim(0,params['simtime'])
-        pylab.plot([left-x_margin,right+x_margin,right+x_margin,left-x_margin,left-x_margin],[bottom-y_margin,bottom-y_margin,top+y_margin,top+y_margin,bottom-y_margin],'--',color = box_color,lw = 1.5)
+        pylab.plot([left-x_margin,right+x_margin,right+x_margin,left-x_margin,
+                    left-x_margin],[bottom-y_margin,bottom-y_margin,
+                                    top+y_margin,top+y_margin,
+                                    bottom-y_margin],'--',
+                    color = box_color,lw = 1.5)
         
         # show only the clusters below and above the focus cluster
 
         cluster_size = params['N_E']/params['Q']
         for i in range(params['Q']):
             pylab.axhline(i*cluster_size,linestyle = '-',color = 'k',alpha = 0.8)
-        pylab.ylim((params['focus_cluster']-(show_clusters))*cluster_size,(params['focus_cluster']+show_clusters+1)*cluster_size)
+        pylab.ylim((params['focus_cluster']-(show_clusters))*cluster_size,
+                   (params['focus_cluster']+show_clusters+1)*cluster_size)
         pylab.yticks([])
         if ylabel:
             pylab.ylabel('unit')
@@ -81,16 +88,21 @@ def do_plot(params,file_name,axes=None,redo = False,plot = True,markersize = 0.5
         pylab.sca(ax)
         bottom = voltage_limits[0]
         top = voltage_limits[1]
-        pylab.fill([left,right,right,left,left],[bottom,bottom,top,top,bottom],color = "r",lw = 0, alpha=0.1)        
+        pylab.fill([left,right,right,left,left],[bottom,bottom,top,top,bottom],
+                   color = "r",lw = 0, alpha=0.1)        
         pylab.xticks(list(range(left,right+50,100)))
         pylab.xlabel('time [ms]')
         ex_current = result['ex_current'][0]+result['Ixe']
         inh_current = result['inh_current'][0]
         time = result['current_times']
         focus_piece = find((time>=left)*(time<=right))        
-        pylab.plot(time[focus_piece],ex_current[focus_piece],color = '0.4',label = r'$I_{E} + I_{x}$')
-        pylab.plot(time[focus_piece],inh_current[focus_piece],color = '0.65',label = r'$I_{I}$')
-        pylab.plot(time[focus_piece],ex_current[focus_piece]+inh_current[focus_piece],color = 'k',label = r'$I_{tot}$')
+        pylab.plot(time[focus_piece],ex_current[focus_piece],color = '0.4',
+                   label = r'$I_{E} + I_{x}$')
+        pylab.plot(time[focus_piece],inh_current[focus_piece],color = '0.65',
+                   label = r'$I_{I}$')
+        pylab.plot(
+            time[focus_piece],ex_current[focus_piece]+inh_current[focus_piece],
+            color = 'k',label = r'$I_{tot}$')
         pylab.axhline(0,linestyle ='--',color = '0.7')
         if params['jipfactor'] == 0.:
             current_limits = [current_limits[0]+4, current_limits[1]-4]
@@ -101,7 +113,10 @@ def do_plot(params,file_name,axes=None,redo = False,plot = True,markersize = 0.5
         if ylabel:
             pylab.ylabel(r'$I_{syn}$ [pA]')
         if legend:
-            pylab.legend(loc = 'upper center',frameon = False,fontsize= 6,ncol = 3,handlelength = 1.5,columnspacing = 1.,handletextpad = 0.5,borderaxespad = 0.,borderpad = 0.)
+            pylab.legend(loc = 'upper center',frameon = False,
+                         fontsize= 6,ncol = 3,handlelength = 1.5,
+                         columnspacing = 1.,handletextpad = 0.5,
+                         borderaxespad = 0.,borderpad = 0.)
         
         if axes is None:
             pylab.figure()
@@ -111,7 +126,8 @@ def do_plot(params,file_name,axes=None,redo = False,plot = True,markersize = 0.5
         pylab.sca(ax)
         bottom = voltage_limits[0]
         top = voltage_limits[1]
-        pylab.fill([left,right,right,left,left],[bottom,bottom,top,top,bottom],color = "r",lw = 0, alpha=0.1)        
+        pylab.fill([left,right,right,left,left],[bottom,bottom,top,top,bottom],
+                   color = "r",lw = 0, alpha=0.1)        
         pylab.xlabel('time [ms]')
         if ylabel:
             pylab.ylabel('$V_{m}$ [mV]')
