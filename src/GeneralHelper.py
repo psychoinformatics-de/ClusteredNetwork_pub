@@ -131,7 +131,7 @@ class Organiser:
             if key not in results_dict:
                 rerun = True
         if rerun:
-            self.logger.info(f"Key '{key}' not found in results. Executing function '{func}'.")
+            self.logger.info(f"Key '{key}' not found in results. Executing function '{func.__name__}'.")
             if self.reps is None:
                 results_dict[key] = self._execute_parallel(func, self.params)
             else:

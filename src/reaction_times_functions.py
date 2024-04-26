@@ -17,7 +17,7 @@ def reaction_time_plot(monkey,nbins = 40,
         params = {'monkey':monkey,'condition':condition}
         ORG = Organiser(params, 
                         'experiment_'+monkey.decode("utf-8")+'_reaction_times',)
-        rt = ORG.check_and_execute(monkey.decode("utf-8")+'_reaction_times') 
+        rt = ORG.check_and_execute(_get_mo_times) 
         rts.append(rt)
         minrt = min(minrt,min(rts[-1]))
         maxrt = max(maxrt,max(rts[-1]))
