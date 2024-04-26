@@ -132,7 +132,9 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,
             ffs = pylab.array(ffs)
 
             ff_conditions = pylab.array(ff_conditions)
-            pickle.dump((ffs,tff,ff_conditions,ff_gns,ff_directions),open('ff_file_'+alignment,'w'),protocol = 2)
+            pickle.dump((ffs,tff,ff_conditions,ff_gns,ff_directions),
+                        open(path+'experiment_'+monkey+'_ff_file_'+alignment,
+                             'wb'),protocol = 2)
         for (condition,color) in zip([1,2,3],condition_colors):
             if mean_matching_ff:
                 ffs_cond = ffs[ff_conditions==condition]
