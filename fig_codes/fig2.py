@@ -297,25 +297,9 @@ if __name__ == '__main__':
                  'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
                  'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
 
-    settings = [{'warmup':200,'ff_window':400,'trials':20,
-                 'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.,
-                 'jep_range':pylab.arange(1,1.001,0.1),
-                 'spike_js':[1.,3.,5., 8. ,10.], 'portion_I':50}, 
-                {'jipfactor':0.,'fixed_indegree':False, 
-                 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
-                 'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26},
-                {'warmup':200,'ff_window':400,'trials':20,
-                 'trial_length':400.,'n_jobs':n_jobs,'Q':50,'jipfactor':0.75,
-                 'jep_range':pylab.arange(1.001,1.001, 0.1),
-                 'spike_js':[1.,8.,10.5,14.,50.], 'portion_I':1},
-                {'jipfactor':0.75,'fixed_indegree':False, 
-                 'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
-                 'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
-
-    
     
     plot = True
-    reps = 2#0
+    reps = 20
     x_label_val = -0.25
     num_row, num_col = 2,3
     if plot:
@@ -339,7 +323,8 @@ if __name__ == '__main__':
             plot_ff_cv_vs_jep(params,reps = reps,jipfactor =jipfactor,
                               jep_range = jep_range,spike_js = spike_js,
                               plot = plot,spike_randseed = 3,
-                              spike_simtime = 2000.,markersize = 0.1,spikealpha= 0.3)
+                              spike_simtime = 2000.,markersize = 0.1,
+                              spikealpha= 0.3)
             pylab.gca().text(-7, i/3.+0.2, title_left[i], rotation=90)
         else:
             jep_step = 0.5
