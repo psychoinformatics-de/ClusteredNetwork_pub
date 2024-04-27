@@ -62,7 +62,8 @@ class Organiser:
         self.logger.setLevel(logging.INFO)  # Set logging level (e.g., INFO, DEBUG)
         log_file = os.path.join(datapath, 'organizer.log')
         file_handler = logging.FileHandler(log_file)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter(
+            '%(asctime)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
 
@@ -116,7 +117,7 @@ class Organiser:
         otherwise execute the function and save the results."""
         key = key_from_params(self.params, self.reps, self.ignore_keys)
         results_dict = self._load_results()
-            
+
         if self.redo:
             print("Redo flag is set. Ignoring saved results.")
             results_dict = {}
@@ -135,14 +136,17 @@ class Organiser:
             if self.reps is None:
                 results_dict[key] = self._execute_parallel(func, self.params)
             else:
-                if type(key) != list:
-                    keys_to_execute = key
-                else:
-                    keys_to_execute = [f"{key}_{i}" for i in range(self.reps)]
+                # if type(key) != list:
+                #     keys_to_execute = key
+                # else:
+                #     keys_to_execute = [f"{key}_{i}" for i in range(self.reps)]
                 params_list = [
                     copy.deepcopy(self.params) for _ in range(self.reps)]
                 results = self._execute_parallel(func, params_list)
-                results_dict.update(zip(keys_to_execute, results))
+                print('reps', self.reps)
+                print('len results',len(results))
+                print('len keys',len(key))
+                results_dict.update(zip(key, results))
             self._save_results(results_dict)
         if self.reps is None:
             return results_dict.get(key)
