@@ -31,7 +31,7 @@ def reaction_time_plot(monkey,nbins = 40,
                         color = condition_colors[condition-1],
                         lw = 1.,density = True)
     
-        
+    pylab.xlim(1400,2000)
 
 
 def _calc_reaction_time_analysis(original_params):
