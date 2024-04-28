@@ -709,11 +709,11 @@ def _simulate_analyse(params):
 
 def get_analysed_spiketimes(params,datafile,window=400, 
                             calc_cv2s=True,
-                            save =False):
+                            redo=False, save =False):
     """ get the analysed spiketimes for the model."""
     params = {'sim_params':deepcopy(params),'window':window,
               'calc_cv2s':calc_cv2s, 'datafile':datafile}
-    ORG = Organiser(params,datafile+'_analyses',redo=False,save=save)
+    ORG = Organiser(params,datafile+'_analyses',redo=redo,save=save)
     return ORG.check_and_execute(_simulate_analyse)
 
 

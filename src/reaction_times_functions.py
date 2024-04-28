@@ -206,8 +206,6 @@ def race_to_threshold(params,tau = 100.,threshold = 0.5,
                     normalise_across_clusters=normalise_across_clusters,redo=redo)
     else:
         full_integrals,time,conditions,directions = integral_output
-    print('full_integrals shap', full_integrals.shape)
-    print('direction shape', directions.shape)
     # Go cue
     go_time = params['sim_params'].get('prep_length',1000)
     go_ind = np.argmin(np.absolute(time-go_time))
@@ -265,7 +263,6 @@ def _calc_thresh_scores(params):
                         normalise_across_clusters=normalise_across_clusters,redo=redo)
 
         finite = np.isfinite(np.array(predictions))
-        print('finite', len(directions), len(predictions))
         predictions = predictions[finite]
         directions = directions[finite]
         if len(directions)<1:

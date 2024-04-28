@@ -142,16 +142,20 @@ def do_plot(extra_filters = [],min_count_rate = 5,
                 test_ind = pylab.argmin(pylab.absolute(tff-ff_test_point))
                 test_time = tff[test_ind]
                 test_vals = ffs[:,test_ind]
+                
                 test_vals1 = test_vals[ff_conditions == test_conditions[0]]
                 test_vals2 = test_vals[ff_conditions == test_conditions[1]]
                 s,p = wilcoxon(test_vals1[:],test_vals2[:])
+                print('p values', p)
                 bottom_val = pylab.nanmean(test_vals1) - pylab.nanmean(
                     ffs[ff_conditions==test_conditions[0]],axis=0)[0]
                 top_val = pylab.nanmean(test_vals2) - pylab.nanmean(
                     ffs[ff_conditions==test_conditions[1]],axis=0)[0]
                 center = 0.5 * (bottom_val+top_val) 
-                pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],'-_k',lw =lw_line,ms = 2.)
-                pylab.text(test_time-10, center+0.05, '*',va = 'top',ha ='right',size = 6)
+                pylab.plot([test_time]*2,[bottom_val+0.02,top_val-0.02],
+                           '-_k',lw =lw_line,ms = 2.)
+                pylab.text(test_time-10, center+0.05, '*',
+                           va = 'top',ha ='right',size = 6)
 
 
 

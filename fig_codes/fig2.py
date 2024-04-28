@@ -101,11 +101,13 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             ffs.append(ff)
             cv2s.append(cv2)
             counts.append(count)
+            print('len ff', len(ff))
         else:
+            print('--> len ff', len(ff))
             ffs.append(ff)
             cv2s.append(cv2)
             counts.append(count)
-    print('len ff', len(ffs))
+    print('len ffs', len(ffs))
     ffs = pylab.array(ffs)
     print('len ff', len(cv2s))
     cv2s = pylab.array(cv2s)
@@ -298,7 +300,6 @@ if __name__ == '__main__':
                  'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
                  'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
 
-    
     plot = True
     reps = 20
     x_label_val = -0.25
