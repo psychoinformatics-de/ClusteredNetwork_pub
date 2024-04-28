@@ -266,7 +266,8 @@ def _calc_population_decoding(params):
     # Suppress specific warning
     warnings.filterwarnings("ignore", category=ConvergenceWarning)
     # training and testing the classifier
-    print('training and testing the classifier (it will some time) ...')
+    print(
+        "Training and testing the classifier (this will take some time) ...")
     for i in range(len(time)):
         features = feature_mat[:,:,i]
         predictions = pylab.zeros_like(targets).astype(float)

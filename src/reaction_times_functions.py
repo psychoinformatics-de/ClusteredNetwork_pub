@@ -103,7 +103,7 @@ def get_reaction_time_analysis(
     original_params,threshold_per_condition = False,
     tlim = [-500,2000],tau = 10.,threshold_resolution = 0.01,
     score_reps =1,redo  =False,integrate_from_go  =False,
-    normalise_across_clusters=False,save=False,
+    normalise_across_clusters=False,save=True,
     fname='reaction_time_analyses'):
     """Get the reaction time analysis for the model"""
     params = deepcopy(original_params)

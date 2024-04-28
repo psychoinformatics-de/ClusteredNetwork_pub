@@ -18,7 +18,7 @@ from GeneralHelper import ( Organiser,
 
 
 datapath = '../data/'
-datafile = 'fig2_simulated_data1'
+datafile = 'fig2_simulated_data'
 
 def get_spikes_fig2(params):
     EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
@@ -93,7 +93,7 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             jip = 1. +(jep-1)*jipfactor
             params['jplus'] = pylab.around(pylab.array([[jep,jip],
                                                         [jip,jip]]),5)
-            ORG = Organiser(params, datafile, reps=reps)
+            ORG = Organiser(params, datafile, reps=reps, n_jobs = 4)
             results = ORG.check_and_execute(simulate_spontaneous)
             ff = [r[0] for r in results]
             cv2 = [r[1] for r in results]
@@ -179,7 +179,7 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
     else:
         model = 'EI_clustered'
     try:
-        ffs = pd.read_pickle(datapath + "ffs_fig2_"+model)
+        ffs = pd.read_pickle(datapath + "fig2_ffs_"+model)
     except:
         ffs = pylab.zeros((len(jep_range),len(Q_range),reps))
         for i,jep_ in enumerate(jep_range):
@@ -190,22 +190,24 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
                 else:
                     params['portion_I'] = 1
                 jip = 1. +(jep-1)*jipfactor
-                print('#################################################################################')
-                print(Q,jep,jip,'-------------------------------------------------------------------------')
-                print('#################################################################################')
+                print('#######################################################')
+                print(Q,jep,jip,'---------------------------------------------')
+                print('#######################################################')
                 params['jplus'] = pylab.around(
                     pylab.array([[jep,jip],[jip,jip]]),5)
                 params['Q'] = int(Q)
-                ORG = Organiser(params, datafile, 
+                ORG = Organiser(deepcopy(params), datafile,
                                 reps=reps,ignore_keys=['n_jobs'],
                                 redo = redo)
-                results = ORG.check_and_execute(simulate_spontaneous)
+                ORG_copy = deepcopy(ORG)
+                results = ORG_copy.check_and_execute(simulate_spontaneous)
+                del ORG_copy
                 ff = [r[0] for r in results]
                 ffs[i,j,:] = ff
                 if jep_>Q:
                     ffs[i,j,:] = pylab.nan
                 
-        pickle.dump(ffs,open(datapath + "ffs_fig2_"+model,'wb'))
+        pickle.dump(ffs,open(datapath + "fig2_ffs_"+model,'wb'))
 
     if plot:
         pylab.contourf(jep_range,Q_range,pylab.nanmean(ffs,axis=2).T,
@@ -236,7 +238,10 @@ def plot_ff_jep_vs_Q_parallel(params, jep_range=pylab.linspace(1, 4, 41),
         ffs = pd.read_pickle(datapath + "fig2_ffs_" + model)
     except FileNotFoundError:
         ffs = np.zeros((len(jep_range), len(Q_range), reps))
-        def process_params(i, jep_, Q_idx, Q):
+        def process_params(i, Q_idx, ffs):
+            jep_ = jep_range[i]
+            Q = Q_range[Q_idx]
+            print('jep_', jep_, 'Q_idx', Q_idx, 'Q', Q)
             jep = float(min(jep_, Q))
             if jipfactor == 0.:
                 params['portion_I'] = Q
@@ -246,24 +251,35 @@ def plot_ff_jep_vs_Q_parallel(params, jep_range=pylab.linspace(1, 4, 41),
             print('##########################################################')
             print(Q, jep, jip, '---------------------------------------------')
             print('##########################################################')
-            params['jplus'] = np.around(np.array([[jep, jip], [jip, jip]]), 5)
+            params['jplus'] = np.around(
+                np.array([[jep, jip], [jip, jip]]), 5)
             params['Q'] = int(Q)
+            print('reps', reps)
             ORG = Organiser(params, datafile, reps=reps,
-                            ignore_keys=['n_jobs'], redo=redo, save=False)
+                            ignore_keys=['n_jobs'], n_jobs=1,
+                            redo=False, save=True)
             results = ORG.check_and_execute(simulate_spontaneous)
+            
+            print(len(results))
             ff = [r[0] for r in results]
+            print('--> ff', ff, len(ff))
             ffs[i, Q_idx, :] = ff
             if jep_ > Q:
+                ff = [np.nan] * reps
                 ffs[i, Q_idx, :] = np.nan
-
+            return i, Q_idx, ff
+        import itertools
         # Parallelize the nested loop using joblib
-        Parallel(n_jobs=-1)(
-            delayed(process_params)(i, jep_, Q_idx, Q)
-            for i, jep_ in enumerate(jep_range)
-            for Q_idx, Q in enumerate(Q_range)
+        results_all = Parallel(n_jobs=4)(
+            delayed(process_params)(i, Q_idx,ffs)
+            for i, Q_idx in list(itertools.product(
+                range(len(jep_range)), range(len(Q_range))))
         )
+        for i, Q_idx, ff in results_all:
+            ffs[i, Q_idx, :] = ff
+        print ('ffs', ffs)
         pickle.dump(ffs, open(datapath + "fig2_ffs_" + model, 'wb'))
-
+    print('--ffs', ffs)
     if plot:
         pylab.contourf(jep_range, Q_range, np.nanmean(ffs, axis=2).T,
                        levels=[0.5, 1., 1.5, 2.], extend='both',
@@ -299,6 +315,7 @@ if __name__ == '__main__':
                  'warmup':200,'ff_window':400,'trials':20,'trial_length':400.,
                  'n_jobs':n_jobs,'I_th_E':2.14,'I_th_I':1.26}]  #3,5  hz
 
+
     plot = True
     reps = 20
     x_label_val = -0.25
@@ -315,7 +332,8 @@ if __name__ == '__main__':
         col= int(i%2)
         jipfactor = params['jipfactor']
         if plot and i in [0,2]:
-            ax = simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col), colspan=2))
+            ax = simpleaxis(pylab.subplot2grid((num_row,num_col),
+                                               (row, col), colspan=2))
             ax_label1(ax, labels[i],x=x_label_val)
             pylab.ylabel('FF')
             pylab.xlabel('$J_{E+}$')
@@ -337,7 +355,7 @@ if __name__ == '__main__':
                 ax = simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col+1)))          
                 ax_label1(ax, labels[i], x=x_label_val)
             ffs = plot_ff_jep_vs_Q_parallel(params,jep_range,Q_range,
-                                   jipfactor=jipfactor,plot=plot)
+                                   jipfactor=jipfactor,plot=plot,reps=40)
             if plot:
                 cbar = pylab.colorbar()
                 cbar.set_label('FF', rotation=90)
