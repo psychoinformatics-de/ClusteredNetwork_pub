@@ -12,12 +12,9 @@ import networkx as nx
 import ast 
 import json
 import pickle
-import time
 import defaultSimulate as default
 from joblib import Parallel,delayed
 import collections
-import logging
-from logging.handlers import RotatingFileHandler
 # ******************************************************************************
 #                                    Classes
 # ******************************************************************************
@@ -26,11 +23,6 @@ from logging.handlers import RotatingFileHandler
 class TimeoutException(Exception):   # Custom exception class
     pass
 
-import os
-import copy
-import pickle
-import pandas as pd
-from joblib import Parallel, delayed
 
 class Organiser:
     """Organiser class for managing function results and data storage."""
@@ -57,19 +49,6 @@ class Organiser:
         self.reps = reps
         self.redo = redo
 
-
-        # Initialize logger
-        self.logger = logging.getLogger('OrganizerLogger')
-        self.logger.setLevel(logging.INFO)  # Set logging level (e.g., INFO, DEBUG)
-        log_file = os.path.join(datapath, 'organizer.log')
-        
-        # Configure rotating file handler
-        handler = RotatingFileHandler(filename=log_file, 
-                                      maxBytes=1024*1024, backupCount=3)  # Rotate when file reaches 1MB, keep 3 backups
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-
     def _load_results(self):
         """Load results from the datafile if it exists, 
         otherwise return an empty dictionary."""
@@ -77,7 +56,7 @@ class Organiser:
             if os.path.exists(self.datafile):
                 return pd.read_pickle(self.datafile)
         except Exception as e:
-            self.logger.error(f"Error loading datafile: {e}")
+            print(f"Error loading datafile: {e}")
         return {}
 
     def _save_results(self, results_dict):
@@ -86,16 +65,16 @@ class Organiser:
             try:
                 with open(self.datafile, 'wb') as file:
                     pickle.dump(results_dict, file, protocol=2)
-                    self.logger.info(f"Results saved to '{self.datafile}'")
+                    print(f"Results saved to '{self.datafile}'")
             except Exception as e:
-                self.logger.error(f"Error saving results: {e}")
+                print(f"Error saving results: {e}")
 
     def _execute_function(self, func, params):
         """Execute the specified function with the given parameters."""
         try:
             return func(copy.deepcopy(params))
         except Exception as e:
-            self.logger.error(f"Error executing function: {e}")
+            print(f"Error executing function: {e}")
         return None
 
     def _execute_parallel(self, func, params_list):
@@ -112,7 +91,7 @@ class Organiser:
                     self._execute_function)(
                         func, params) for params in params_list)
         except Exception as e:
-            self.logger.error(f"Error executing parallel function: {e}")
+            print(f"Error executing parallel function: {e}")
         return []
 
     def check_and_execute(self, func):
@@ -135,7 +114,7 @@ class Organiser:
             if key not in results_dict:
                 rerun = True
         if rerun:
-            self.logger.info(f"Key '{key}' not found in results. Executing function '{func.__name__}'.")
+            print(f"Key '{key}' not found in results. Executing function '{func.__name__}'.")
             if self.reps is None:
                 results_dict[key] = self._execute_parallel(func, self.params)
             else:
