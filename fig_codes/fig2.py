@@ -103,7 +103,6 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             counts.append(count)
             print('len ff', len(ff))
         else:
-            print('--> len ff', len(ff))
             ffs.append(ff)
             cv2s.append(cv2)
             counts.append(count)

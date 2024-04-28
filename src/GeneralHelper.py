@@ -17,6 +17,7 @@ import defaultSimulate as default
 from joblib import Parallel,delayed
 import collections
 import logging
+from logging.handlers import RotatingFileHandler
 # ******************************************************************************
 #                                    Classes
 # ******************************************************************************
@@ -61,11 +62,13 @@ class Organiser:
         self.logger = logging.getLogger('OrganizerLogger')
         self.logger.setLevel(logging.INFO)  # Set logging level (e.g., INFO, DEBUG)
         log_file = os.path.join(datapath, 'organizer.log')
-        file_handler = logging.FileHandler(log_file)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(levelname)s - %(message)s')
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(file_handler)
+        
+        # Configure rotating file handler
+        handler = RotatingFileHandler(filename=log_file, 
+                                      maxBytes=1024*1024, backupCount=3)  # Rotate when file reaches 1MB, keep 3 backups
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
 
     def _load_results(self):
         """Load results from the datafile if it exists, 
@@ -136,10 +139,6 @@ class Organiser:
             if self.reps is None:
                 results_dict[key] = self._execute_parallel(func, self.params)
             else:
-                # if type(key) != list:
-                #     keys_to_execute = key
-                # else:
-                #     keys_to_execute = [f"{key}_{i}" for i in range(self.reps)]
                 params_list = [
                     copy.deepcopy(self.params) for _ in range(self.reps)]
                 results = self._execute_parallel(func, params_list)
@@ -154,106 +153,6 @@ class Organiser:
             return [results_dict.get(k) for k in sorted(
                 results_dict.keys())]
 
-
-# class Organizer(object):
-#     def __init__(self, params, datafile, datapath='../data/',  
-#                  save=True, n_jobs=1, ignore_keys=[], 
-#                  reps = None, redo=None) -> None:
-#         self.params = params
-#         self.datafile = datafile
-#         self.datapath = datapath
-#         self.save = save
-#         self.n_jobs = n_jobs
-#         self.ignore_keys = ignore_keys
-#         self.reps = reps
-#         self.redo = redo
-    
-#     def check_and_execute(self,func):
-#         """Check if the data is already saved in the datafile, 
-#         if not, execute the function and save the results in the datafile."""
-
-#         key = key_from_params(self.params,self.reps,self.ignore_keys)
-        
-#         full_datafile = os.path.join(self.datapath,self.datafile)                                                          
-#         try:
-#             if self.redo:
-#                 raise ValueError
-#             all_results = pd.read_pickle(full_datafile)
-#             if self.reps is None:
-#                 if key not in all_results.keys():
-#                     key = compare_key(all_results.keys(), self.params)
-#                 else:
-#                     pass
-
-#             if self.reps is None and not self.redo:
-#                 results = all_results[key]
-#                 result_keys = [key]
-                
-#             elif not self.redo:
-#                 result_keys =  key#[key+'_'+str(r) for r in range(reps)]
-#                 results = [all_results[result_key] for result_key in result_keys]
-#             elif self.redo:
-#                 raise 
-#         except:
-#             try:
-#                 all_results = pd.read_pickle(full_datafile)
-#             except:
-#                 all_results = {}  
-#                 if self.save:
-#                     pickle.dump(all_results,
-#                                 open(full_datafile,'wb'),protocol = 2)
-#             if self.reps is None:
-#                 results = func(self.params)
-#                 all_results[key] = results
-#             else:
-#                 all_keys = []
-#                 possible_keys = key
-#                 missing_keys = [k for k in possible_keys if k not in all_keys]
-
-#                 if self.n_jobs>1:
-#                     print('careful: in parallel, randseeds need to be set')
-#                     copied_params = [
-#                         copy.deepcopy(self.params) for mk in missing_keys]
-
-
-#                     # this sometimes breaks, so we need to catch the error and try again
-#                     max_retries = 5
-#                     retries = 0
-#                     while retries < max_retries:
-#                         try:
-#                             new_results = Parallel(self.n_jobs)(
-#                                 delayed(func)(cp) for cp in copied_params)  # Call your parallel task function
-#                             break  # If successful, break out of the loop
-#                         except Exception as e:
-#                             print(f"Attempt {retries + 1} failed:", e)
-#                             retries += 1
-#                             if retries < max_retries:
-#                                 print("Retrying...")
-#                                 time.sleep(2)  # Wait for a moment before retrying
-        
-        
-
-#                     for mk,nr in zip(missing_keys,new_results):
-#                         all_results[mk] = nr
-#                 else:
-#                     for mk in missing_keys:
-#                         print('loop')
-#                         all_results[mk] = func(copy.deepcopy(self.params))
-#                         if self.save:
-#                             pickle.dump(all_results,open(full_datafile,'wb'),
-#                                         protocol = 2)
-                
-#                 #all_keys = sorted([k for k in list(all_results.keys()) if k in key])
-#                 all_keys = [k for k in sorted(all_results.keys()) if k not in key]
-#                 results = [all_results[k] for k in all_keys[:self.reps]]
-                
-#             if self.save:
-#                 print('saving results of ', func)
-#                 pickle.dump(all_results,open(full_datafile,'wb'),protocol = 2)
-#         return results
-    
-    
-    
 
 class memoized(object):
     '''Decorator. Caches a function's return value each time it is called.

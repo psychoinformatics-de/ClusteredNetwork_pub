@@ -59,10 +59,9 @@ except:
                 result = get_analysed_spiketimes(
                     params, datafile,window=params['ff_window'],
                     calc_cv2s=True, save=save)
-                while result is None:
-                    result = get_analysed_spiketimes(
-                        params, datafile,window=params['ff_window'],
-                        calc_cv2s=True, redo=True, save=save)
+                if result is None:
+                    print('No results for ', params)
+                    break
     Anls = pd.read_pickle(data_path + file_name_analysis_sw)
 
 data_lists = {
