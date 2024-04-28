@@ -28,7 +28,7 @@ class Organiser:
     """Organiser class for managing function results and data storage."""
     def __init__(self, params, datafile, datapath='../data/', 
                 n_jobs=1, ignore_keys=[''], 
-                 reps=None, redo=None, save=True,):
+                 reps=None, redo=None, save=True):
         """Initialise the Organiser with the given parameters.
         
         Args:
@@ -120,17 +120,22 @@ class Organiser:
             else:
                 params_list = [
                     copy.deepcopy(self.params) for _ in range(self.reps)]
-                results = self._execute_parallel(func, params_list)
-                print('reps', self.reps)
-                print('len results',len(results))
-                print('len keys',len(key))
+                if self.n_jobs == 1:
+                    results = []
+                    for i in range(self.reps):
+                        results.append(self._execute_function(
+                            func, params_list[i]))
+                else:
+                    results = self._execute_parallel(func, params_list)
+                print('exec reps', self.reps)
+                print('exec len results',len(results))
+                print('exec len keys',len(key))
                 results_dict.update(zip(key, results))
             self._save_results(results_dict)
         if self.reps is None:
             return results_dict.get(key)
         else:
-            return [results_dict.get(k) for k in sorted(
-                results_dict.keys())]
+            return [results_dict.get(k) for k in key]
 
 
 class memoized(object):
