@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 import time
 import pickle
 import sys
@@ -29,6 +30,7 @@ class ClusteredNetworkBase:
             defaultValues (module): A Module which contains the default configuration
             parameters (dict):      Dictionary with parameters which should be modified from their default values
         """
+        parameters = deepcopy(parameters)
         self.params = GeneralHelper.mergeParams(parameters, defaultValues)
         self.Populations = []
         self.RecordingDevices = []
@@ -54,7 +56,8 @@ class ClusteredNetworkBase:
 
 
         np.random.seed(self.params['randseed'])
-        randseeds = list(range(self.params['randseed'] + 2, self.params['randseed'] + 2 + self.params.get('n_jobs', 1)))
+        randseeds = list(range(self.params['randseed'] + 2, 
+                               self.params['randseed'] + 2 + self.params.get('n_jobs', 1)))
         nest.SetKernelStatus({"resolution": self.params.get('dt', 0.1),
                               "print_time": True, "overwrite_files": True,
                               'local_num_threads': self.params.get('n_jobs', 1),
@@ -67,8 +70,8 @@ class ClusteredNetworkBase:
 
         """
         # make sure number of clusters and units are compatible
-        #assert self.params['N_E'] % self.params['Q'] == 0, 'N_E needs to be evenly divisible by Q'
-        #assert self.params['N_I'] % self.params['Q'] == 0, 'N_I needs to be evenly divisible by Q'
+        assert self.params['N_E'] % self.params['Q'] == 0, 'N_E needs to be evenly divisible by Q'
+        assert self.params['N_I'] % self.params['Q'] == 0, 'N_I needs to be evenly divisible by Q'
 
         N = self.params['N_E'] + self.params['N_I']  # total units
         try:
@@ -187,6 +190,7 @@ class ClusteredNetworkBase:
         # if js are not given compute them so that sqrt(K) spikes equal v_thr-E_L and rows are balanced
         if np.isnan(js).any():
             js = ClusterHelper.calc_js(self.params)
+            self.params['js'] = js
         js *= self.params['s']
 
         # jminus is calculated so that row sums remain constant
@@ -222,15 +226,20 @@ class ClusteredNetworkBase:
         # EI
         j_ei = js[0, 1] / np.sqrt(N)
         nest.CopyModel("static_synapse", "EI_plus",
-                       {"weight": j_ei * self.params['jplus'][0, 1], "delay": self.params['delay']})
-        nest.CopyModel("static_synapse", "EI_minus", {"weight": j_ei * jminus[0, 1], "delay": self.params['delay']})
+                       {"weight": j_ei * self.params['jplus'][0, 1], 
+                        "delay": self.params['delay']})
+        nest.CopyModel("static_synapse", "EI_minus", 
+                       {"weight": j_ei * jminus[0, 1], 
+                        "delay": self.params['delay']})
         if self.params['fixed_indegree']:
             K_EI = int(self.params['ps'][0, 1] * self.params['N_I'] / self.params['Q'])
             print('K_EI: ', K_EI)
-            conn_params_EI = {'rule': 'fixed_indegree', 'indegree': K_EI, 'autapses': False,
+            conn_params_EI = {'rule': 'fixed_indegree', 
+                              'indegree': K_EI, 'autapses': False,
                               'multapses': False}
         else:
-            conn_params_EI = {'rule': 'pairwise_bernoulli', 'p': self.params['ps'][0, 1], 'autapses': False,
+            conn_params_EI = {'rule': 'pairwise_bernoulli', 
+                              'p': self.params['ps'][0, 1], 'autapses': False,
                               'multapses': False}
         for i, pre in enumerate(self.Populations[1]):
             for j, post in enumerate(self.Populations[0]):
@@ -281,29 +290,6 @@ class ClusteredNetworkBase:
                     nest.Connect(pre, post, conn_params_II, 'II_plus')
                 else:
                     nest.Connect(pre, post, conn_params_II, 'II_minus')
-        #print('Js: ', js / np.sqrt(N))
-
-    # def create_stimulation(self):
-    #     """
-    #     Creates a current source as stimulation of the specified cluster/s.
-    #     """
-    #     if self.params['stim_clusters'] is not None:
-    #         stim_amp = self.params['stim_amp']  # amplitude of the stimulation current in pA
-    #         stim_starts = self.params['stim_starts']  # list of stimulation start times
-    #         stim_ends = self.params['stim_ends']  # list of stimulation end times
-    #         amplitude_values = []
-    #         amplitude_times = []
-    #         for start, end in zip(stim_starts, stim_ends):
-    #             amplitude_times.append(start + self.params['warmup'])
-    #             amplitude_values.append(stim_amp)
-    #             amplitude_times.append(end + self.params['warmup'])
-    #             amplitude_values.append(0.)
-    #         self.Currentsources = [nest.Create('step_current_generator')]
-    #         for stim_cluster in self.params['stim_clusters']:
-    #             nest.Connect(self.Currentsources[0], self.Populations[0][stim_cluster])
-    #         nest.SetStatus(self.Currentsources[0],
-    #                        {'amplitude_times': amplitude_times, 
-    #                        'amplitude_values': amplitude_values})
 
 
     def create_stimulation(self):

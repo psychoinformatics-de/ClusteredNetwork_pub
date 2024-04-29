@@ -358,6 +358,7 @@ def plot_population_decoding(params,plot, redo=False):
     print('pop decoding score', scores)
     if not plot:
         return 
+    
     time = scores.pop('time') + 500
 
     for condition in params['sim_params']['conditions']:

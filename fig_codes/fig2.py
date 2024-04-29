@@ -21,9 +21,11 @@ datapath = '../data/'
 datafile = 'fig2_simulated_data'
 
 def get_spikes_fig2(params):
-    EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
+    params_copy = deepcopy(params)
+    EI_Network = ClusterModelNEST.ClusteredNetwork(default, params_copy)
+    EI_Network_copy = deepcopy(EI_Network)
     # Creates object which creates the EI clustered network in NEST
-    result = EI_Network.get_simulation() 
+    result = EI_Network_copy.get_simulation() 
     return result
 
 def simulate_spontaneous(params):
@@ -33,9 +35,11 @@ def simulate_spontaneous(params):
     sim_params = deepcopy(params)
     sim_params['simtime'] = trials*trial_length
     ff_window = params['ff_window']
-    EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
+    #EI_Network = ClusterModelNEST.ClusteredNetwork(default, params)
+    #EI_Network_copy = deepcopy(EI_Network)
     # Creates object which creates the EI clustered network in NEST
-    results = EI_Network.get_simulation()
+    results = get_spikes_fig2(sim_params)
+    #results = EI_Network_copy.get_simulation()
     long_spiketimes = results['spiketimes']
     order = pylab.argsort(long_spiketimes[0])
     long_spiketimes = long_spiketimes[:,order]
@@ -60,7 +64,6 @@ def simulate_spontaneous(params):
     counts = []
     for unit in range(N_E):
         unit_end = bisect_right(spiketimes[2], unit)
-        
         unit_spikes = spiketimes[:2,:unit_end]
         spiketimes = spiketimes[:,unit_end:]
         counts.append(unit_spikes.shape[1])
@@ -94,23 +97,21 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             params['jplus'] = pylab.around(pylab.array([[jep,jip],
                                                         [jip,jip]]),5)
             ORG = Organiser(params, datafile, reps=reps, n_jobs = 4)
-            results = ORG.check_and_execute(simulate_spontaneous)
+            ORG_copy = deepcopy(ORG)
+            results = ORG_copy.check_and_execute(simulate_spontaneous)
+
             ff = [r[0] for r in results]
             cv2 = [r[1] for r in results]
             count = [r[2] for r in results]
             ffs.append(ff)
             cv2s.append(cv2)
             counts.append(count)
-            print('len ff', len(ff))
         else:
             ffs.append(ff)
             cv2s.append(cv2)
             counts.append(count)
-    print('len ffs', len(ffs))
     ffs = pylab.array(ffs)
-    print('len ff', len(cv2s))
     cv2s = pylab.array(cv2s)
-    print('cv2sss', cv2s)
     cv2s = pylab.nanmean(cv2s,axis=1)
     
     if plot:
@@ -151,7 +152,6 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spike_params['simtime'] = spike_simtime
             ORG = Organiser(spike_params, datafile +'_spikes')
             results = ORG.check_and_execute(get_spikes_fig2)
-            print('results', results)
             spiketimes = results['spiketimes']
             spiketimes = spiketimes[:,spiketimes[1]<plot_units[1]]
             spiketimes = spiketimes[:,spiketimes[1]>=plot_units[0]]
@@ -254,15 +254,11 @@ def plot_ff_jep_vs_Q_parallel(params, jep_range=pylab.linspace(1, 4, 41),
             params['jplus'] = np.around(
                 np.array([[jep, jip], [jip, jip]]), 5)
             params['Q'] = int(Q)
-            print('reps', reps)
             ORG = Organiser(params, datafile, reps=reps,
                             ignore_keys=['n_jobs'], n_jobs=1,
                             redo=False, save=True)
             results = ORG.check_and_execute(simulate_spontaneous)
-            
-            print(len(results))
             ff = [r[0] for r in results]
-            print('--> ff', ff, len(ff))
             ffs[i, Q_idx, :] = ff
             if jep_ > Q:
                 ff = [np.nan] * reps
@@ -277,9 +273,7 @@ def plot_ff_jep_vs_Q_parallel(params, jep_range=pylab.linspace(1, 4, 41),
         )
         for i, Q_idx, ff in results_all:
             ffs[i, Q_idx, :] = ff
-        print ('ffs', ffs)
         pickle.dump(ffs, open(datapath + "fig2_ffs_" + model, 'wb'))
-    print('--ffs', ffs)
     if plot:
         pylab.contourf(jep_range, Q_range, np.nanmean(ffs, axis=2).T,
                        levels=[0.5, 1., 1.5, 2.], extend='both',

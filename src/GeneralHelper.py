@@ -127,9 +127,6 @@ class Organiser:
                             func, params_list[i]))
                 else:
                     results = self._execute_parallel(func, params_list)
-                print('exec reps', self.reps)
-                print('exec len results',len(results))
-                print('exec len keys',len(key))
                 results_dict.update(zip(key, results))
             self._save_results(results_dict)
         if self.reps is None:
