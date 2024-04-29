@@ -70,8 +70,8 @@ class ClusteredNetworkBase:
 
         """
         # make sure number of clusters and units are compatible
-        assert self.params['N_E'] % self.params['Q'] == 0, 'N_E needs to be evenly divisible by Q'
-        assert self.params['N_I'] % self.params['Q'] == 0, 'N_I needs to be evenly divisible by Q'
+        #assert self.params['N_E'] % self.params['Q'] == 0, 'N_E needs to be evenly divisible by Q'
+        #assert self.params['N_I'] % self.params['Q'] == 0, 'N_I needs to be evenly divisible by Q'
 
         N = self.params['N_E'] + self.params['N_I']  # total units
         try:

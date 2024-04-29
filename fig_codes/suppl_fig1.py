@@ -9,13 +9,15 @@ from Helper import ClusterModelNEST
 from Defaults import defaultSimulate as default
 import pickle
 import pandas as pd
+import numpy as np
+from joblib import Parallel, delayed
 from GeneralHelper import ( Organiser,
     colors, text_width_pts, simpleaxis, 
     ax_label1, nice_figure, draw_box
 )
 
 datapath = '../data/'
-datafile = 'ff_cv2_spontaneous_new'
+datafile = 'supplyfig1_simulated_data'
 
 def simulate_spontaneous(params):
     pylab.seed()
@@ -124,18 +126,18 @@ def get_spikes_fig2(params):
 
 
 
-    if plot:
-        print(pylab.nanmean(ffs,axis=2).T)
-        pylab.contourf(jep_range,Q_range,pylab.nanmean(ffs,axis=2).T,
-                       levels = [0.5, 1.,1.5,2.],extend = 'both',cmap = 'Greys')
-        x = pylab.linspace(Q_range.min(), jep_range.max(),1000)
-        y1 = pylab.ones_like(x)*Q_range.min()
-        y2 = x
-        pylab.fill_between(x,y1, y2,facecolor = 'w',
-                           hatch = '\\\\\\',edgecolor = colors['orange'])
-        pylab.xlabel('$J_{E+}$',size = 14)
-        pylab.ylabel('$Q$', size = 14)
-        pylab.axis('tight')
+    # if plot:
+    #     print(pylab.nanmean(ffs,axis=2).T)
+    #     pylab.contourf(jep_range,Q_range,pylab.nanmean(ffs,axis=2).T,
+    #                    levels = [0.5, 1.,1.5,2.],extend = 'both',cmap = 'Greys')
+    #     x = pylab.linspace(Q_range.min(), jep_range.max(),1000)
+    #     y1 = pylab.ones_like(x)*Q_range.min()
+    #     y2 = x
+    #     pylab.fill_between(x,y1, y2,facecolor = 'w',
+    #                        hatch = '\\\\\\',edgecolor = colors['orange'])
+    #     pylab.xlabel('$J_{E+}$',size = 14)
+    #     pylab.ylabel('$Q$', size = 14)
+    #     pylab.axis('tight')
 
 
 
@@ -145,10 +147,14 @@ def plot_ff_jep_vs_Q_LitwinKumaretal_parallel(
     plot=True, vrange=[0, 15], redo=False):
 
     try:
-        ffs = pd.read_pickle(datapath + "supplyfig1_simulated_data")
+        ffs = pd.read_pickle(
+            datapath + "supplyfig1_simulated_data_analysis")
     except FileNotFoundError:
         ffs = np.zeros((len(jep_range), len(Q_range), reps))
-        def process_params(i, jep_, Q_idx, Q):
+        def process_params(i, Q_idx, ffs):
+            jep_ = jep_range[i]
+            Q = Q_range[Q_idx]
+            print('jep_', jep_, 'Q_idx', Q_idx, 'Q', Q)
             jep = float(min(jep_, Q))
             if jipfactor == 0.:
                 params['portion_I'] = Q
@@ -161,24 +167,26 @@ def plot_ff_jep_vs_Q_LitwinKumaretal_parallel(
             params['jplus'] = pylab.around(
                 pylab.array([[jep,1.0],[jip,1.0]]),5)
             params['Q'] = int(Q)
-            # adjust for devisable N and Q
-            params['N_E'] = default.N_E - default.N_E%params['Q']
-            params['N_I'] = default.N_I - default.N_I%params['Q']
             ORG = Organiser(params, datafile, reps=reps,
-                            ignore_keys=['n_jobs'], redo=redo, save=False)
+                            ignore_keys=['n_jobs'], n_jobs=1,
+                            redo=False, save=True)
             results = ORG.check_and_execute(simulate_spontaneous)
             ff = [r[0] for r in results]
             ffs[i, Q_idx, :] = ff
             if jep_ > Q:
+                ff = [np.nan] * reps
                 ffs[i, Q_idx, :] = np.nan
-
+            return i, Q_idx, ff
+        import itertools
         # Parallelize the nested loop using joblib
-        Parallel(n_jobs=-1)(
-            delayed(process_params)(i, jep_, Q_idx, Q)
-            for i, jep_ in enumerate(jep_range)
-            for Q_idx, Q in enumerate(Q_range)
+        results_all = Parallel(n_jobs=4)(
+            delayed(process_params)(i, Q_idx,ffs)
+            for i, Q_idx in list(itertools.product(
+                range(len(jep_range)), range(len(Q_range))))
         )
-        pickle.dump(ffs,open(datapath + "supplyfig1_simulated_data",'wb'))
+        for i, Q_idx, ff in results_all:
+            ffs[i, Q_idx, :] = ff
+        pickle.dump(ffs,open(datapath + "supplyfig1_simulated_data_analysis",'wb'))
 
     if plot:
         pylab.contourf(jep_range, Q_range, np.nanmean(ffs, axis=2).T,
