@@ -4,8 +4,8 @@ import spiketools
 import defaultSimulate as default
 from copy import deepcopy
 from bisect import bisect_right
-from Helper import ClusterModelNEST
-from Defaults import defaultSimulate as default
+import ClusterModelNEST
+import defaultSimulate as default
 import pickle
 import pandas as pd
 import numpy as np
