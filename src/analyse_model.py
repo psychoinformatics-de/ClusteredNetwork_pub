@@ -10,7 +10,6 @@ import defaultSimulate as default
 import ClusterModelNEST
 from joblib import Parallel,delayed
 from copy import deepcopy
-import ClusterModelNEST
 import numpy as np
 from GeneralHelper import Organiser, find
 
@@ -434,16 +433,17 @@ def _calc_population_decoding(original_params):
             for i in range(len(time)):
                 features = feature_mat[:,:,i].T
                 predictions = pylab.zeros_like(targets)
-                for train,test in StratifiedKFold(
-                    n_splits =folds).split(features,targets):
+                skf = StratifiedKFold(n_splits=folds)
+                for train_index, test_index in skf.split(
+                    features, targets):
                     cl = classifier(**classifier_args)
-                    cl.fit(features[train],targets[train])
-                    predictions[test] = cl.predict(features[test])
+                    cl.fit(features[train_index],targets[train_index])
+                    predictions[test_index] = cl.predict(features[test_index])
                 score[i] = balanced_accuray(targets, predictions)
             scores.append(score)
         condition_scores['time'] = time
         condition_scores[condition] = scores    
-
+    print('_calc_population_decoding function score-->',condition_scores)
     return condition_scores
         
 
