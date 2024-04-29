@@ -16,7 +16,7 @@ from GeneralHelper import ( Organiser,
 )
 
 datapath = '../data/'
-datafile = 'supplyfig1_simulated_data'
+datafile = 'suppl_fig1_simulated_data'
 
 def simulate_spontaneous(params):
     pylab.seed()
@@ -147,7 +147,7 @@ def plot_ff_jep_vs_Q_LitwinKumaretal_parallel(
 
     try:
         ffs = pd.read_pickle(
-            datapath + "supplyfig1_simulated_data_analysis")
+            datapath + "suppl_fig1_simulated_data_analysis")
     except FileNotFoundError:
         ffs = np.zeros((len(jep_range), len(Q_range), reps))
         def process_params(i, Q_idx, ffs):
@@ -185,7 +185,9 @@ def plot_ff_jep_vs_Q_LitwinKumaretal_parallel(
         )
         for i, Q_idx, ff in results_all:
             ffs[i, Q_idx, :] = ff
-        pickle.dump(ffs,open(datapath + "supplyfig1_simulated_data_analysis",'wb'))
+        pickle.dump(
+            ffs,open(
+                datapath + "suppl_fig1_simulated_data_analysis",'wb'))
 
     if plot:
         pylab.contourf(jep_range, Q_range, np.nanmean(ffs, axis=2).T,
