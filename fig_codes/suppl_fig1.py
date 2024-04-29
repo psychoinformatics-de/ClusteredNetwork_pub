@@ -1,6 +1,5 @@
 import sys;sys.path.append('../utils/')
 import pylab
-import plotting_functions as plotting
 import spiketools
 import defaultSimulate as default
 from copy import deepcopy
