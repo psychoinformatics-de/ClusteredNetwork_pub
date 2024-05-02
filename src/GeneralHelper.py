@@ -614,23 +614,24 @@ def ax_label(ax,label,size= 10, family ='sans-serif'):
                 fontsize = size,family =family)
     return ax
 
-def ax_label_title(ax,label,size= 10,family ='sans-serif'):
+def ax_label_title(ax,label,size= 10,
+                   family ='sans-serif'):
     pylab.sca(ax)
     pylab.title(label,loc = 'center',
                 fontsize = size,family =family)
     return ax
 
 
-def ax_label1(ax,label,x=-0.5, size= 10):
+def ax_label1(ax,label,x=-0.5, size= 8,y=1.1):
     pylab.sca(ax)
-    ax.text(x, 1.1, label,transform=ax.transAxes, 
+    ax.text(x, y, label,transform=ax.transAxes, 
             size=size, weight='bold')
     return ax
 def ax_label2(ax,label,size= 10):
     ax.annotate(label, xy=(0.9, 0.9), xycoords="axes fraction")
     return ax
 
-def ax_label_fig1(ax,label,size= 10):
+def ax_label_fig1(ax,label,size= 8):
     pylab.sca(ax)
     ax.text(-0.3, 1.08, label,transform=ax.transAxes, 
             size=size, weight='bold',font='DejaVu Sans')
@@ -660,8 +661,12 @@ def simpleaxis1(ax,labelsize = 5,pad=1.5):
     ax.get_xaxis().set_tick_params(which = 'minor',direction='out')
     return ax
 
-def nice_figure(fig_width= 0.95,ps = False,square = False,
-                ratio = None,latex_page = 345.,rcparams = {}):
+def nice_figure(fig_width= 1,ps = False,square = False,
+                ratio = None,latex_page = 510.,rcparams = {}):
+    # A4 size in pt 595 × 842 pts
+    # A4 size in mm 210 x 297 mm
+    # A4 size in inches 8.27 x 11.69 inches
+    
     inches_per_pt = 1.0/(72.27)  
     if not square and ratio is None:        # Convert pt to cm
         golden_mean = (pylab.sqrt(5)-1.0)/2.0
@@ -673,13 +678,17 @@ def nice_figure(fig_width= 0.95,ps = False,square = False,
     fig_size =  [fig_width,fig_height]
            
     params = {'axes.labelsize': 7,
-              'font.size':8,
+              'font.size':7,
               'font.family':'sans-serif',
               'legend.fontsize': 7,
-              'xtick.labelsize':6,
-              'ytick.labelsize': 6,
+              'xtick.labelsize':7,
+              'ytick.labelsize': 7,
               'mathtext.fontset': 'cm',
-              'figure.figsize' : fig_size}
+              'figure.figsize' : fig_size,
+            'xtick.major.size': 3,
+            'ytick.major.size': 3.,          
+            'lines.linewidth':1.,
+            'axes.linewidth':0.2}
 
     params.update(rcparams)
     

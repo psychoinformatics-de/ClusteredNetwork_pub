@@ -3,7 +3,8 @@ import pylab
 from simulate_experiment import get_simulated_data
 import spiketools
 from GeneralHelper import (
-    find, nice_figure, ax_label1, simpleaxis
+    find, nice_figure, ax_label1, 
+    simpleaxis, ax_label_title
     )
 import scipy.stats as ss
 from reaction_times_functions import (
@@ -27,16 +28,17 @@ min_count_rate = 7.5
 align_ts = False
 ########################################################################
 
-x_label_val=-0.5                            
-fig = nice_figure(ratio = 1.)
+x_label_val=-0.3      
+abc_fontsize = 10*0.7              
+fig = nice_figure(fig_width=0.489, ratio = 1.3)
 nrows = 2
 ncols = 2
-gs = pylab.GridSpec(nrows,ncols,top=0.9,bottom=0.1,hspace = 0.4,
-                    wspace = 0.9,left = 0.2,right = 0.88,height_ratios = [2,1])
+gs = pylab.GridSpec(nrows,ncols,top=0.85,bottom=0.15,hspace = 0.4,
+                    wspace = 0.5,left = 0.15,right = 0.85,height_ratios = [2,1])
 subplotspec = gs.new_subplotspec((1,1), colspan=1,rowspan=1)
 ax2 = ax_label1(simpleaxis(pylab.subplot(subplotspec)),
-                         'c',x=x_label_val)
-ax2.set_title('Behaving monkey')
+                         'c',x=x_label_val, size=abc_fontsize)
+ax2.set_title('  Behaving monkey',size=8, loc='center')
 labelsize=5
 cond_colors = ['navy','royalblue','lightskyblue']
 reaction_time_plot(b'joe', condition_colors = cond_colors)
@@ -47,8 +49,8 @@ pylab.ylim(0,0.015)
 pylab.yticks([0,0.004,0.008,0.012])
 pylab.legend(frameon = False,fontsize = 6,loc = 'upper right', 
              bbox_to_anchor=(1.45, 1.1))
-pylab.xticks([1500,1600,1700,1800,1900,2000])
-ax2.set_xticklabels(['RS', '100','200','300','400','500'])
+pylab.xticks([1500,1700,1900])
+ax2.set_xticklabels(['RS','200','400'])
 condition_alpha = 1.
             
 condition_colors = [[0,0,0,condition_alpha],
@@ -73,8 +75,10 @@ correct_inds = find(correct)
 incorrect_inds = find(correct==False)
 subplotspec = gs.new_subplotspec((0,0), colspan=2,rowspan=1)
 ax1 = ax_label1(simpleaxis(
-    pylab.subplot(subplotspec)),'a',x=x_label_val/3)
-pylab.suptitle('Example trial of motor cortical attractor model')
+    pylab.subplot(subplotspec)),'a',x=x_label_val/3, size=abc_fontsize)
+ax1.text(-500,1500,   
+               'Example trial of motor cortical attractor model', size=8)
+#pylab.suptitle()
 
 plot_trial = find(correct*(conditions==3))[7]#[6]#[8]
 pylab.xticks([-500,0,1000])
@@ -134,8 +138,8 @@ pylab.text(950,1250,'RS')
 
 subplotspec = gs.new_subplotspec((1,0), colspan=1,rowspan=1)
 ax2 = ax_label1(simpleaxis(
-    pylab.subplot(subplotspec)),'b',x=x_label_val)
-ax2.set_title('Attractor model')
+    pylab.subplot(subplotspec)),'b',x=x_label_val, size=abc_fontsize)
+ax2.set_title('Attractor model', size=8)
 for condition in [1,2,3]:
     
     rt = rts[(conditions == condition)*correct]
@@ -151,8 +155,8 @@ min_len = min(len(rts[(conditions == 2)*correct]),
               len(rts[(conditions == 3)*correct]))
 
 pylab.xlim(-100,500)
-pylab.xticks([0,100,200,300,400,500])
-pylab.gca().set_xticklabels(['RS', '100','200','300','400','500'])
+pylab.xticks([0,200,400])
+pylab.gca().set_xticklabels(['RS','200','400'])
 pylab.ylim(0,0.015)
 pylab.yticks([0,0.004,0.008,0.012])                            
 pylab.ylabel('p.d.f')

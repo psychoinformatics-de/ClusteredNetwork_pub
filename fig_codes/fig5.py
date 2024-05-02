@@ -1,5 +1,6 @@
 import sys;sys.path.append('../src')#;sys.path.append('../data')
 from matplotlib import pylab
+import numpy as np
 import os
 import pandas as pd
 from scipy.stats import wilcoxon
@@ -11,6 +12,7 @@ from matplotlib.patches import Rectangle
 import analyse_model
 import analyse_experiment as analyses
 import joe_and_lili
+from network_schematic import schematic_2d_model
 from GeneralHelper import (
     nice_figure, ax_label1, simpleaxis1, find
 )
@@ -131,7 +133,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,
                 test_vals2 = test_vals[ff_conditions == test_conditions[1]]
                 scores = pylab.zeros_like(test_time)
                 for i in range(len(test_time)):
-                    s,p = wilcoxon(test_vals1[:,i],test_vals2[:,i])
+                    s,p = wilcoxon(test_vals1[:,i],test_vals2[:,i],
+                                   nan_policy='omit')
                     scores[i] = p
                 sigplot=pylab.zeros_like(scores)*pylab.nan
                 sigplot[scores <0.05] = ff_test_ys[ntest]            
@@ -146,7 +149,6 @@ def do_plot(extra_filters = [],min_count_rate = 5,
                 test_vals1 = test_vals[ff_conditions == test_conditions[0]]
                 test_vals2 = test_vals[ff_conditions == test_conditions[1]]
                 s,p = wilcoxon(test_vals1[:],test_vals2[:])
-                print('p values', p)
                 bottom_val = pylab.nanmean(test_vals1) - pylab.nanmean(
                     ffs[ff_conditions==test_conditions[0]],axis=0)[0]
                 top_val = pylab.nanmean(test_vals2) - pylab.nanmean(
@@ -295,7 +297,7 @@ def plot_ffs(params,sig_time = 1000,plot = True,lw_line=0.5, redo=False):
         sigs = []
 
         for i,c in enumerate(conditions[:-1]):
-            s,p = wilcoxon(test_vals[i,:],test_vals[i+1,:])
+            s,p = wilcoxon(test_vals[i,:],test_vals[i+1,:],nan_policy='omit')
             sigs.append(p)
             if p<0.05:
                 sig_symbol = '*'
@@ -355,7 +357,6 @@ def plot_population_decoding(params,plot, redo=False):
     """plot population decoding of the model"""
     scores = analyse_model.get_population_decoding(
         params,redo  =redo, datafile='fig5_model_popdecoding')
-    print('pop decoding score', scores)
     if not plot:
         return 
     
@@ -482,23 +483,26 @@ def model_plot(ax, net_factor = 1.6,net_offset = 1.,
                 )
     rectangle.set_zorder(0)
     ax.add_patch(rectangle)
-    pylab.text(stim_center[0],stim_center[1]-stim_size*1.5,'stimulus',ha = 'center',va = 'top',size = '10')
-    pylab.text(decoder_center[0],decoder_center[1]+edge_length,'decoder',ha = 'center',va ='bottom',size = '10')
-    pylab.text(stim_center[0]-.7,(decoder_center[1] - stim_center[1])/2-1.,
+    pylab.text(stim_center[0],stim_center[1]-stim_size*1.5,
+               'stimulus',ha = 'center',va = 'top',size = 20)
+    pylab.text(decoder_center[0],decoder_center[1]+edge_length,
+               'decoder',ha = 'center',va ='bottom',size = 20)
+    pylab.text(stim_center[0]-.79,(decoder_center[1] - stim_center[1])/2-1.16,
                'E/I Clustered model',ha = 'center',va ='bottom',
-               size = '14',rotation=90,weight='bold')    
+               size = 27,rotation=90,weight='bold') 
     pylab.axis('equal')
 
 
   
     
 
-labelsize = 6#8
+labelsize = 8
 labelsize1 = 6    
 ticksize =2.
-size = 4
+size = 6
 scale=1.5
 lw= 0.3
+
 rcparams = {'axes.labelsize': size*scale,
             'xtick.major.size': ticksize,
             'ytick.major.size': ticksize,          
@@ -507,8 +511,9 @@ rcparams = {'axes.labelsize': size*scale,
             'lines.linewidth':0.5,
             'axes.linewidth':0.2}
 
-fig = nice_figure(fig_width= 1.,ratio  =.5,rcparams = rcparams)
-fig.subplots_adjust(hspace = .5,wspace = 0.6,bottom  =0.14,top  =0.95)
+fig = nice_figure(ratio  =.5,rcparams = rcparams)
+fig.subplots_adjust(
+    hspace = .5,wspace = 0.5,bottom  =0.14,top  =0.95)
 tlim = [0,2000]
 xticks = [0,500,1000,1500,2000]
 nrow,ncol = 7, 3
@@ -520,7 +525,8 @@ size_cond = 15
 ##########################
 exp_ax = simpleaxis1(pylab.subplot2grid((nrow,ncol),(0,0),rowspan=3),
                                 labelsize,pad=pad)
-ax_label1(exp_ax,'a',x=x_label_val,size=labelsize)
+ax_label1(exp_ax,'a',x=x_label_val,size=labelsize,y=1.08)
+
 pylab.sca(exp_ax)
 pylab.axis('off')
 condition_colors_exp = ['navy','royalblue','lightskyblue']    
@@ -560,13 +566,13 @@ pylab.xticks([])
 pylab.ylabel(r'$\Delta$FF',rotation=90)
 pylab.ylim(-0.7,0.1)
 pylab.yticks([-0.5,0])
-pylab.legend(frameon = False,fontsize = labelsize1-1,loc = 'upper center',
+pylab.legend(frameon = False,fontsize = labelsize-1,loc = 'upper center',
                 bbox_to_anchor=(1.2, 1.1))
 
 pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
-pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize1)
+pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize-1)
 pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
-pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',ha = 'center',size = labelsize1)
+pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',ha = 'center',size = labelsize-1)
 #pylab.fill_betweenx([-.7,0.1],1500,2000,color='gray',alpha=0.5)
 
 pylab.sca(pop_score_ax)
@@ -577,9 +583,9 @@ pylab.ylim(0.1,1.)
 pylab.yticks([0.1,0.4,0.7,1.])
 #pylab.fill_betweenx([0.1,1],1500,2000,color='gray',alpha=0.5)
 pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
-pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize1)
+pylab.text(500, pylab.ylim()[1],'PS',va = 'bottom',ha = 'center',size = labelsize)
 pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
-pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',ha = 'center',size = labelsize1)
+pylab.text(1500, pylab.ylim()[1],'RS',va = 'bottom',ha = 'center',size = labelsize)
 # FIRING RATES
 pylab.sca(rate_ax)
 pylab.xlim(tlim)
@@ -606,7 +612,10 @@ print('PLOT MODEL ...')
 ax_model = ax_label1(simpleaxis1(
     pylab.subplot2grid((nrow,ncol),(4,0),rowspan=3),labelsize,pad=pad),
                                 'd',x=x_label_val, 
-                                size=labelsize)      
+                                size=labelsize,y=1.08)  
+# ax_model.text(0.1,.2,
+#         'E/I Clustered model',ha = 'center',va ='bottom',
+#         size = labelsize-2,rotation=90,weight='bold')       
 pylab.box('off')
 pylab.axis('off')
 
@@ -725,14 +734,14 @@ pylab.close()
 
 
 ## plot model sketch
-fig = nice_figure()
+fig = nice_figure(fig_width=1)
 ax = pylab.subplot(1,1,1)
 model_plot(ax, colors=['gray']+5*['gray'])
 pylab.axis('off')
 pylab.box('off')
-pylab.subplots_adjust(left=0.1, bottom=0, right=1, top=1, wspace=0, hspace=0)        
+pylab.subplots_adjust(left=0.1, bottom=0, right=0.95, top=1, wspace=0, hspace=0)        
 pylab.savefig('./model.eps')
-pylab.savefig('./model.jpg',dpi=300)
+pylab.savefig('./model.jpg',dpi=600)
 pylab.close()
 
 ######################################
@@ -741,12 +750,14 @@ pylab.close()
 import pyx
 c = pyx.canvas.canvas()
 c.insert(pyx.epsfile.epsfile(0, 0.0, "compound_data_fig_cv2_corrected0.eps"))
-c.insert(pyx.epsfile.epsfile(.35, 3.5,"experiment.eps",scale=0.32))
+c.insert(pyx.epsfile.epsfile(.35, 4.9,"experiment.eps",scale=0.3))
 c.writeEPSfile("compound_data_fig_cv2_corrected1.eps")  
 #inser model
 c.insert(pyx.epsfile.epsfile(0, 0.0, "compound_data_fig_cv2_corrected1.eps"))
+# c.insert(pyx.epsfile.epsfile(.8, 1.2,"model.eps",scale=0.3))
 i = pyx.bitmap.jpegimage("model.jpg")
-c.insert(pyx.bitmap.bitmap(.4, .3,i, compressmode=None,width=3.7, height=2.5))
+c.insert(pyx.bitmap.bitmap(.7, 1.2,i, compressmode=None,
+                           width=3.7*1.2, height=2.5*1.2))
 c.writePDFfile('fig5.pdf')
 # remove intemittent files
 os.remove('compound_data_fig_cv2_corrected0.eps')

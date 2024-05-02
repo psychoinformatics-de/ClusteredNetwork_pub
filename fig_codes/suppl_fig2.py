@@ -193,21 +193,20 @@ condition_colors = ['navy','royalblue','lightskyblue']
     
 
 if __name__ == '__main__':
-    labelsize = 7
-    labelsize1 = 6    
+    abc_fontsize = 10
+    labelsize = 8
+    labelsize1 = 6
     ticksize =2.
-    size = 4
+    size = 7
     scale=1.5
     lw= 0.3
     rcparams = {'axes.labelsize': size*scale,
                 'xtick.major.size': ticksize,
                 'ytick.major.size': ticksize,            
-              'xtick.labelsize':size,
-                'ytick.labelsize': size,
                 'lines.linewidth':0.5,
                 'axes.linewidth':0.2}
 
-    fig = nice_figure(fig_width= 1.2,ratio  =.7,rcparams = rcparams)
+    fig = nice_figure(fig_width= 1.,ratio  =.7,rcparams = rcparams)
     fig.subplots_adjust(hspace = .5,wspace = 0.9,bottom  =0.14,top  =0.9)
     tlim = [0,2000]
     xticks = [0,500,1000,1500,2000]
@@ -222,11 +221,11 @@ if __name__ == '__main__':
         extra_filters = [('monkey','=',str.encode(monkey))]
         ff_ax = ax_label1(simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(0,0),rowspan=3, colspan=3),
-            labelsize,pad=pad),'a',x=x_label_val/5,size=labelsize)
+            labelsize,pad=pad),'a',x=x_label_val/5,size=abc_fontsize)
 
         mean_matched_ff_ax = ax_label1(simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(0,3),rowspan=3, colspan=3),
-            labelsize,pad=pad),'b',x=x_label_val/5,size=labelsize)
+            labelsize,pad=pad),'b',x=x_label_val/5,size=abc_fontsize)
         count_dist_ax_list=[]
         count_dist_ax_mm_list=[]
         for i in range(9):
@@ -238,11 +237,11 @@ if __name__ == '__main__':
                 label_axis_mm = 'd'                
             count_dist_ax = ax_label1(simpleaxis1(
                 pylab.subplot2grid((nrow,ncol),(row,col),rowspan=1, colspan=1),
-                labelsize,pad=pad),label_axis,x=x_label_val,size=labelsize)
+                labelsize,pad=pad),label_axis,x=x_label_val,size=abc_fontsize)
             count_dist_ax_list.append(count_dist_ax)
             count_dist_ax_mm = ax_label1(simpleaxis1(
                 pylab.subplot2grid((nrow,ncol),(row,col+3),rowspan=1, colspan=1),
-                labelsize,pad=pad),label_axis_mm,x=x_label_val,size=labelsize)
+                labelsize,pad=pad),label_axis_mm,x=x_label_val,size=abc_fontsize)
             count_dist_ax_mm_list.append(count_dist_ax_mm) 
 
 
@@ -262,9 +261,9 @@ if __name__ == '__main__':
     pylab.ylim(-0.7,0.1)
     pylab.yticks([-0.5,0])
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
-    pylab.text(500, pylab.ylim()[0]-0.1,'PS',va = 'bottom',ha = 'center',size = labelsize1)
+    pylab.text(500, pylab.ylim()[0]-0.1,'PS',va = 'bottom',ha = 'center',size = labelsize)
     pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
-    pylab.text(1500, pylab.ylim()[0]-0.1,'RS',va = 'bottom',ha = 'center',size = labelsize1)
+    pylab.text(1500, pylab.ylim()[0]-0.1,'RS',va = 'bottom',ha = 'center',size = labelsize)
 
 
     pylab.sca(mean_matched_ff_ax)
@@ -272,12 +271,13 @@ if __name__ == '__main__':
     pylab.xticks([])
     pylab.ylim(-0.7,0.1)
     pylab.yticks([-0.5,0])
-    pylab.legend(frameon = False,fontsize = labelsize1,loc = 'upper center',bbox_to_anchor=(1.1, 1.1))
+    pylab.legend(frameon = False,fontsize = labelsize,
+                 loc = 'upper center',bbox_to_anchor=(1., 1.1))
     
     pylab.axvline(500,linestyle = '-',color = 'k',lw = lw/2)
-    pylab.text(500, pylab.ylim()[0]-0.1,'PS',va = 'bottom',ha = 'center',size = labelsize1)
+    pylab.text(500, pylab.ylim()[0]-0.1,'PS',va = 'bottom',ha = 'center',size = labelsize)
     pylab.axvline(1500,linestyle = '-',color = 'k',lw = lw/2)
-    pylab.text(1500, pylab.ylim()[0]-0.1,'RS',va = 'bottom',ha = 'center',size = labelsize1)
+    pylab.text(1500, pylab.ylim()[0]-0.1,'RS',va = 'bottom',ha = 'center',size = labelsize)
   
     pylab.sca(count_dist_ax_list[6])
     pylab.xlabel('Spike Count')#

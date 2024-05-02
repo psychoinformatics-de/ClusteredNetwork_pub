@@ -8,11 +8,10 @@ import scipy.stats as ss
 
 # Local imports (not installed packages)
 from GeneralHelper import (
-    text_width_pts, extract_info_from_keys,
+    extract_info_from_keys,
     nice_figure, simpleaxis, ax_label1, CB_color_cycle)
 from analyse_model import get_analysed_spiketimes
 
-#datafile = 'SponEvoked_Q50_q1_50_Stim5cluster_100trial_1s'
 data_path = '../data/'
 datafile = 'fig4_simulated_data'
 file_name_analysis_sw = datafile + '_analyses'
@@ -122,18 +121,19 @@ CV_mat_nonstim_std = populate_matrix('CV_std1', data_lists, {'amp': amp_uni, 'po
 rate_mat_nonstim_std = populate_matrix('rate_std1', data_lists, {'amp': amp_uni, 'portion': portion_uni})
 
 # Plot
-fig = nice_figure(ratio = 0.8,latex_page=text_width_pts)
-fig.subplots_adjust(bottom = 0.1,left = 0.1,top=0.85, wspace = 0.3,hspace=0.4)
+fig = nice_figure(fig_width=0.489, ratio = 0.9)
+abc_fontsize = 10*0.7
+fig.subplots_adjust(bottom = 0.1,left = 0.1,right=0.94,top=0.8, wspace = 0.3,hspace=0.6)
 
 nrow,ncol = 2,2
 ax1 = simpleaxis(plt.subplot2grid((nrow,ncol), (0,0), colspan=1))
 x_label_val=-0.15
-ax_label1(ax1, 'a',x=x_label_val)
+ax_label1(ax1, 'a',x=x_label_val, size=abc_fontsize)
 plt.axis('off')
 
 ax1 = simpleaxis(plt.subplot2grid((nrow,ncol), (1,0), rowspan=1))
 FF_ylim = (-2,8)
-ax_label1(ax1, 'c',x=x_label_val)
+ax_label1(ax1, 'c',x=x_label_val, size=abc_fontsize)
 
 lw = 1.
 ls = '-'
@@ -159,7 +159,7 @@ plt.ylim(-2,20)
 plt.yticks([-2,0,5,10,15,20])
 
 ax1 = simpleaxis(plt.subplot2grid((nrow,ncol), (1,1), rowspan=1))
-ax_label1(ax1, 'd',x=x_label_val)
+ax_label1(ax1, 'd',x=x_label_val, size=abc_fontsize)
 plt.gca().set_title('E/I clustered network')
 plt.plot(amp_uni, FF[:,0], lw = lw, label = 'E/I clustered network', c = CB_color_cycle[0])
 plt.fill_between(amp_uni, FF[:,0]-FF_std[:,0], FF[:,0]+FF_std[:,0],
@@ -175,7 +175,7 @@ plt.axvline(0.4, ls ='--', lw=0.8, color='gray')
 plt.axhline(0., ls ='--', lw=0.8, color='gray')
 plt.ylim(-2,1)
 ax1 = simpleaxis(plt.subplot2grid((nrow,ncol), (0,1), rowspan=1))
-ax_label1(ax1, 'b',x=x_label_val)
+ax_label1(ax1, 'b',x=x_label_val, size=abc_fontsize)
 
 RATE = rate_mat-rate_mat[0]
 RATE_nonstim = rate_mat_nonstim-rate_mat_nonstim[0]
@@ -189,7 +189,7 @@ plt.axhline(0,ls='--',lw=0.8,color='gray')
 plt.gca().set_ylabel(r'$\Delta$rate [1/s]')
 plt.xlabel('stim. Amplitude [pA]')
 plt.axvline(0.4, ls='--', lw=0.8, color='gray')
-plt.legend(loc=9,ncol=2,bbox_to_anchor=(.5, 1.48))
+plt.legend(loc=9,ncol=2,bbox_to_anchor=(-0.1, 1.7))
 
 plt.savefig('../data/fig_StimAmp0.eps')
 plt.savefig('../data/fig_StimAmp0.jpg')
@@ -198,7 +198,7 @@ plt.savefig('../data/fig_StimAmp0.jpg')
 import pyx
 c = pyx.canvas.canvas()
 c.insert(pyx.epsfile.epsfile(0, 0.0, "../data/fig_StimAmp0.eps"))
-c.insert(pyx.epsfile.epsfile(1.5, 5.2,"../data/sketch_ff.eps"))
+c.insert(pyx.epsfile.epsfile(.5, 3.8,"../data/sketch_ff.eps",scale=0.7))
 c.writePDFfile("fig4.pdf")  
 plt.show()
 # remove intermediate files

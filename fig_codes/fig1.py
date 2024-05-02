@@ -27,8 +27,11 @@ except:
                        'cv_twos':cv_twos}
     np.save(data_path + fn, dict_ff_cv_twos)
 
-fig = nice_figure(fig_width= 1.,ratio  =0.55,
-                           latex_page = 1.2*text_width_pts)
+rcparams = {'axes.labelsize': 9,
+            'lines.linewidth':1.5}
+fig = nice_figure(ratio  =0.55,
+                latex_page = 1.2*text_width_pts,
+                rcparams=rcparams)
 
 
 ########################################################################
@@ -44,12 +47,12 @@ hspace = 0.05
 plot = True
 ########################################################################
 
-gs = pylab.GridSpec(nrows,ncols,top=0.95,bottom=0.1,hspace = 0.1,
+gs = pylab.GridSpec(nrows,ncols,top=0.9,bottom=0.1,hspace = 0.1,
                     wspace = 3.,left = 0.08,right = 0.94,
                     height_ratios = [0.5,0.3,0.4,hspace,0.4])
 
 
-
+abc_size = 10
 # load monkey drawing
 data_path = '../data/'
 if os.path.exists(data_path+'drawing_small.png'):
@@ -58,7 +61,7 @@ else:
     raise ValueError('drawing file not found1 Please download drawing_small.png file, following the istructions in the README.md file.')
 subplotspec = gs.new_subplotspec((0,0), colspan=int(ncols/3),rowspan=1)
 ax1 = pylab.subplot(subplotspec)
-ax_label_fig1(ax1, 'a')
+ax_label_fig1(ax1, 'a', size=abc_size)
 ax_label_title(ax1, 'Behaving monkey')
 drawing = mimage.imread(data_path+'drawing_small.png')
 drawing = drawing[:-2]
@@ -97,7 +100,7 @@ pylab.xlabel('time [ms]')
 subplotspec = gs.new_subplotspec((0,ncols-int(ncols/3)), colspan=int(ncols/3),
                                  rowspan=1)
 ax4 = pylab.subplot(subplotspec)
-ax_label_fig1(ax4, 'c')
+ax_label_fig1(ax4, 'c', size=abc_size)
 ax_label_title(ax4, 'E/I clustered network')
 pylab.axis('off')
 network_schematic.draw_EI_schematic()
@@ -106,7 +109,7 @@ network_schematic.draw_EI_schematic()
 subplotspec = gs.new_subplotspec((0,ncols-2*int(ncols/3)), colspan=int(ncols/3),
                                  rowspan=1)
 ax41 = pylab.subplot(subplotspec)
-ax_label_fig1(ax41, 'b')
+ax_label_fig1(ax41, 'b', size=abc_size)
 ax_label_title(ax41, 'E clustered network')
 pylab.axis('off')
 network_schematic.draw_EE_network(I_radius = 60,I_position = [-170,-50], 

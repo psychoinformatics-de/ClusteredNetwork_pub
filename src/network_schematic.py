@@ -1,10 +1,10 @@
-#import sys;sys.path.append('../')
-import os
 import pylab
 from matplotlib.patches import Polygon,Circle,Rectangle
 from scipy.spatial.distance import pdist,squareform
-from GeneralHelper import Organiser, yellow, red
-
+from GeneralHelper import Organiser, yellow, red, find
+from matplotlib.collections import LineCollection
+from matplotlib.patches import Rectangle
+from GeneralHelper import nice_figure, find
 # def get_weight_matrix(N_E = 4000,N_I=1000,Q = 20,jplus = 5,
 #                       jip_factor = 3/4.,ps = None,g = 1.2):
 
@@ -429,6 +429,122 @@ def draw_EI_network(Q = 20,randseed = 3,network_linewidth = 0.4,network_connecti
     network_positions = draw_network(n = Q,randseed = randseed,lw= network_linewidth,connection_lw=network_connection_lw,fraction  =fraction,gap  =network_gap,connection_alpha = network_connection_alpha,radius = network_radius,x_offset = x_offset,y_offset = y_offset)
    
     
+    
+    
+
+def schematic_2d_model(ax, net_factor = 1.6,net_offset = 1.,
+               offset_dir = [1.2,0.4],net_sigma = 0.12,N = 1200,
+               decoder_factor = 0.7,decoder_offset = 1,randseed=0,
+               colors = None):
+    off_color = '0.8'
+    green = '0.5'
+    red = '0.3'
+    pylab.seed(randseed)
+
+    stim_center = [0,0]
+    stim_size  =0.3
+    if colors is None:
+        colors = [red]+5*[off_color]
+    circs,coords = draw_hex_array(stim_center,size  =stim_size,colors =colors)
+
+    for circ in circs:
+        circ.set_zorder(4)
+
+    Q = len(circs)
+    net_positions = []
+
+    cluster_centers = []
+    positions = pylab.zeros((0,2))
+    
+    for coord in coords:
+        new_pos =pylab.randn(N//Q,2)*net_sigma
+        new_pos[:,0] += coord[0]*net_factor + net_offset*offset_dir[0]
+        new_pos[:,1] += coord[1]*net_factor + net_offset*offset_dir[1]
+        
+        cluster_centers.append((coord[0]*net_factor + net_offset*offset_dir[0],coord[1]*net_factor + net_offset*offset_dir[1]))
+        positions = pylab.append(positions, new_pos,axis=0)
+    
+    ax.plot(positions[:,0],positions[:,1],'ok',ms = 0.2,zorder = 2 )
+    
+    connectivity = pylab.rand(N,N)<0.006
+
+    connections = []
+    for i in range(N):
+        js = find(connectivity[i])
+        for j in js:
+            connections.append([positions[i],positions[j]])
+    
+    color = [0.3]*3 + [0.05]
+    colors = [color]*len(connections)
+
+    lines = LineCollection(connections,colors = colors,linewidths =0.04,zorder =2)
+    
+    ax.add_collection(lines)
+    
+    for i in range(6):
+        ax.annotate('', xy=cluster_centers[i], xycoords='data',
+                xytext=coords[i], textcoords='data',
+                size=20,
+                # bbox=dict(boxstyle="round", fc="0.8"),
+                arrowprops=dict(arrowstyle="simple,tail_width=0.06,head_width=0.15",
+                                fc=[0,0,0,1.], ec="none",
+                                connectionstyle="arc3,rad=-0.3"),zorder = 3
+                )
+
+
+    cluster_center_center = pylab.array(cluster_centers).mean(axis=0)
+    
+    edge_length = stim_size * decoder_factor
+
+    decoder_center = pylab.array((cluster_center_center[0] + decoder_offset*offset_dir[0],cluster_center_center[1] + decoder_offset*offset_dir[1]))
+    rectangle = Rectangle(decoder_center-0.5*edge_length, edge_length, edge_length,ec ='k',fc ='w')
+
+    for i in range(6):
+        ax.annotate('', xy=decoder_center, xycoords='data',
+                xytext=cluster_centers[i], textcoords='data',
+                size=20,
+                # bbox=dict(boxstyle="round", fc="0.8"),
+                arrowprops=dict(arrowstyle="-",
+                                fc=[0,0,0,1], ec="k",
+                                connectionstyle="arc3,rad=0.3",shrinkB=0),zorder = -1,
+                )
+
+
+    rectangle.set_zorder(0)
+    ax.add_patch(rectangle)
+    pylab.text(stim_center[0],stim_center[1]-stim_size*1.5,'stimulus',ha = 'center',va = 'top',size = '6')
+    pylab.text(decoder_center[0],decoder_center[1]+edge_length,'decoder',ha = 'center',va ='bottom',size = '6')
+    pylab.axis('equal')
+    
+    
+    
+def draw_hex_array(center,size=0.3,colors = [[0.5]*3]*6,axes = None,radius = 0.1,add = True,show_numbers = False):
+    angles = pylab.array([30,90,150,210,270,330])*pylab.pi/180
+    Y = size*pylab.cos(angles)
+    X = size*pylab.sin(angles)
+    
+    
+    i = 0
+    circs= []
+    coords = []
+    number = 6
+    for x,y in zip(X,Y):
+        coords.append((x+center[0],y+center[1]))
+        circ = pylab.Circle((x+center[0],y+center[1]), radius=radius,  fc=colors[i])
+        if axes is None:
+            axes = pylab.gca()
+        if add:
+            axes.add_patch(circ)
+        circs.append(circ)
+        #pylab.text(x,y,str(i),va='center',ha = 'center')
+        if show_numbers:
+            pylab.text(x+center[0],y+center[1],str(number),size = 6,ha ='center',va = 'center')
+            if number == 6:
+                number =1
+            else:
+                number+=1
+        i+=1
+    return circs,coords
 if __name__ == '__main__':
     
 

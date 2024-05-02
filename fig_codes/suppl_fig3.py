@@ -133,8 +133,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
                     ffs[ff_conditions==test_conditions[1]],axis=0)[0]
                 center = 0.5 * (bottom_val+top_val) 
 
-        pylab.text(-1500,-0.6,'Experiment',ha = 'center',va ='bottom',
-            size = '6',rotation=90,weight='bold')  
+        pylab.text(-1400,-0.58,'Experiment',ha = 'center',va ='bottom',
+            size = labelsize+2,rotation=90,weight='bold')  
 
     if cv2_ax is not None:
         pylab.sca(cv2_ax)
@@ -175,8 +175,8 @@ def do_plot(extra_filters = [],min_count_rate = 5,min_trials  =10,tlim = [0,2000
         pylab.axvline(1500,linestyle = '-',color = 'k',lw = 0.5)
         pylab.ylim(0,0.015)    
         pylab.yticks([0,0.004,0.008,0.012])
-        pylab.legend(frameon = False,fontsize = 6,loc = 'upper right', 
-                     bbox_to_anchor=(1.6, 1.1))
+        pylab.legend(frameon = False,fontsize = labelsize,loc = 'upper right', 
+                     bbox_to_anchor=(1.5, 1.1))
         pylab.xticks([1500,1600,1700,1800,1900,2000])
         pylab.gca().set_xticklabels(['RS', '100','200','300','400','500'])
 
@@ -350,9 +350,9 @@ def plot_RTs(params, redo=False,save=False):
     
 if __name__ == '__main__':
     labelsize = 8
-    labelsize1 = 6    
+    labelsize1 = 7 
     ticksize =2.
-    size = 4
+    size = 6
     scale=1.5
     lw= 0.3
     rcparams = {'axes.labelsize': size*scale,
@@ -363,21 +363,21 @@ if __name__ == '__main__':
                 'lines.linewidth':0.5,
                 'axes.linewidth':0.2}
 
-    fig = nice_figure(fig_width= 1.,ratio  =.5,rcparams = rcparams)
-    fig.subplots_adjust(hspace = .8,wspace = 0.7,bottom  =0.14,
-                        top  =0.9,left=0.15, right=0.9)
+    fig = nice_figure(ratio  =.6,rcparams = rcparams)
+    fig.subplots_adjust(hspace = .9,wspace = 0.5,bottom  =0.14,
+                        top =0.9,left=0.15, right=0.9)
     tlim = [0,2000]
     xticks = [0,500,1000,1500,2000]
     nrow,ncol = 4, 3
     pad=.3
     x_label_val=-0.5
-    size_cond = 12
+    size_cond = 15
     condition_colors_exp = ['navy','royalblue','lightskyblue']    
     for monkey in ['lili']:
         extra_filters = [('monkey','=',str.encode(monkey))]
         rate_ax = ax_label1(simpleaxis1(pylab.subplot2grid(
             (nrow,ncol),(0,1)),labelsize,pad=pad),'b',
-                x=x_label_val,size=labelsize)
+                x=x_label_val,size=labelsize,y=1.25)
         ff_ax = ax_label1(simpleaxis1(
             pylab.subplot2grid(
                 (nrow,ncol),(0,0),rowspan=2),labelsize,pad=pad),'a',
@@ -388,7 +388,7 @@ if __name__ == '__main__':
         RTs_ax = ax_label1(simpleaxis1(
             pylab.subplot2grid(
                 (nrow,ncol),(0,2),rowspan=2),labelsize,pad=pad),'d',
-                x=x_label_val,size=labelsize)
+                x=x_label_val,size=labelsize,y=1.05)
         do_plot(extra_filters = extra_filters,ff_ax = ff_ax,rate_ax = rate_ax, 
                     cv2_ax=cv2_ax,RTs_ax=RTs_ax,textsize=size,
                     lw=1,lw_line=0.3, condition_colors=condition_colors_exp)
@@ -461,7 +461,8 @@ if __name__ == '__main__':
         
         ax_label1(simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(2,0),rowspan=2),
-            labelsize,pad=pad),'e',x=x_label_val,size=labelsize)            
+            labelsize,pad=pad),'e',x=x_label_val,
+                  size=labelsize, y=1.05)            
         
         plot_ffs(plot_params,plot = plot,redo=redo_model,save=save)
         pylab.axvline(500,linestyle = '-',color = 'k',lw = lw)
@@ -471,9 +472,9 @@ if __name__ == '__main__':
         pylab.ylim(-.7,0.2)
         pylab.xlabel('')
         pylab.xlabel('time [ms]') 
-        pylab.text(-1400,-0.65,'E/I clustered\n model',
+        pylab.text(-1300,-0.6,'E/I clustered\n model',
                    ha = 'center',va ='bottom',
-                size = '6',rotation=90,weight='bold')  
+                size = labelsize+2,rotation=90,weight='bold')  
         ax_label1(simpleaxis1(pylab.subplot2grid(
             (nrow,ncol),(3,1)),labelsize,pad=pad),'g',
             x=x_label_val,size=labelsize)          
@@ -486,7 +487,8 @@ if __name__ == '__main__':
         pylab.yticks([0.4,0.8,1.2])
         ax_label1(simpleaxis1(
             pylab.subplot2grid((nrow,ncol),(2,2),rowspan=2),
-            labelsize,pad=pad),'h',x=x_label_val,size=labelsize) 
+            labelsize,pad=pad),'h',x=x_label_val,
+                  size=labelsize, y=1.0) 
         plot_RTs(plot_params,redo=redo_model,save=save)
 
     pylab.savefig('suppl_fig3.pdf')
