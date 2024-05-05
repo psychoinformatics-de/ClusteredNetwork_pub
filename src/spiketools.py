@@ -1,14 +1,20 @@
 import pylab
 import numpy as np
 from scipy.signal import convolve2d
-from pylab import nanmean
+from scipy.stats import gamma
 from bisect import bisect_right
-import numpy
+import unittest
+import os
+from scipy.integrate import quad
+from scipy.optimize import fmin
+from scipy import vectorize
+import pickle
 import pyximport
-pyximport.install(setup_args={"include_dirs":numpy.get_include()}, reload_support=True)
+pyximport.install(setup_args={"include_dirs":np.get_include()}, 
+                  reload_support=True)
 
 from Cspiketools import time_resolved_cv_two as _time_resolved_cv_two
-import numpy as np
+
 def spiketimes_to_binary(spiketimes,tlim = None,dt = 1.):
     """ takes a n array of spiketimes and turns it into a binary
         array of spikes.
@@ -140,8 +146,6 @@ def cv2(spiketimes,pool=True,return_all = False,bessel_correction = False,minval
             squared coefficient of variation
         """
 
-    #trials = len(pylab.unique(spiketimes[1]))
-    #print 'mean count: ',spiketimes.shape[1]/float(trials)
     if spiketimes.shape[1]<3:
         # need at least three spikes to calculate anything
         if return_all:
@@ -155,7 +159,6 @@ def cv2(spiketimes,pool=True,return_all = False,bessel_correction = False,minval
     maxlen = max([len(sl) for sl in spikelist])
     if maxlen <3:
         return pylab.nan
-    #spikearray = pylab.array([sl.tolist()+[pylab.nan]*(maxlen-len(sl)) for sl in spikelist])
     spikearray = pylab.zeros((len(spikelist),maxlen))*pylab.nan
     spike_counts = []
     for i,sl in enumerate(spikelist):
@@ -167,7 +170,6 @@ def cv2(spiketimes,pool=True,return_all = False,bessel_correction = False,minval
     
 
     if pool:
-
         var = pylab.nanvar(intervals,ddof=ddof)
         mean_squared = pylab.nanmean(intervals)**2
         return var/mean_squared
@@ -180,6 +182,7 @@ def cv2(spiketimes,pool=True,return_all = False,bessel_correction = False,minval
             return var/mean_squared
         else:
             return pylab.nanmean(var/mean_squared)
+        
 def time_resolved(spiketimes,window,func,kwargs = {},tlim = None,tstep = 1.):
     """ applies a function to spiketimes in a time resolved manner.
             spiketimes:  array where - spiketimes[0,:] -> spike times
@@ -689,50 +692,245 @@ def resample(vals,time,new_time):
 def time_resolved_cv_two( spiketimes,window=400, tlim = None, min_vals = 10,tstep = 1):
     """ compute the time resolved local coefficient of variation. """
     return _time_resolved_cv_two(spiketimes,window,tlim,min_vals,tstep)
-if __name__ == '__main__':
-    trials = 50
-    time = pylab.arange(1000.)
-    rate = 0.05+0.15*pylab.exp(-((500-time[pylab.newaxis,:])/200.)**2)
-    spikes = 1.*(pylab.rand(trials,1000)<pylab.repeat(rate,trials,axis = 0))
-    spiketimes = binary_to_spiketimes(spikes, time)
+
+
+def generate_gamma(k,rates,warmup_isis = 10):
+    """generates gamma distributed spike trains"""
+    if warmup_isis is None:
+        return _generate_gamma(k, rates)
+    else:
+        # add a warmup time
+        initial_rates = rates[:,0]
+        try:
+            min_rate = rates[rates>0].min()
+            max_isi = 1/min_rate*1000.
+            warmup_samples = int(warmup_isis*max_isi)
+        except:
+            #rates are zero: no point in warming up
+            warmup_samples = 1
+        # warmup samples should not be more than say 100000
+        warmup_samples = int(min(warmup_samples,1e5))
+        warmup_rates = np.array([initial_rates]*warmup_samples).T
+        full_rates = np.append(warmup_rates, rates,axis=1)
+        full_spikes =  _generate_gamma(k,full_rates)
+        return full_spikes[:,-rates.shape[1]+1:]
+
+
+def _generate_gamma(k,rates):
+    """generates gamma distributed spike trains"""
+    if np.isscalar(k):
+        k = np.array([k])
+    if len(k)!=1:
+        assert len(k)==rates.shape[0],'k must be a scalar or a vector of length N_trials'
+    # inflate k to vector
+    if len(k)==1:
+        k = np.ones((rates.shape[0],))*k
+    # if rates and k are constant across trials, just generate in one go
+    if rates.var(axis = 0).sum()==0 and k.var()==0:
+        l = rates[0,:]/1000.
+        n = rates.shape[0]
+        k = k[0]
+        return randg_equilibrium(k,l,n)
+    else:
+        spikes = np.zeros_like(rates)[:,:-1]
+        for i in range(rates.shape[0]):
+            l = rates[i,:]/1000.
+            spikes[i,:] = randg_equilibrium(k[i],l,1)
+        
+        return spikes
+
+def randg(k,l,n):
+    # make sure k is float
+    k=float(k)
+    # integrate rate
+    L = np.cumsum(l)
+    N = L[-1]
     
-    warped,twarped = rate_warped_analysis(spiketimes,5,func = cv2,kwargs = {'pool':False},rate = (rate*1000,time))
-    pylab.figure()
-    pylab.plot(twarped,warped,'-o')
-    #pylab.ylim(0,2)
-    pylab.show()
-    """
+    W = 5. * np.ceil(k)
+    M = 5. * np.sqrt(N)
     
-    t1 = pylab.arange(0,1000)
-    t2 = (500./(1+pylab.exp(-.02*(t1-0.5*t1[-1])))+t1)*0.1
-    events =pylab.around(pylab.rand(1,10)*1000.)
-   
+    R = gamma.rvs(k,scale = 1/k,size=(np.ceil(N+M),n))
     
-    print events.shape,t1.shape,t2.shape
-    
-    
-    
-    
-    pylab.plot(events,[0]*len(events),'ok')
-    
-    
-    new_events = time_warp(events,t1,t2)
-    
-    
-    pylab.plot([0]*len(new_events),new_events,'ok')
-   
+    R = np.cumsum(R,axis = 0)
+    spikes = np.zeros((n,len(L)-1))
+    for i in range(n):
+        spikes[i,:] = np.histogram(R[:,i],bins = L)[0]
+    return spikes
     
 
+def randg_equilibrium(k,l,n):
+    """ the first interval is drawn from UY,
+        where U is uniforml distributed in [0,1]
+        and  if from gamma_(k+1,l)
+        """
+    # make sure k is float
+    k=float(k)
+    # integrate rate
+    L = np.cumsum(l)
+    N = L[-1]
     
+    W = 5. * np.ceil(k)
+    M = 5. * np.sqrt(N)
     
-    for i in range(len(events[0,:])):
-        pylab.plot([events[0,i]]*2,[0,t2[pylab.find(t1==events[0,i])]],'--k',linewidth = 0.5)
-        pylab.plot([0,t1[pylab.find(t2==new_events[0,i])]],[new_events[0,i]]*2,'--k',linewidth = 0.5)
-    
-    pylab.plot(t1,t2,linewidth = 2)
-    #pylab.axis('off')
-    pylab.box(False)
-    pylab.show()  
-    """   
-       
+    U = np.random.rand(n)
+    Y = gamma.rvs(k+1,scale = 1/k,size=(1,n))
+    UY = U*Y
 
+    R = gamma.rvs(k,scale = 1/k,size=(int(np.ceil(N+M)),int(n)))
+    R = np.append(UY,R[:-1], axis=0)
+    R = np.cumsum(R,axis = 0)
+    spikes = np.zeros((n,len(L)-1))
+    for i in range(n):
+        spikes[i,:] = np.histogram(R[:,i],bins = L)[0]
+    return spikes
+ 
+
+
+class TestRandG(unittest.TestCase):
+    def test_count_consistency(self):
+        n = 5000
+        
+        for r in [1,10,100,200]:
+            time = np.arange(1000)
+            rate = np.ones_like(time)*r
+            k=1.
+            l = rate/1000.
+            spikes = randg(k,l,n) 
+            counts = spikes.sum(axis = 1)
+            # count should be about right (test for 5% difference)
+            self.assertAlmostEqual( counts.mean(), r,delta = r/20.)
+    
+    def test_ff_consistency(self):
+        n = 5000
+        
+        for ff in [0.0001,0.1,0.5,1.,1.5]:
+            time = np.linspace(0,1000,5000)
+            rate = np.ones_like(time)*20
+            k=1/ff
+            l = rate/5000.
+            spikes = randg(k,l,n) 
+            
+            ff_estimate = ff(binary_to_spiketimes(spikes, time))
+            # ff should be approcimately equal to 1/k
+            self.assertAlmostEqual( ff_estimate, ff,delta = 0.1)
+            
+    def test_cv_ff_consistency(self):
+        n = 3000
+        
+        for ff in [0.0001,0.1,0.5,1.,1.5]:
+            time = np.linspace(0,1000,5000)
+            rate = np.ones_like(time)*10
+            k=1/ff
+            l = rate/5000.
+            spikes = randg(k,l,n) 
+            ff_estimate = ff(binary_to_spiketimes(spikes, time))
+            cv2_estimate = cv2(binary_to_spiketimes(spikes, time))
+            # ff should be approcimately equal to cv^2
+            self.assertAlmostEqual( ff_estimate, cv2_estimate,delta = 0.1)
+    
+    def test_rate_modulation(self):
+        n = 5000
+        
+        time = np.arange(1000)
+        rate = np.exp(-(time-500)**2/5000.)*10
+        k=1.
+        l = rate/1000.
+        spikes = randg(k,l,n) 
+        spiketimes = binary_to_spiketimes(spikes, time)
+        e_rate,e_time = kernel_rate(spiketimes, gaussian_kernel(11.),tlim=[0,1000])
+        e_rate = e_rate[0,:]
+        len_diff = len(rate)-len(e_rate)
+        rate = rate[len_diff/2:-len_diff/2]
+        # mean squared error between input and estimate should be small
+        error=np.mean((e_rate-rate)**2)
+        self.assertTrue(error<0.02)
+
+
+class TestGenerateGamma(unittest.TestCase):
+    def test_rates(self):
+        tmax_s = 100. 
+        rates = np.zeros((5,1000*tmax_s))
+        for i in range(rates.shape[0]):
+            rates[i,:] = i+1
+        # regular 
+        k = 1e30
+        spikes = generate_gamma(k,rates)
+        counts = spikes.sum(axis = 1)
+        self.assertTrue( ((counts-rates.mean(axis=1)  *tmax_s)**2).max()<2) 
+        
+        
+        
+
+
+
+
+def gamma_pdf(x,rho=1,alpha = 1):
+    return 1/gamma(alpha)*rho *(rho*x)**(alpha-1)*pylab.exp(-rho*x)
+#@memoized
+def eta(T,rho = 1,alpha = 1):
+    def func(s):
+        return (T-s)*gamma_pdf(s,rho,alpha)
+    return quad(func, 0, T)[0]
+
+def gamma_pdf_hat(x,T=10,rho=1,alpha = 1):
+    #print eta(T,rho,alpha)
+    return (T-x)*gamma_pdf(x,rho,alpha)/eta(T,rho,alpha)
+
+
+def pdf_mean(pdf,lower,upper,kwargs = {}):
+    def func(x):
+        return x*pdf(x,**kwargs)
+    return quad(func, lower, upper)[0]
+
+def pdf_var(pdf,lower,upper,kwargs = {},mu =None):
+    if mu is None:
+        mu = pdf_mean(pdf, lower, upper,kwargs=kwargs)
+    def func(x):
+        return (x-mu)**2 * pdf(x,**kwargs)
+    return quad(func, lower, upper)[0]
+
+def gamma_cv2(ot,alpha):
+    kwargs = {'alpha':alpha,'rho':alpha,'T':ot}
+    m = pdf_mean(gamma_pdf_hat, 0, ot,kwargs)
+    v = pdf_var(gamma_pdf_hat, 0, ot,kwargs,mu = m)
+    return v/m**2
+
+def correct_cv2(measured_cv2,ot):
+    if not pylab.isfinite(measured_cv2):
+        return measured_cv2
+    def minfunc(alpha):
+        return (measured_cv2-gamma_cv2(ot, float(alpha)))**2
+    
+    result = fmin(minfunc,1/measured_cv2,disp = False)
+    print('result',result)
+    return 1/result
+
+def _get_cv_file(fname):
+    
+    try:
+        look_up = pickle.load(open(fname,'rb'),encoding='latin-1')
+    except:
+        look_up = {}
+    return look_up
+@vectorize    
+def unbiased_cv2(measured_cv2,ot,precission=3):
+    """ same as correct_cv2 but with file memory."""
+    current_path = os.path.abspath(__file__)
+    full_path = os.path.join(os.path.split(current_path)[0],'..','data')
+    cv_bias_lookup_fname = 'cv2_bias_lookup'
+    if not pylab.isfinite(measured_cv2):
+        return measured_cv2
+    fname = os.path.join(full_path,cv_bias_lookup_fname)
+    look_up = _get_cv_file(fname)
+    key = (round(measured_cv2,precission),round(ot,precission))
+    try:
+        return look_up[key]
+    except:
+        print('adding cv bias entry for ',key)
+        try:
+            look_up[key] = correct_cv2(key[0], key[1])
+        except:
+            look_up[key] = pylab.nan
+        pickle.dump(look_up,open(fname,'wb'),protocol = 2)
+        _get_cv_file.cache = {}
+        return look_up[key]

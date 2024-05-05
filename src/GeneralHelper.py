@@ -99,20 +99,28 @@ class Organiser:
         otherwise execute the function and save the results."""
         key = key_from_params(self.params, self.reps, self.ignore_keys)
         results_dict = self._load_results()
+        # insert literal newline string if exists
+        updated_results_dict = {key.replace(
+            '\n', '\\n'): value for key, value in results_dict.items()}
 
         if self.redo:
             print("Redo flag is set. Ignoring saved results.")
             results_dict = {}
 
         rerun = False
-        if type(key) == list:
+        if isinstance(key, list):
             for k in key:
-                if k not in results_dict:
+                if k in updated_results_dict.keys() or k.replace(
+                    '\n', '\\n') in updated_results_dict.keys() or k.strip(
+                        ) in updated_results_dict.keys():
+                    pass
+                else:
                     rerun = True
                     break
         else:
             if key not in results_dict:
                 rerun = True
+
         if rerun:
             print(f"Key '{key}' not found in results. Executing function '{func.__name__}'.")
             if self.reps is None:
@@ -531,7 +539,7 @@ def draw_network(weights,alpha = 0.04,node_size = 25,pos = None,e_col = 'k',i_co
 def psth_plot(spiketimes,binsize=2.,tlim = None,color = 'k',lw = 2.):
     if tlim is None:
         tlim = [spiketimes[0].min(),spiketimes[0].max()]
-    bins = pylab.linspace(tlim[0], tlim[1],(tlim[1]-tlim[0])/binsize)
+    bins = pylab.linspace(int(tlim[0]), int(tlim[1]),int((tlim[1]-tlim[0])//binsize))
     h,b = pylab.histogram(spiketimes[0],bins)
     x = pylab.tile(b,(2,1)).T.reshape(len(b)*2)
     y = pylab.array([0] + pylab.tile(h,(2,1)).T.reshape(len(h)*2).tolist()+[0])
@@ -608,10 +616,10 @@ def make_color_list(n,cmap = 'jet',minval = 0.0,maxval = 1.):
 
 col_conv= matplotlib.colors.ColorConverter()
 
-def ax_label(ax,label,size= 10, family ='sans-serif'):
+def ax_label(ax,label,size= 10, family ='sans-serif', weigth = 'normal'):
     pylab.sca(ax)
     pylab.title(label,loc = 'left',
-                fontsize = size,family =family)
+                fontsize = size,family =family, weight = weigth)
     return ax
 
 def ax_label_title(ax,label,size= 10,
