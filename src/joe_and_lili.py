@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import numpy as np
 gdf_path = '../data/'
-pickle_path = os.path.join(gdf_path,'pickle')
+pickle_path = os.path.join(gdf_path,'experimental_data')
 
 
 def find(condition):
@@ -233,17 +233,12 @@ def gdf2pickle(fname,outpath,cut_window = [0,3000]):
      
 def get_toc(filters = standard_filters,extra_filters = []):
     
-    dpath = '../data/pickle'
+    dpath = '../data/experimental_data/'
     if 'toc' in os.listdir(dpath):
-        #f=open(os.path.join(dpath,'toc'), 'rb')
-        #toc = pickle.load(f, encoding='latin1')
         toc = pd.read_pickle(os.path.join(dpath,'toc'))
-        #print('pandatoc',toc)
-        #toc = pickle.load(open(os.path.join(dpath,'toc')))   
     else:
         # generate new toc
         print('creating new toc')
-        
         #information contained in the filename
         file = []
         monkey = []

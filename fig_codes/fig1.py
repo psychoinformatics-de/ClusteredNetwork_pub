@@ -12,7 +12,7 @@ from GeneralHelper import (
     simpleaxis,colors,text_width_pts)
 import network_schematic
 
-data_path = '../data/'
+data_path = '../data/preprocessed_and_simulated_data/'
 
 # experimental data statistics for Moneky Joe (M1)
 try:
@@ -54,7 +54,6 @@ gs = pylab.GridSpec(nrows,ncols,top=0.9,bottom=0.1,hspace = 0.1,
 
 abc_size = 10
 # load monkey drawing
-data_path = '../data/'
 if os.path.exists(data_path+'drawing_small.png'):
     print('drawing exists')
 else:

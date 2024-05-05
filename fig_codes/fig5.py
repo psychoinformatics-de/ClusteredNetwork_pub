@@ -18,7 +18,7 @@ from GeneralHelper import (
 )
 
 
-path = '../data/'
+path = '../data/preprocessed_and_simulated_data/'
 
 ########################################
 ########### EXPERIMENT #################
@@ -519,7 +519,7 @@ xticks = [0,500,1000,1500,2000]
 nrow,ncol = 7, 3
 pad=.3
 x_label_val=-0.5
-size_cond = 15
+size_cond = 20
 ##########################
 ###EXPERIMENT PROTOCOL####
 ##########################

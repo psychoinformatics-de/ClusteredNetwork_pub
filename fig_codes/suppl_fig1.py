@@ -15,7 +15,7 @@ from GeneralHelper import ( Organiser,
     ax_label1, nice_figure, draw_box
 )
 
-datapath = '../data/'
+datapath = '../data/preprocessed_and_simulated_data/'
 datafile = 'suppl_fig1_simulated_data'
 
 def simulate_spontaneous(params):

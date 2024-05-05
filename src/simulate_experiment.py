@@ -174,7 +174,7 @@ def simulate(original_params):
 
 def get_simulated_data(extra_params = {},
                        datafile = 'simulated_experiment',
-                        save = True,redo=False, backup_file = None):
+                        save = True,redo=False):
 
     params = {'conditions':[1,2,3],'trials':150,'clusters_per_direction':1,'Q':20,
                 'jep':4,'jipfactor':3/4.,'prep_length':1000,'rs_length':400,
