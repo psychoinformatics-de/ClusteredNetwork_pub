@@ -12,12 +12,12 @@ import numpy as np
 # Local modules (not installed packages)
 import ClusterModelNEST
 from GeneralHelper import ( Organiser,
-    colors, text_width_pts, simpleaxis, 
+    colors, simpleaxis, 
     ax_label1, nice_figure, draw_box
 )
 
 
-datapath = '../data/'
+datapath = '../data/preprocessed_and_simulated_data/'
 datafile = 'fig2_simulated_data'
 
 def get_spikes_fig2(params):
@@ -218,8 +218,8 @@ def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
         y2 = x
         pylab.fill_between(x,y1, y2,facecolor = 'w',hatch = '\\\\\\',
                            edgecolor = colors['orange'])
-        pylab.xlabel(r'$J_{E+}$')
-        pylab.ylabel(r'$Q$')
+        pylab.xlabel(r'$\mathrm{J_{E+}}$')
+        pylab.ylabel(r'Q')
         pylab.axis('tight')
     return ffs
     
@@ -283,8 +283,8 @@ def plot_ff_jep_vs_Q_parallel(params, jep_range=pylab.linspace(1, 4, 41),
         y2 = x
         pylab.fill_between(x, y1, y2, facecolor='w', hatch='\\\\\\',
                            edgecolor='orange')
-        pylab.xlabel(r'$J_{E+}$')
-        pylab.ylabel(r'$Q$')
+        pylab.xlabel(r'$\mathrm{J_{E+}}$')
+        pylab.ylabel(r'Q')
         pylab.axis('tight')
 
     return ffs
@@ -315,10 +315,14 @@ if __name__ == '__main__':
     x_label_val = -0.25
     num_row, num_col = 2,3
     if plot:
-        fig  =nice_figure(ratio = 0.8,
-                                   latex_page=text_width_pts)
-        fig.subplots_adjust(bottom = 0.15,hspace = 0.4,wspace = 0.3)
         
+        rc_params = {'axes.labelsize': 10,
+                    'lines.linewidth':2,
+                    'xtick.labelsize': 8,
+                    'ytick.labelsize': 8}
+        fig = nice_figure(ratio = .9, rcparams = rc_params)        
+        fig.subplots_adjust(bottom = 0.15,hspace = 0.4,wspace = 0.3)
+        abc_size = 10
         labels = ['a','b','c','d']
     title_left = ['E clustered network','','E/I clustered network']
     for i,params in enumerate(settings):
@@ -328,9 +332,9 @@ if __name__ == '__main__':
         if plot and i in [0,2]:
             ax = simpleaxis(pylab.subplot2grid((num_row,num_col),
                                                (row, col), colspan=2))
-            ax_label1(ax, labels[i],x=x_label_val)
+            ax_label1(ax, labels[i],x=x_label_val, size=abc_size)
             pylab.ylabel('FF')
-            pylab.xlabel('$J_{E+}$')
+            pylab.xlabel('$\mathrm{J_{E+}}$')
             jep_range = params.pop('jep_range')
             spike_js = params.pop('spike_js')
             plot_ff_cv_vs_jep(params,reps = reps,jipfactor =jipfactor,
@@ -338,7 +342,8 @@ if __name__ == '__main__':
                               plot = plot,spike_randseed = 3,
                               spike_simtime = 2000.,markersize = 0.1,
                               spikealpha= 0.3)
-            pylab.gca().text(-7, i/3.+0.2, title_left[i], rotation=90)
+            pylab.gca().text(-7, i/3.+0.5, title_left[i], 
+                             rotation=90,size=abc_size)
         else:
             jep_step = 0.5
             jep_range = pylab.arange(1.,15.+0.5*jep_step,jep_step)
@@ -347,7 +352,7 @@ if __name__ == '__main__':
             
             if plot:
                 ax = simpleaxis(pylab.subplot2grid((num_row,num_col),(row, col+1)))          
-                ax_label1(ax, labels[i], x=x_label_val)
+                ax_label1(ax, labels[i], x=x_label_val, size=abc_size)
             ffs = plot_ff_jep_vs_Q_parallel(params,jep_range,Q_range,
                                    jipfactor=jipfactor,plot=plot,reps=40)
             if plot:

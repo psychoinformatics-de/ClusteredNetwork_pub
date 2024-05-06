@@ -112,7 +112,7 @@ class Organiser:
             for k in key:
                 if k in updated_results_dict.keys() or k.replace(
                     '\n', '\\n') in updated_results_dict.keys() or k.strip(
-                        ) in updated_results_dict.keys():
+                        ) in results_dict.keys() or k in results_dict.keys():
                     pass
                 else:
                     rerun = True
@@ -120,7 +120,6 @@ class Organiser:
         else:
             if key not in results_dict:
                 rerun = True
-
         if rerun:
             print(f"Key '{key}' not found in results. Executing function '{func.__name__}'.")
             if self.reps is None:

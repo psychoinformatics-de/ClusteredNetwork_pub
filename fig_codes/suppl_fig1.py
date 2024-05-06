@@ -11,8 +11,8 @@ import pandas as pd
 import numpy as np
 from joblib import Parallel, delayed
 from GeneralHelper import ( Organiser,
-    colors, text_width_pts, simpleaxis, 
-    ax_label1, nice_figure, draw_box
+    simpleaxis, 
+    nice_figure
 )
 
 datapath = '../data/preprocessed_and_simulated_data/'
@@ -77,68 +77,7 @@ def get_spikes_fig2(params):
     result = EI_Network.get_simulation() 
     return result
 
-        
-    
-# def plot_ff_jep_vs_Q_Litwin(params,jep_range=pylab.linspace(1,4,41),
-#                             Q_range = pylab.arange(2,20,2),jipfactor = 1,
-#                             reps = 40,plot = True,vrange = [0,15],redo = False):
-    
-    
-#     try:
-#         ffs = pd.read_pickle(datapath + "supplyfig1_simulated_data")
-#     except:
-#         ffs = pylab.zeros((len(jep_range),len(Q_range),reps))
-#         counts = pylab.zeros((len(jep_range),len(Q_range),reps))
-#         cvs = pylab.zeros((len(jep_range),len(Q_range),reps))
-#         for i,jep_ in enumerate(jep_range):
-#             print(jep_,'-------------------------------------------------------------------------')
-#             for j,Q in enumerate(Q_range):
-#                 jep = float(min(jep_,Q))
-#                 if jipfactor == 0.:
-#                     params['portion_I'] = Q
-#                 else:
-#                     params['portion_I'] = 1
-#                 jip = 1. +(jep-1)*jipfactor
-
-#                 params['jplus'] = pylab.around(pylab.array([[jep,1.0],[jip,1.0]]),5)
-#                 params['Q'] = int(Q)
-#                 # adjust for devisable N and Q
-#                 params['N_E'] = default.N_E - default.N_E%params['Q']
-#                 params['N_I'] = default.N_I - default.N_I%params['Q']
-#                 results = organiser.check_and_execute(
-#                     params, simulate_spontaneous, datafile,
-#                     reps = reps,ignore_keys=['n_jobs'],save=False, redo = redo)
-#                 ff = [r[0] for r in results]
-#                 count=[r[2] for r in results]
-#                 cv=[r[1] for r in results]
-
-#                 counts[i,j,:] = count
-#                 cvs[i,j,:] = cv
-#                 ffs[i,j,:] = ff
-
-                
-#                 if jep_>Q:
-#                     ffs[i,j,:] = pylab.nan
-#         pickle.dump(ffs,open(datapath + "supplyfig1_simulated_data",'wb'))
-
-
-
-
-
-    # if plot:
-    #     print(pylab.nanmean(ffs,axis=2).T)
-    #     pylab.contourf(jep_range,Q_range,pylab.nanmean(ffs,axis=2).T,
-    #                    levels = [0.5, 1.,1.5,2.],extend = 'both',cmap = 'Greys')
-    #     x = pylab.linspace(Q_range.min(), jep_range.max(),1000)
-    #     y1 = pylab.ones_like(x)*Q_range.min()
-    #     y2 = x
-    #     pylab.fill_between(x,y1, y2,facecolor = 'w',
-    #                        hatch = '\\\\\\',edgecolor = colors['orange'])
-    #     pylab.xlabel('$J_{E+}$',size = 14)
-    #     pylab.ylabel('$Q$', size = 14)
-    #     pylab.axis('tight')
-
-
+   
 
 def plot_ff_jep_vs_Q_LitwinKumaretal_parallel(
     params, jep_range=pylab.linspace(1, 4, 41),
@@ -198,8 +137,8 @@ def plot_ff_jep_vs_Q_LitwinKumaretal_parallel(
         y2 = x
         pylab.fill_between(x, y1, y2, facecolor='w', hatch='\\\\\\',
                            edgecolor='orange')
-        pylab.xlabel(r'$J_{E+}$')
-        pylab.ylabel(r'$Q$')
+        pylab.xlabel(r'$\mathrm{J_{E+}}$')
+        pylab.ylabel(r'Q')
         pylab.axis('tight')
 
     return ffs
@@ -217,8 +156,13 @@ if __name__ == '__main__':
     x_label_val = -0.25
     num_row, num_col = 1,1
     if plot:
-        fig  =nice_figure(ratio = 0.8,
-                                   latex_page=text_width_pts)
+        rc_params = {'axes.labelsize': 10,
+                'lines.linewidth':2,
+                'xtick.labelsize': 6,
+                'ytick.labelsize': 6}
+        fig = nice_figure(fig_width=0.489,ratio = .9, rcparams = rc_params)
+
+        abc_fontsize = 10*0.7
         fig.subplots_adjust(bottom = 0.15,hspace = 0.4,wspace = 0.3)
 
     for i,params in enumerate(settings):
