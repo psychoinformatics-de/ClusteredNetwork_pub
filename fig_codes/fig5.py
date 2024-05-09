@@ -123,7 +123,6 @@ def do_plot(extra_filters = [],min_count_rate = 5,
             avg_ff = pylab.nanmean(ffs[ff_conditions==condition],axis=0)
             pylab.plot(tff, avg_ff-avg_ff[0],
                        color = color,label = 'condition '+str(condition))
-
         if ff_test_interval is not None:
             for ntest,test_conditions in enumerate([[1,2],[2,3]]):
                 interval_mask = (tff>ff_test_interval[0]) * (tff<ff_test_interval[1])
@@ -145,7 +144,6 @@ def do_plot(extra_filters = [],min_count_rate = 5,
                 test_ind = pylab.argmin(pylab.absolute(tff-ff_test_point))
                 test_time = tff[test_ind]
                 test_vals = ffs[:,test_ind]
-                
                 test_vals1 = test_vals[ff_conditions == test_conditions[0]]
                 test_vals2 = test_vals[ff_conditions == test_conditions[1]]
                 s,p = wilcoxon(test_vals1[:],test_vals2[:])

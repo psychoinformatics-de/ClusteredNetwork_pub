@@ -115,14 +115,8 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
     cv2s = pylab.nanmean(cv2s,axis=1)
     
     if plot:
-        ffs = pylab.nanmean(ffs,axis=1)
-        pylab.plot(jep_range,ffs,'k')
-        if jipfactor == 0.:
-            pylab.gca().set_ylim(-0.2, 3)
-        else:
-            pylab.gca().set_ylim(-0.2, 12)
             
-
+        ffs = pylab.nanmean(ffs,axis=1)
 
         n_boxes = len(spike_js)
         box_bottom = ffs.max()*1.1
@@ -163,13 +157,31 @@ def plot_ff_cv_vs_jep(params,jep_range=pylab.linspace(1,4,41),jipfactor = 0.,rep
             spiketimes[0] += box_left
             spiketimes[1] *= box_height
             spiketimes[1] += box_bottom
-            
+
+            downsampling_factor = 1  # Adjust as needed
+
+            # Downsample the spike data
+            spike_x = spiketimes[0][::downsampling_factor]
+            spike_y = spiketimes[1][::downsampling_factor]
+            # Plot the downsampled spike data
+            #pylab.plot(spike_x, spike_y, '.k', 
+            #           markersize=markersize, alpha=spikealpha)
+
+            #pylab.scatter(spiketimes[0],spiketimes[1],s=5, marker='.', color='k',
+              #            rasterized=True)
             pylab.plot(spiketimes[0],spiketimes[1],'.k',
-                       markersize = markersize,alpha = spikealpha)
+                      markersize = markersize,alpha = spikealpha,
+                      rasterized=True)
 
-            pylab.xlim(jep_range.min(),jep_range.max())
+            
+        
+        pylab.plot(jep_range,ffs,'k')
+        if jipfactor == 0.:
+            pylab.gca().set_ylim(-0.2, 3)
+        else:
+            pylab.gca().set_ylim(-0.2, 12)
         pylab.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
-
+        pylab.xlim(jep_range.min(),jep_range.max())
 def plot_ff_jep_vs_Q(params,jep_range=pylab.linspace(1,4,41),
                      Q_range = pylab.arange(2,20,2),jipfactor = 1,reps = 40,
                      plot = True,vrange = [0,15],redo = False):
@@ -358,8 +370,9 @@ if __name__ == '__main__':
             if plot:
                 cbar = pylab.colorbar()
                 cbar.set_label('FF', rotation=90)
-    pylab.savefig('fig2.pdf')
-    pylab.savefig('fig2.png', dpi=300)    
+    pylab.savefig('fig2.pdf', dpi=600)
+    #pylab.savefig('fig2.eps')
+    #pylab.savefig('fig2.png', dpi=300)    
     pylab.show()
 
 
