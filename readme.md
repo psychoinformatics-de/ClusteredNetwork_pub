@@ -2,18 +2,23 @@
 
 This repository hosts the code necessary to reproduce the figures presented in our paper:
 
-**Vahid Rostami, Thomas Rost, Felix Schmitt, Alexa Riehle, Sacha van Albada, Martin Nawrot. "Spiking attractor model of motor cortex explains modulation of neural and behavioral variability by prior target information."**
+**Vahid Rostami, Thomas Rost, Felix Schmitt, Sacha van Albada, Alexa Riehle, Martin Nawrot. "Spiking attractor model of motor cortex explains modulation of neural and behavioral variability by prior target information."**
 
-Should you utilize any segments of this code for your work, kindly acknowledge us by citing the above paper.
 
-Should you encounter any inquiries or issues while using this codebase, please create a GitHub issue, and we'll promptly engage with you!
+## Table of Contents
+- [Project Structure](#project-structure)
+- [Environment Setup](#environment-setup)
+- [Reproducing Figures](#reproducing-figures)
+- [Accessing Data](#accessing-data)
+- [Docker Image for Code Execution](#docker-image-for-code-execution)
+- [Known Issues](#known-issues)
 
 ## Project Structure
-This project utilizes Python and Nest for analyzing experimental data, simulating spiking neural networks (SNN), and producing figures. The simulation results (spike trains) are stored as pickled files.
+This project utilizes Python and Nest Simulator for analyzing experimental data, simulating spiking neural networks (SNN), and producing figures.
 
-* `fig_codes/` houses matplotlib scripts to replicate all paper figures.
-* `data/` includes all experimental and simulated data required to reproduce the figures. The data is hosted on G-Node GIN and can be downloaded using the instructions below.
-* `utils/` contains Python scripts for executing SNN simulations and analyzing simulated/experimental data.
+- **`fig_codes/`**: Contains Python scripts to plot all paper figures.
+- **`data/`**: Includes all experimental and simulated data required to reproduce the figures. The data is hosted on G-Node GIN and can be downloaded using the instructions below.
+- **`utils/`**: Contains Python scripts for executing SNN simulations and analyzing simulated/experimental data.
 
 ## Environment Setup
 The `environment.yml` file contains necessary packages to execute the code. To create a Conda environment:
@@ -22,6 +27,7 @@ The `environment.yml` file contains necessary packages to execute the code. To c
 conda env create -f environment.yml
 conda activate ClusteredNetwork_pub
 ```
+
 Unfortunately, the conda environment does not contain all dependencies. You might need to install some libaries outside of the conda environment.
 We recommend using our docker image to run the code. Please see the section below for more information.
 
@@ -85,4 +91,6 @@ docker network create --driver bridge common
 docker run -d -it --network common --name clusternet --mount type=bind,source="$(pwd)"/ClusteredNetwork_pub,target=/app fschmitt/clustered_network_pub:nest2_20
 ```
 
+If you utilize any segments of this code for your work, please acknowledge us by citing the above paper.
+If you encounter any inquiries or issues while using this codebase, please create a GitHub issue, and we'll promptly engage with you!
 
