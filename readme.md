@@ -27,10 +27,9 @@ The `environment.yml` file contains necessary packages to execute the code. To c
 conda env create -f environment.yml
 conda activate ClusteredNetwork_pub
 ```
+Note: Some dependencies might need to be installed outside the conda environment.
 
-Unfortunately, the conda environment does not contain all dependencies. You might need to install some libaries outside of the conda environment.
-We recommend using our docker image to run the code. Please see the section below for more information.
-
+Alternatively, use the provided Docker image (recommended). See the "Docker Image for Code Execution" section below for details.
 
 ## Reproducing figures
 To recreate specific figures, execute the following command within the fig_codes directory:
