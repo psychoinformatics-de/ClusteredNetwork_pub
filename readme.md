@@ -6,9 +6,9 @@ This is a Python implementation of E/I clustered neural network together with co
 
 ## Table of Contents
 - [Project Structure](#project-structure)
-- [Environment Setup](#environment-setup)
 - [Reproducing Figures](#reproducing-figures)
 - [Accessing Data](#accessing-data)
+- [Environment Setup](#environment-setup)
 - [Docker Image for Code Execution](#docker-image-for-code-execution)
 - [Known Issues](#known-issues)
 
@@ -18,17 +18,6 @@ This project utilizes Python and Nest Simulator for analyzing experimental data,
 - **`fig_codes/`**: Contains Python scripts to plot all paper figures.
 - **`data/`**: Includes all experimental and simulated data required to reproduce the figures. The data is hosted on G-Node GIN and can be downloaded using the instructions below.
 - **`src/`**: Contains Python scripts for executing SNN simulations and analyzing simulated/experimental data.
-
-## Environment Setup
-The `environment.yml` file contains necessary packages to execute the code. To create a Conda environment:
-
-```bash
-conda env create -f environment.yml
-conda activate ClusteredNetwork_pub
-```
-Note: Some dependencies might need to be installed outside the conda environment.
-
-Alternatively, use the provided Docker image (recommended). See the "Docker Image for Code Execution" section below for details.
 
 ## Reproducing figures
 To recreate specific figures, execute the following command within the fig_codes directory:
@@ -56,6 +45,17 @@ Alternatively, utilize the provided script to download the data:
 This script creates a ***'data'*** folder in the repository and initiates the download. 
 It verifies if the data is already present and skips download if it exists. 
 Note that the download may take a considerable amount of time, and git-annex might appear stalled but will resume eventually.
+
+## Environment Setup
+The `environment.yml` file contains necessary packages to execute the code. To create a Conda environment:
+
+```bash
+conda env create -f environment.yml
+conda activate ClusteredNetwork_pub
+```
+Note: Some dependencies might need to be installed outside the conda environment.
+
+Alternatively, use the provided Docker image (recommended). See the "Docker Image for Code Execution" section below for details.
 
 ## Docker Image for Code Execution
 We provide a docker image, 
