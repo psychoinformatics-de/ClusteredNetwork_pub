@@ -90,6 +90,6 @@ docker network create --driver bridge common
 docker run -d -it --network common --name clusternet --mount type=bind,source="$(pwd)"/ClusteredNetwork_pub,target=/app fschmitt/clustered_network_pub:nest2_20
 ```
 
-If you utilize any segments of this code for your work, please acknowledge us by citing the above paper.
-If you encounter any inquiries or issues while using this codebase, please create a GitHub issue, and we'll promptly engage with you!
+Please cite the paper if you use any part of this code.
 
+If you encounter any problems, feel free to create a GitHub issue.
