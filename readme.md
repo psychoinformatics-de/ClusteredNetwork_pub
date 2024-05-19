@@ -17,7 +17,7 @@ This project utilizes Python and Nest Simulator for analyzing experimental data,
 
 - **`fig_codes/`**: Contains Python scripts to plot all paper figures.
 - **`data/`**: Includes all experimental and simulated data required to reproduce the figures. The data is hosted on G-Node GIN and can be downloaded using the instructions below.
-- **`utils/`**: Contains Python scripts for executing SNN simulations and analyzing simulated/experimental data.
+- **`src/`**: Contains Python scripts for executing SNN simulations and analyzing simulated/experimental data.
 
 ## Environment Setup
 The `environment.yml` file contains necessary packages to execute the code. To create a Conda environment:
