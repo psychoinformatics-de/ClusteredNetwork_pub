@@ -10,7 +10,6 @@ This is a Python implementation of E/I clustered neural network together with co
 - [Accessing Data](#accessing-data)
 - [Environment Setup](#environment-setup)
 - [Docker Image for Code Execution](#docker-image-for-code-execution)
-- [Known Issues](#known-issues)
 
 ## Project Structure
 This project utilizes Python and Nest Simulator for analyzing experimental data, simulating spiking neural networks (SNN), and producing figures.
