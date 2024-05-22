@@ -233,7 +233,7 @@ def gdf2pickle(fname,outpath,cut_window = [0,3000]):
      
 def get_toc(filters = standard_filters,extra_filters = []):
     
-    dpath = '../data/experimental_data/'
+    dpath = '../inputs/joe_and_lili/data/'
     if 'toc' in os.listdir(dpath):
         toc = pd.read_pickle(os.path.join(dpath,'toc'))
     else:
