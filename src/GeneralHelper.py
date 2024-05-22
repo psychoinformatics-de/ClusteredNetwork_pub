@@ -1,5 +1,6 @@
 from types import ModuleType
 import copy
+import hashlib
 import pylab
 import numpy as np
 import pandas as pd
@@ -26,7 +27,7 @@ class TimeoutException(Exception):   # Custom exception class
 
 class Organiser:
     """Organiser class for managing function results and data storage."""
-    def __init__(self, params, datafile, datapath='../preprocessed_and_simulated_data/', 
+    def __init__(self, params, datafile, datapath='../preprocessed_and_simulated_data/',
                 n_jobs=1, ignore_keys=[''], 
                  reps=None, redo=None, save=True):
         """Initialise the Organiser with the given parameters.
@@ -48,7 +49,8 @@ class Organiser:
         self.reps = reps
         self.redo = redo
         self.key = key_from_params(self.params, self.reps, self.ignore_keys)
-        self.datafile = os.path.join(datapath, f"{datafile}_{self.key}")
+        self.key_hash = hashlib.md5(self.key.encode('utf-8')).hexdigest()
+        self.datafile = os.path.join(datapath, f"{datafile}_{self.keyhash}")
 
     def _load_results(self):
         """Load results from the datafile if it exists, 
@@ -112,10 +114,10 @@ class Organiser:
     def check_and_execute(self, func):
         """Check if results exist in the datafile, 
         otherwise execute the function and save the results."""
-        key = key_from_params(self.params, self.reps, self.ignore_keys)
+        #key = key_from_params(self.params, self.reps, self.ignore_keys)
         results_dict = self._load_results()
         # insert literal newline string if exists
-        updated_results_dict = {key.replace(
+        updated_results_dict = {self.key.replace(
             '\n', '\\n'): value for key, value in results_dict.items()}
 
         if self.redo:
