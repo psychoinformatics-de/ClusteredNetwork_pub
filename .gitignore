@@ -137,3 +137,5 @@ dmypy.json
 # images
 *.pdf
 *.png
+
+dockertmp
