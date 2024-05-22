@@ -63,6 +63,10 @@ class Organiser:
     def _save_results(self, results_dict):
         """Save results dictionary to the datafile."""
         if self.save:
+            if os.path.lexists(self.datafile):
+                # remove any existing file to support dropped git-annex
+                # objects. We would overwrite anyways as the next step
+                os.unlink(self.datafile)
             try:
                 with open(self.datafile, 'wb') as file:
                     pickle.dump(results_dict, file, protocol=2)
