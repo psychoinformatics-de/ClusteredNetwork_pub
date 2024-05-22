@@ -57,6 +57,7 @@ class Organiser:
                 return pd.read_pickle(self.datafile)
         except Exception as e:
             print(f"Error loading datafile: {e}")
+            raise
         return {}
 
     def _save_results(self, results_dict):
@@ -68,6 +69,7 @@ class Organiser:
                     print(f"Results saved to '{self.datafile}'")
             except Exception as e:
                 print(f"Error saving results: {e}")
+                raise
 
     def _execute_function(self, func, params):
         """Execute the specified function with the given parameters."""
@@ -75,6 +77,7 @@ class Organiser:
             return func(copy.deepcopy(params))
         except Exception as e:
             print(f"Error executing function: {e}")
+            raise
         return None
 
     def _execute_parallel(self, func, params_list):
@@ -92,6 +95,7 @@ class Organiser:
                         func, params) for params in params_list)
         except Exception as e:
             print(f"Error executing parallel function: {e}")
+            raise
         return []
 
     def check_and_execute(self, func):
