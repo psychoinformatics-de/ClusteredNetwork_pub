@@ -54,7 +54,8 @@ gs = pylab.GridSpec(nrows,ncols,top=0.9,bottom=0.1,hspace = 0.1,
 
 abc_size = 10
 # load monkey drawing
-if os.path.exists(data_path+'drawing_small.png'):
+drawing_path = '../img/drawing_small.png'
+if os.path.exists(drawing_path):
     print('drawing exists')
 else:
     raise ValueError('drawing file not found1 Please download drawing_small.png file, following the istructions in the README.md file.')
@@ -62,7 +63,7 @@ subplotspec = gs.new_subplotspec((0,0), colspan=int(ncols/3),rowspan=1)
 ax1 = pylab.subplot(subplotspec)
 ax_label_fig1(ax1, 'a', size=abc_size)
 ax_label_title(ax1, 'Behaving monkey')
-drawing = mimage.imread(data_path+'drawing_small.png')
+drawing = mimage.imread(drawing_path)
 drawing = drawing[:-2]
 pylab.imshow(drawing, cmap='gray')
 pylab.axis('off')
