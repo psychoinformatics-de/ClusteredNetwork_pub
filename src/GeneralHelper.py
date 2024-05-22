@@ -42,19 +42,21 @@ class Organiser:
             save (bool): Flag to save the results to the datafile.
         """
         self.params = params
-        self.datafile = os.path.join(datapath, datafile)
         self.save = save
         self.n_jobs = n_jobs
         self.ignore_keys = ignore_keys
         self.reps = reps
         self.redo = redo
+        self.key = key_from_params(self.params, self.reps, self.ignore_keys)
+        self.datafile = os.path.join(datapath, f"{datafile}_{self.key}")
 
     def _load_results(self):
         """Load results from the datafile if it exists, 
         otherwise return an empty dictionary."""
         try:
             if os.path.exists(self.datafile):
-                return pd.read_pickle(self.datafile)
+                loaded = pd.read_pickle(self.datafile)
+                return {self.key: loaded}
         except Exception as e:
             print(f"Error loading datafile: {e}")
             raise
@@ -62,6 +64,11 @@ class Organiser:
 
     def _save_results(self, results_dict):
         """Save results dictionary to the datafile."""
+        # assert a few assumptions:
+        # we get results for the one known key
+        assert self.key in results_dict
+        # and there is only one result record
+        assert len(results_dict) == 1
         if self.save:
             if os.path.lexists(self.datafile):
                 # remove any existing file to support dropped git-annex
@@ -69,7 +76,7 @@ class Organiser:
                 os.unlink(self.datafile)
             try:
                 with open(self.datafile, 'wb') as file:
-                    pickle.dump(results_dict, file, protocol=2)
+                    pickle.dump(results_dict[self.key], file, protocol=2)
                     print(f"Results saved to '{self.datafile}'")
             except Exception as e:
                 print(f"Error saving results: {e}")
