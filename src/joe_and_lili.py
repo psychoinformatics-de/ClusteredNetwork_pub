@@ -6,8 +6,8 @@ import pylab
 import numpy as np
 import pandas as pd
 import numpy as np
-gdf_path = '../data/'
-pickle_path = os.path.join(gdf_path,'experimental_data')
+gdf_path = '../inputs/joe_and_lili/data/'
+pickle_path = gdf_path
 
 
 def find(condition):
