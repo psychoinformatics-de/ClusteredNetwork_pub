@@ -1,0 +1,7 @@
+name	ClusteredNetwork_pub
+title	Spiking Attractor Model of Motor Cortex: Modulating Neural and Behavioral Variability via Prior Target Information
+description	This DataLad dataset contains a variant of the analysis described by Rostami et al. in https://doi.org/10.21203/rs.3.rs-1337724/v1 (Spiking Attractor Model of Motor Cortex: Modulating Neural and Behavioral Variability via Prior Target Information). It focuses on demonstrating computational reproducibility and contains a subset of original results.
+crc-project	A06	INF
+sample[organism]	NCBITaxon:9544
+sample[organism-part]	UBERON:0001384	UBERON:0016634
+keywords	Motor cortex	Delayed center-out task
